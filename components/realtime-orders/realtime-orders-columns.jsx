@@ -49,10 +49,12 @@ function statusBadgeStyle(name = "", apiColor, apiTextColor, dark = false) {
 export function buildRealtimeOrderColumns({
   onView,
   onStatusChange,
+  onDelete,
   statuses,
   changingOrderId,
   canChangeStatus = true,
   canAddStatus = false,
+  canDelete = false,
   dark = false,
 } = {}) {
   return [
@@ -327,6 +329,8 @@ export function buildRealtimeOrderColumns({
             isStatusPending={changingOrderId != null && changingOrderId === row.id}
             canChangeStatus={canChangeStatus}
             canAddStatus={canAddStatus}
+            onDelete={onDelete}
+            canDelete={canDelete}
           />
         </div>
       ),

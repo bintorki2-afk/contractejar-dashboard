@@ -12,6 +12,7 @@ import RealtimeOrdersToolbar from "@/components/realtime-orders/realtime-orders-
 import AllOrdersPagination from "./all-orders-pagination";
 import AllOrdersDialogs from "./all-orders-dialogs";
 import { buildAllOrderColumns } from "./all-orders-columns";
+import ConfirmDialog from "@/components/shared/confirm-dialog";
 import { getStatusCaseFields } from "@/components/realtime-orders/change-order-status-fields-dialog";
 import { ALL_ORDERS_QUERY_KEY } from "@/src/hooks/use-realtime-new-orders";
 import { useAllOrdersWrapper } from "@/src/hooks/use-all-orders-wrapper";
@@ -36,10 +37,12 @@ export default function AllOrdersWrapper() {
         onView: vm.goToDetails,
         onStatusChange: vm.handleStatusChange,
         onPrint: vm.handlePrint,
+        onDelete: vm.requestDeleteOrder,
         statuses: vm.statusItems,
         changingOrderId: vm.isChangingStatus ? vm.changingStatusId?.orderId : null,
         canChangeStatus: vm.canChangeStatus,
         canAddStatus: vm.canAddStatus,
+        canDelete: vm.canDelete,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -49,6 +52,7 @@ export default function AllOrdersWrapper() {
       vm.changingStatusId,
       vm.canChangeStatus,
       vm.canAddStatus,
+      vm.canDelete,
     ]
   );
 
@@ -119,8 +123,14 @@ export default function AllOrdersWrapper() {
       <TableBatchActionsBar
         count={selection.selectedCount}
         onPrint={() => vm.handleBatchPrint(selection.selectedArray)}
+        onDelete={
+          vm.canDelete
+            ? () => vm.requestBulkDelete(selection.selectedArray)
+            : undefined
+        }
         onClear={selection.clear}
         isPrinting={vm.isBatchPrinting}
+        isDeleting={vm.isDeletingOrder}
         dark={vm.isDark}
       />
 
@@ -170,6 +180,20 @@ export default function AllOrdersWrapper() {
         onManageStatusesOpenChange={vm.setManageStatusesOpen}
         canAddStatus={vm.canAddStatus}
         canEditStatus={vm.canEditStatus}
+      />
+
+      <ConfirmDialog
+        open={vm.deleteDialogOpen}
+        onOpenChange={vm.setDeleteDialogOpen}
+        title={vm.deleteCount > 1 ? "حذف الطلبات" : "حذف الطلب"}
+        description={`سيتم حذف ${
+          vm.deleteLabel ?? "الطلب"
+        } نهائيًا مع جميع البيانات المرتبطة. لا يمكن التراجع عن هذا الإجراء.`}
+        confirmLabel="حذف نهائيًا"
+        cancelLabel="إلغاء"
+        destructive
+        isPending={vm.isDeletingOrder}
+        onConfirm={vm.confirmDeleteOrder}
       />
     </div>
   );

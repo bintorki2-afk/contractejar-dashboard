@@ -25,10 +25,12 @@ export function buildAllOrderColumns({
   onView,
   onStatusChange,
   onPrint,
+  onDelete,
   statuses,
   changingOrderId,
   canChangeStatus = true,
   canAddStatus = false,
+  canDelete = false,
   dark = false,
 } = {}) {
   return [
@@ -190,6 +192,8 @@ export function buildAllOrderColumns({
               isStatusPending={changingOrderId != null && changingOrderId === row.id}
               canChangeStatus={canChangeStatus}
               canAddStatus={canAddStatus}
+              onDelete={onDelete}
+              canDelete={canDelete}
             />
             {canPrint ? (
               <button

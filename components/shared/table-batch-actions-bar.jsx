@@ -1,20 +1,23 @@
 "use client";
 
-import { Printer, X } from "lucide-react";
+import { Printer, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
  * Contextual action bar shown above a table when one or more rows are selected.
- * Currently exposes a single "batch print" action.
+ * Exposes a "batch print" action and, optionally, a "batch delete" action.
  */
 export default function TableBatchActionsBar({
   count = 0,
   onPrint,
   onClear,
+  onDelete,
   isPrinting = false,
+  isDeleting = false,
   dark = false,
   label = "عقد محدد",
   printLabel = "طباعة المحدد",
+  deleteLabel = "حذف المحدد",
 }) {
   if (!count) return null;
 
@@ -50,6 +53,21 @@ export default function TableBatchActionsBar({
         <Printer className="size-4" strokeWidth={2.2} />
         {isPrinting ? "جاري التحضير…" : printLabel}
       </button>
+
+      {onDelete ? (
+        <button
+          type="button"
+          onClick={onDelete}
+          disabled={isDeleting}
+          className={cn(
+            "inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl text-[12.5px] font-bold transition-colors",
+            "bg-red-600 text-white hover:bg-red-600/90 disabled:opacity-60"
+          )}
+        >
+          <Trash2 className="size-4" strokeWidth={2.2} />
+          {isDeleting ? "جاري الحذف…" : deleteLabel}
+        </button>
+      ) : null}
 
       <button
         type="button"

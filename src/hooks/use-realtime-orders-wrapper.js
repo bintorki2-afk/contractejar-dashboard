@@ -35,6 +35,7 @@ import {
   useRealtimeOrdersList,
 } from "@/src/hooks/use-realtime-new-orders";
 import { useChangeOrderStatus } from "@/src/hooks/use-change-order-status";
+import { useDeleteOrderFlow } from "@/src/hooks/use-delete-order-flow";
 import { getRealtimeStatusChipStatuses } from "@/src/lib/contract-statuses";
 import { useReceiveContract } from "@/src/hooks/use-receive-contract";
 import { useBatchPrintContracts } from "@/src/hooks/use-batch-print-contracts";
@@ -225,6 +226,10 @@ export function useRealtimeOrdersWrapper() {
   const { isBatchPrinting, batchPrint: handleBatchPrint } =
     useBatchPrintContracts();
 
+  const deleteFlow = useDeleteOrderFlow({
+    queryKey: [REALTIME_ORDERS_QUERY_KEY],
+  });
+
   const {
     mutate: changeStatus,
     isPending: isChangingStatus,
@@ -384,5 +389,15 @@ export function useRealtimeOrdersWrapper() {
     sectionCount,
     hasInlineFilters,
     getStatusCaseFields,
+    // delete-order flow
+    canDelete: deleteFlow.canDelete,
+    deleteLabel: deleteFlow.deleteLabel,
+    deleteCount: deleteFlow.deleteCount,
+    deleteDialogOpen: deleteFlow.deleteDialogOpen,
+    setDeleteDialogOpen: deleteFlow.setDeleteDialogOpen,
+    isDeletingOrder: deleteFlow.isDeletingOrder,
+    requestDeleteOrder: deleteFlow.requestDeleteOrder,
+    requestBulkDelete: deleteFlow.requestBulkDelete,
+    confirmDeleteOrder: deleteFlow.confirmDeleteOrder,
   };
 }

@@ -9,6 +9,7 @@ import {
   MoreVertical,
   Printer,
   Tag,
+  Trash2,
 } from "lucide-react";
 import { isReturnContractStatus } from "@/components/analysis/returned/refund-contract-utils";
 import {
@@ -31,6 +32,8 @@ export default function OrderActionsMenu({
   onStatusChange,
   canChangeStatus = false,
   isStatusPending = false,
+  onDelete,
+  canDelete = false,
 }) {
   const [isPrinting, setIsPrinting] = useState(false);
   // حالات قابلة للتغيير من القائمة، مع استبعاد حالات الاسترجاع (معطّلة لعقد إيجار).
@@ -162,6 +165,24 @@ export default function OrderActionsMenu({
                   </span>
                 </DropdownMenuItem>
               ))}
+            </>
+          )}
+
+          {canDelete && onDelete && (
+            <>
+              <DropdownMenuSeparator className="my-1" />
+              <DropdownMenuItem
+                onSelect={(event) => {
+                  event.preventDefault();
+                  onDelete(order);
+                }}
+                className="rounded-xl px-3 py-2.5 cursor-pointer gap-2.5 focus:bg-red-50 dark:focus:bg-red-500/10"
+              >
+                <Trash2 className="size-4 text-red-600 dark:text-red-400 shrink-0" />
+                <span className="flex-1 text-13 font-bold text-red-600 dark:text-red-400 text-right">
+                  حذف الطلب
+                </span>
+              </DropdownMenuItem>
             </>
           )}
         </div>

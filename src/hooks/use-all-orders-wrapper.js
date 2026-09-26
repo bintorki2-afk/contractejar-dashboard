@@ -37,6 +37,7 @@ import {
 } from "@/src/hooks/use-realtime-new-orders";
 import { axiosInstance } from "@/src/utils/axios";
 import { useChangeOrderStatus } from "@/src/hooks/use-change-order-status";
+import { useDeleteOrderFlow } from "@/src/hooks/use-delete-order-flow";
 import { getAllOrdersExtraFilterStatuses } from "@/src/lib/contract-statuses";
 
 const COMPLETION_FILTERS = ["authenticated", "incomplete"];
@@ -238,6 +239,8 @@ export function useAllOrdersWrapper({
     changeStatus({ orderId: row.id, statusId: status.id });
   };
 
+  const deleteFlow = useDeleteOrderFlow({ queryKey: [ALL_ORDERS_QUERY_KEY] });
+
   const { isBatchPrinting, batchPrint: handleBatchPrint } =
     useBatchPrintContracts();
 
@@ -352,5 +355,15 @@ export function useAllOrdersWrapper({
     isExporting,
     exportParams,
     listParams,
+    // delete-order flow
+    canDelete: deleteFlow.canDelete,
+    deleteLabel: deleteFlow.deleteLabel,
+    deleteCount: deleteFlow.deleteCount,
+    deleteDialogOpen: deleteFlow.deleteDialogOpen,
+    setDeleteDialogOpen: deleteFlow.setDeleteDialogOpen,
+    isDeletingOrder: deleteFlow.isDeletingOrder,
+    requestDeleteOrder: deleteFlow.requestDeleteOrder,
+    requestBulkDelete: deleteFlow.requestBulkDelete,
+    confirmDeleteOrder: deleteFlow.confirmDeleteOrder,
   };
 }
