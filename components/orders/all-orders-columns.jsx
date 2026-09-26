@@ -168,7 +168,8 @@ export function buildAllOrderColumns({
       sticky: "end",
       stopRowClick: true,
       cell: (row) => {
-        const canPrint = Boolean(row?.is_paid === true || row?.is_paid === 1);
+        // الطباعة متاحة دائمًا (لا تشترط الدفع) — لعقد إيجار بلا بوابة دفع.
+        const canPrint = true;
         return (
           <div className="flex items-center gap-1.5">
             <button

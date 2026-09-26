@@ -8,7 +8,9 @@ import {
   Loader2,
   MoreVertical,
   Printer,
+  Tag,
 } from "lucide-react";
+import { isReturnContractStatus } from "@/components/analysis/returned/refund-contract-utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,8 +27,16 @@ import { printOrderContract } from "@/components/orders/single-order/print-contr
 export default function OrderActionsMenu({
   order,
   triggerClassName,
+  statuses = [],
+  onStatusChange,
+  canChangeStatus = false,
+  isStatusPending = false,
 }) {
   const [isPrinting, setIsPrinting] = useState(false);
+  // حالات قابلة للتغيير من القائمة، مع استبعاد حالات الاسترجاع (معطّلة لعقد إيجار).
+  const changeableStatuses = (statuses || []).filter(
+    (status) => status && !isReturnContractStatus(status)
+  );
 
   const copyUuid = () => {
     navigator.clipboard.writeText(String(order?.uuid ?? ""));
@@ -123,6 +133,37 @@ export default function OrderActionsMenu({
               طباعة الطلب
             </span>
           </DropdownMenuItem>
+
+          {canChangeStatus && changeableStatuses.length > 0 && (
+            <>
+              <DropdownMenuSeparator className="my-1" />
+              <div className="flex items-center gap-2 px-3 pt-1 pb-1.5">
+                <Tag className="size-3.5 text-status-neutral dark:text-white/50 shrink-0" />
+                <span className="text-11 font-bold text-status-neutral dark:text-white/50">
+                  تغيير الحالة
+                </span>
+              </div>
+              {changeableStatuses.map((status) => (
+                <DropdownMenuItem
+                  key={status.id}
+                  disabled={isStatusPending}
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    onStatusChange?.(order, status);
+                  }}
+                  className="rounded-xl px-3 py-2.5 cursor-pointer gap-2.5 focus:bg-[#F3F9F6] dark:focus:bg-white/[0.06]"
+                >
+                  <span
+                    className="size-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: status.color || "#9CA3AF" }}
+                  />
+                  <span className="flex-1 text-13 font-bold text-gray-900 dark:text-white/90 text-right">
+                    {status.name ?? status.label}
+                  </span>
+                </DropdownMenuItem>
+              ))}
+            </>
+          )}
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

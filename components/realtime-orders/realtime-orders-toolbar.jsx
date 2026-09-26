@@ -356,29 +356,35 @@ export default function RealtimeOrdersToolbar({
         <Bell className="size-[16px]" />
       </button>
 
-      <button
-        type="button"
-        onClick={openPayments}
-        aria-label="إشعارات الدفع"
-        title="إشعارات الدفع"
-        className={cn(
-          roundBtn,
-          displayedPart === "payments" &&
-            "!bg-[#0E5F4E] !text-white !border-[#0E5F4E]"
-        )}
-      >
-        <CreditCard className="size-[16px]" />
-      </button>
+      {/* أزرار الدفع (إشعارات الدفع + رابط دفع واتساب) مخفية — بوابة الدفع غير مفعّلة لعقد إيجار.
+          لإعادة تفعيلها لاحقًا: غيّر false إلى true. */}
+      {false && (
+        <>
+          <button
+            type="button"
+            onClick={openPayments}
+            aria-label="إشعارات الدفع"
+            title="إشعارات الدفع"
+            className={cn(
+              roundBtn,
+              displayedPart === "payments" &&
+                "!bg-[#0E5F4E] !text-white !border-[#0E5F4E]"
+            )}
+          >
+            <CreditCard className="size-[16px]" />
+          </button>
 
-      <button
-        type="button"
-        onClick={() => onOpenPaymentLink?.()}
-        aria-label="توليد رابط دفع — طلب واتساب"
-        title="توليد رابط دفع — طلب واتساب"
-        className={roundBtn}
-      >
-        <Link2 className="size-[16px]" />
-      </button>
+          <button
+            type="button"
+            onClick={() => onOpenPaymentLink?.()}
+            aria-label="توليد رابط دفع — طلب واتساب"
+            title="توليد رابط دفع — طلب واتساب"
+            className={roundBtn}
+          >
+            <Link2 className="size-[16px]" />
+          </button>
+        </>
+      )}
     </>
   );
 
