@@ -17,6 +17,20 @@ import {
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { PERMISSION_SECTIONS } from "@/src/lib/permissions";
 import { SYSTEM_CATEGORIES } from "./mock-data";
+
+// أيقونات غير مفعّلة لعقد إيجار (خاصة بالتطبيق/الدفع أو غير موصولة بالموقع بعد) → تعرض «قريبًا» ومعطّلة.
+const COMING_SOON_CARDS = new Set([
+  "property-types",
+  "property-usage",
+  "message-sections",
+  "message-section-items",
+  "customer-app-messages",
+  "message-for-employee",
+  "message-for-property",
+  "blogs",
+  "notifications",
+  "payments",
+]);
 import "./settings-design.css";
 
 function SiteSwitch({ checked, disabled, onCheckedChange }) {
@@ -133,18 +147,43 @@ export default function GeneralSettingsTab() {
           إعدادات النظام <span className="asg">({visibleCategories.length} فئة)</span>
         </div>
         <div className="set-catgrid">
-          {visibleCategories.map((category) => (
-            <Link key={category.id} href={category.href} className="set-catcard">
-              <span className="set-caticon">
-                <AlignJustify className="size-4" />
-              </span>
-              <span className="set-cattext">
-                <b>{category.label}</b>
-                <small>{category.subtitle}</small>
-              </span>
-              <span className="set-catarrow">←</span>
-            </Link>
-          ))}
+          {visibleCategories.map((category) => {
+            if (COMING_SOON_CARDS.has(category.id)) {
+              return (
+                <div
+                  key={category.id}
+                  className="set-catcard cursor-not-allowed opacity-60"
+                  aria-disabled="true"
+                  title="قريبًا"
+                >
+                  <span className="set-caticon">
+                    <AlignJustify className="size-4" />
+                  </span>
+                  <span className="set-cattext">
+                    <b>
+                      {category.label}
+                      <span className="mr-2 align-middle rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-700 dark:bg-amber-400/15 dark:text-amber-300">
+                        قريبًا
+                      </span>
+                    </b>
+                    <small>{category.subtitle}</small>
+                  </span>
+                </div>
+              );
+            }
+            return (
+              <Link key={category.id} href={category.href} className="set-catcard">
+                <span className="set-caticon">
+                  <AlignJustify className="size-4" />
+                </span>
+                <span className="set-cattext">
+                  <b>{category.label}</b>
+                  <small>{category.subtitle}</small>
+                </span>
+                <span className="set-catarrow">←</span>
+              </Link>
+            );
+          })}
         </div>
       </section>
     </div>

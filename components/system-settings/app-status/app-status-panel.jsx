@@ -34,6 +34,15 @@ function errorMessage(err, fallback) {
   return err?.response?.data?.message || err?.message || fallback;
 }
 
+// شارة «قريبًا» للميزات غير المفعّلة بعد (مثل تطبيق الجوال لعقد إيجار).
+function ComingSoonBadge() {
+  return (
+    <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-700 dark:bg-amber-400/15 dark:text-amber-300">
+      قريبًا
+    </span>
+  );
+}
+
 export default function AppStatusPanel() {
   const queryClient = useQueryClient();
   const { can, isReady } = usePermissions();
@@ -203,12 +212,15 @@ export default function AppStatusPanel() {
       </section>
 
       <section className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-card dark:shadow-none">
-        <h2 className="text-lg font-black text-black dark:text-white">حالة تطبيق الجوال</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-black text-black dark:text-white">حالة تطبيق الجوال</h2>
+          <ComingSoonBadge />
+        </div>
         <p className="mt-1 text-13 leading-7 text-[#707070] dark:text-white/55">
-          إيقاف تطبيق الجوال يمنع المستخدمين من استخدامه حتى إعادة التشغيل.
+          هذه الميزة غير مفعّلة حاليًا (لا يوجد تطبيق جوال لعقد إيجار بعد).
         </p>
 
-        <div className="mt-5 flex items-center justify-between gap-4 rounded-2xl border border-surface-border bg-neutral-50 px-4 py-3.5 dark:border-white/10 dark:bg-white/[0.04]">
+        <div className="pointer-events-none mt-5 flex items-center justify-between gap-4 rounded-2xl border border-surface-border bg-neutral-50 px-4 py-3.5 opacity-60 dark:border-white/10 dark:bg-white/[0.04]">
           <div>
             <div className="text-sm font-bold text-black dark:text-white">تشغيل التطبيق</div>
             <div
@@ -244,11 +256,14 @@ export default function AppStatusPanel() {
             key={platform.key}
             className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-card dark:shadow-none"
           >
-            <h2 className="text-lg font-black text-black dark:text-white">
-              {platform.label}
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-black text-black dark:text-white">
+                {platform.label}
+              </h2>
+              <ComingSoonBadge />
+            </div>
 
-            <div className="mt-5 grid gap-5 sm:grid-cols-2">
+            <div className="pointer-events-none mt-5 grid gap-5 opacity-60 sm:grid-cols-2">
               {fields.map((field) => (
                 <div
                   key={field.key}
@@ -285,7 +300,7 @@ export default function AppStatusPanel() {
               ))}
             </div>
 
-            <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
+            <div className="pointer-events-none mt-5 flex flex-wrap items-center justify-between gap-4 opacity-60">
               <label className="flex items-center gap-3">
                 <Switch
                   checked={form.force_update}
