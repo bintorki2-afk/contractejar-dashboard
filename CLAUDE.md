@@ -1,3 +1,5 @@
+> 📌 سياق المشروع الكامل (أعمال + حسابات + نشر): اقرأ **@AQDI-CONTEXT.md**
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
