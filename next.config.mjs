@@ -35,14 +35,17 @@ const nextConfig = {
         source: "/:path*",
         headers: [
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
-          { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
           {
-            // Report-only: never blocks. Flip to "Content-Security-Policy" to enforce after testing.
-            key: "Content-Security-Policy-Report-Only",
+            // Enforced (was report-only). frame-src/worker-src/object-src are scoped
+            // to what the admin tooling uses — same-origin/blob:/data: iframes and
+            // workers for contract previews and PDF/Excel/canvas export — so enforcing
+            // does not break exports or previews. 'unsafe-inline'/'unsafe-eval' stay
+            // because the Next.js runtime + Firebase rely on them (nonces = follow-up).
+            key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
               "base-uri 'self'",
@@ -52,6 +55,9 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com",
               "connect-src 'self' https: wss:",
+              "frame-src 'self' blob: data:",
+              "worker-src 'self' blob:",
+              "object-src 'none'",
             ].join("; "),
           },
         ],
