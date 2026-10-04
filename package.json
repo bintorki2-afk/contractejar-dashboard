@@ -51,7 +51,7 @@
     "firebase": "^12.16.0",
     "html-react-parser": "^5.2.2",
     "html2canvas": "^1.4.1",
-    "isomorphic-dompurify": "^2.36.0",
+    "isomorphic-dompurify": "^4.4.0",
     "js-cookie": "^3.0.5",
     "jspdf": "^4.2.1",
     "lucide-react": "^0.469.0",
