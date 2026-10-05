@@ -40,7 +40,7 @@ const blogSchema = z.object({
 }).superRefine((data, ctx) => {
   if (data.publishMode === "schedule" && !data.publish_at) {
     ctx.addIssue({
-      code: z.ZodIssueCode.custom,
+      code: "custom",
       message: "تاريخ ووقت النشر مطلوب عند الجدولة",
       path: ["publish_at"],
     });

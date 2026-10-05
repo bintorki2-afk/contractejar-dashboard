@@ -27,7 +27,7 @@ export const discountFormSchema = z
   .superRefine((data, ctx) => {
     if (data.notifyOnLogin && !data.notificationMessage?.trim()) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "نص الرسالة مطلوب عند تفعيل إشعار العميل",
         path: ["notificationMessage"],
       });
