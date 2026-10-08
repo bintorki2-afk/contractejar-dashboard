@@ -3,6 +3,7 @@ import { getContractTypeLabel } from "@/src/lib/contract-period-utils";
 import { getOrderClientPhone } from "@/components/orders/messages/order-section-message-utils";
 import { formatSaudiMobileDisplay, toSaudiMobileDialDigits } from "@/src/lib/format-phone";
 import { fileNameFromUrl, resolveImageUrl, resolveNationalAddress } from "./national-address-utils";
+import { normalizeApiInvoice } from "@/src/lib/invoice-lines";
 
 function pick(...values) {
   for (const value of values) {
@@ -349,5 +350,7 @@ export function mapOrderDetailView(orderData = {}) {
       furnished: unit.furnished === true || unit.furnished === 1 ? "نعم" : unit.furnished === false || unit.furnished === 0 ? "لا" : unit.furnished,
     })),
     units_count: orderData.units_count ?? units.length,
+    // فاتورة الطلب من الخادم (ف1): البنود والمجاميع من ContractPricing — null قبل الدفع.
+    invoice: normalizeApiInvoice(orderData.invoice),
   };
 }

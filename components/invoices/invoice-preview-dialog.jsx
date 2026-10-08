@@ -88,7 +88,7 @@ export default function InvoicePreviewDialog({ open, onOpenChange, invoice }) {
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <h2 className="text-[28px] font-black leading-none text-brand-dark dark:text-emerald-400">
-                  عقدي
+                  عقد إيجار
                 </h2>
                 <p className="mt-1.5 text-xs font-semibold text-status-neutral dark:text-white/50">
                   منصة توثيق عقود الإيجار

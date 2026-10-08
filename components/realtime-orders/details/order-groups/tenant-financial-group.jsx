@@ -4,6 +4,7 @@ import { Check, ScrollText, UserRound, Wallet } from "lucide-react";
 import { RT } from "../../theme";
 import { cn } from "@/lib/utils";
 import { AccentCard, Field, GroupTitle, Money } from "./primitives";
+import InvoiceCard from "./invoice-card";
 
 function hasValue(value) {
   return value != null && value !== "";
@@ -151,6 +152,8 @@ export default function TenantFinancialGroup({ order, onEdit }) {
           </FeeLine>
         </div>
       </AccentCard>
+
+      <InvoiceCard invoice={order.invoice} />
 
       <AccentCard
         accent={RT.brand}
