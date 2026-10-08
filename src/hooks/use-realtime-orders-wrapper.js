@@ -84,7 +84,17 @@ export function useRealtimeOrdersWrapper() {
     can(PERMISSION_SECTIONS.returned_request, "create") ||
     can(PERMISSION_SECTIONS.returned_request, "edit");
 
+  const {
+    activeItems: statusItems,
+    receivedStatusId,
+    newStatusId,
+    returnedStatusId,
+    canceledStatusId,
+  } = useContractStatuses();
+
   const visiblePills = STATUS_FILTER_PILLS.filter((pill) => {
+    // لا توجد حالة «استرجاع» بالاسم → لا نعرض الفلتر (بدل الاحتياط بحالة أخرى).
+    if (pill.id === "returned" && returnedStatusId == null) return false;
     const section = PILL_PERMISSIONS[pill.id];
     if (!section) return true;
     return isAdmin || can(section, "view");
@@ -109,14 +119,6 @@ export function useRealtimeOrdersWrapper() {
 
   const activeFilters = activeSection ? [activeSection] : [];
   const inSectionMode = Boolean(activeSection);
-
-  const {
-    activeItems: statusItems,
-    receivedStatusId,
-    newStatusId,
-    returnedStatusId,
-    canceledStatusId,
-  } = useContractStatuses();
 
   const statusChips = useMemo(
     () => getRealtimeStatusChipStatuses(statusItems, receivedStatusId),

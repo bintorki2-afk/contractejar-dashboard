@@ -7,7 +7,8 @@ export const CONTRACT_STATUSES_ACTIVE_QUERY_KEY = "contract-statuses-active";
 
 export const NEW_CONTRACT_STATUS_ID = 1;
 export const RECEIVED_CONTRACT_STATUS_ID = 6;
-export const RETURN_CONTRACT_STATUS_ID = 2;
+// لا يوجد رقم ثابت لحالة «الاسترجاع»: الرقم 2 في قاعدة «عقد إيجار» هو «قيد المراجعة».
+// تُعرف حالة الاسترجاع بالاسم فقط (انظر resolveReturnedContractStatusId).
 export const CANCELED_CONTRACT_STATUS_ID = 4;
 
 export const emptyContractStatusForm = {
@@ -82,11 +83,12 @@ export function resolveReceivedContractStatusId(statusItems = []) {
   );
 }
 
+/** null عندما لا توجد حالة باسم «استرجاع/مسترجع» — لا احتياط برقم (كان 2 = «قيد المراجعة»). */
 export function resolveReturnedContractStatusId(statusItems = []) {
   return (
     findExactStatusId(statusItems, "استرجاع") ??
     findOrdersPageStatusIdByLabel(statusItems, "استرجاع") ??
-    RETURN_CONTRACT_STATUS_ID
+    null
   );
 }
 
