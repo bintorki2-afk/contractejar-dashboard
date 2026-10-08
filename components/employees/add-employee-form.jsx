@@ -58,9 +58,13 @@ const employeeSchema = (isEdit) =>
   z.object({
     firstName: z.string().min(2, "الإسم يجب أن يكون على الأقل حرفين"),
     lastName: z.string().min(2, "الاسم الأخير يجب أن يكون على الأقل حرفين"),
+    // نفس شرط الخادم (min:8) حتى لا يُرفض الحفظ برسالة من الخادم.
     password: isEdit
-      ? z.string().optional()
-      : z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
+      ? z
+          .string()
+          .optional()
+          .refine((value) => !value || value.length >= 8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل")
+      : z.string().min(8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل"),
     email: z.string().email("البريد الإلكتروني غير صحيح"),
     phone: z.string().min(10, "رقم الهاتف غير صحيح"),
     base_salary: z.string().min(1, "الراتب الأساسي مطلوب"),
