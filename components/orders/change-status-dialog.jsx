@@ -30,8 +30,13 @@ import ChangeOrderStatusFieldsDialog, {
   statusRequiresExtraFields,
 } from "@/components/realtime-orders/change-order-status-fields-dialog"
 import { postOrderStatus } from "@/src/lib/order-status-api"
+import { usePermissions } from "@/src/hooks/use-permissions"
+import { PERMISSION_SECTIONS } from "@/src/lib/permissions"
 
 export default function ChangeStatusDialog({ orderId, order, queryKey }) {
+  // الحذف النهائي: نفس شرط الخادم (all_requests.delete أو مدير النظام).
+  const { isAdmin, can } = usePermissions()
+  const canDeleteOrder = isAdmin || can(PERMISSION_SECTIONS.all_requests, "delete")
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const [statusFieldsOpen, setStatusFieldsOpen] = useState(false);
@@ -188,6 +193,8 @@ export default function ChangeStatusDialog({ orderId, order, queryKey }) {
           <i className="fa-solid fa-chevron-left mr-auto text-ink-placeholder text-10"></i>
         </DropdownMenuItem>
 
+        {canDeleteOrder ? (
+        <>
         <DropdownMenuSeparator className="bg-neutral-100 my-1" />
 
         <DropdownMenuItem
@@ -195,6 +202,7 @@ export default function ChangeStatusDialog({ orderId, order, queryKey }) {
           disabled={isDeleting}
           onSelect={(e) => {
             e.stopPropagation?.()
+            if (!window.confirm("حذف الطلب نهائياً؟ لا يمكن التراجع.")) return
             deleteOrder()
           }}
         >
@@ -206,6 +214,8 @@ export default function ChangeStatusDialog({ orderId, order, queryKey }) {
             <i className="fa-solid fa-chevron-left mr-auto text-red-300 text-10"></i>
           )}
         </DropdownMenuItem>
+        </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
 
