@@ -98,3 +98,23 @@ describe("print helpers", () => {
     expect(sandbox).not.toContain("allow-scripts");
   });
 });
+
+describe("contract print — mobiles keep the leading 05 like the order page", () => {
+  it("formats owner/tenant/agent/customer mobiles for display", () => {
+    const html = buildContractPrintHtml({
+      uuid: "1",
+      user: { mobile: "966551112233" },
+      contract_summary: {
+        property_owner_mobile: "551234567",
+        add_legal_agent_of_owner: 1,
+        mobile_of_property_owner_agent: "+966559998877",
+      },
+      step3: { tenant_mobile: "559876543" },
+    });
+    expect(html).toContain("رقم جوال العميل: 0551112233");
+    expect(html).toContain("0551234567");
+    expect(html).toContain("0559998877");
+    expect(html).toContain("0559876543");
+    expect(html).not.toMatch(/>551234567</);
+  });
+});
