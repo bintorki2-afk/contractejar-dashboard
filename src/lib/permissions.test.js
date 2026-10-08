@@ -83,6 +83,23 @@ describe("permissions — pages match what the server allows", () => {
 
   it("hidden features stay closed even for the system admin", () => {
     expect(canAccessRoute("/home/invoices", admin.permissions, admin)).toBe(false);
-    expect(canAccessRoute("/home/return-orders", admin.permissions, admin)).toBe(false);
+  });
+
+  it("«المرتجعات» is open again (Moyasar refunds) for payments.view or returned_request.view", () => {
+    expect(canAccessRoute("/home/return-orders", admin.permissions, admin)).toBe(true);
+    const payer = { is_system_admin: false };
+    expect(canAccessRoute("/home/return-orders", ["payments.view"], payer)).toBe(true);
+    expect(canAccessRoute("/home/return-orders", ["returned_request.view"], payer)).toBe(true);
+    expect(canAccessRoute("/home/return-orders", ["all_requests.view"], payer)).toBe(false);
+  });
+});
+
+describe("payments.refund (د9)", () => {
+  it("refund is a payments-only action granted explicitly or to system admins", async () => {
+    const { canAccess } = await import("./permissions");
+    const employee = { is_system_admin: false };
+    expect(canAccess(["payments.view"], employee, "payments", "refund")).toBe(false);
+    expect(canAccess(["payments.view", "payments.refund"], employee, "payments", "refund")).toBe(true);
+    expect(canAccess([], { is_system_admin: true }, "payments", "refund")).toBe(true);
   });
 });

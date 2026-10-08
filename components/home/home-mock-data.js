@@ -49,7 +49,7 @@ export const HOME_MOCK = {
     },
     {
       id: 'return-orders',
-      label: 'طلبات الاسترجاع',
+      label: 'المرتجعات',
       href: '/home/return-orders',
       badge_count: 3,
     },

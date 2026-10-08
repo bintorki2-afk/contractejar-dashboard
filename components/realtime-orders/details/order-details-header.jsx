@@ -133,6 +133,7 @@ export default function OrderDetailsHeader({
   onQuickNotarized,
   onSendSectionError,
   onViewExpanded,
+  refundLabel,
   statuses = [],
   canChangeStatus = true,
   isStatusPending = false,
@@ -494,7 +495,7 @@ export default function OrderDetailsHeader({
               className={cn(pillBase, pill.className)}
             >
               <Icon className="size-3.5 shrink-0" />
-              {pill.label}
+              {pill.id === "refund" && refundLabel ? refundLabel : pill.label}
             </button>
           );
         })}

@@ -20,6 +20,8 @@ import ContractExpandedViewDialog from "./contract-expanded-view-dialog";
 import { mapOrderDetailView } from "./map-order-detail";
 import OrderJourney from "./order-journey";
 import OrderStageBar from "./order-stage-bar";
+import OrderHistoryPanel from "./order-history-panel";
+import RefundDialog from "./refund-dialog";
 
 function resolveBackLink(from) {
   if (from === "/home/realtime-orders" || from?.startsWith("/home/realtime-orders")) {
@@ -48,6 +50,8 @@ function OrderDetailsBody() {
     can(PERMISSION_SECTIONS.request_classification, "edit") ||
     can(PERMISSION_SECTIONS.all_requests, "edit");
   const canEditOrder = isAdmin || can(PERMISSION_SECTIONS.all_requests, "edit");
+  // د9: الاسترجاع عبر Moyasar بصلاحية payments.refund (مدير النظام ضمنياً).
+  const canRefundPayments = isAdmin || can(PERMISSION_SECTIONS.payments, "refund");
   const canAddStatus =
     isAdmin || can(PERMISSION_SECTIONS.request_classification, "create");
   const canReturn =
@@ -63,6 +67,7 @@ function OrderDetailsBody() {
     statuses,
   });
   const [expandedViewOpen, setExpandedViewOpen] = useState(false);
+  const [refundOpen, setRefundOpen] = useState(false);
 
   useEffect(() => {
     setOrderId(id);
@@ -109,7 +114,8 @@ function OrderDetailsBody() {
         onStatusChange={dialogs.handleStatusChange}
         onOpenNotes={handleOpenNotes}
         onPayLink={dialogs.handlePayLink}
-        onRefund={() => dialogs.openReturn(orderData)}
+        onRefund={() => (canRefundPayments ? setRefundOpen(true) : dialogs.openReturn(orderData))}
+        refundLabel={canRefundPayments ? "استرجاع المبلغ" : undefined}
         onPropertyUpdate={() => dialogs.setPropertyUpdateOpen(true)}
         onSendDraft={() => dialogs.setSendDraftOpen(true)}
         onMissingAttachment={() => dialogs.setCorrectionRequestOpen(true)}
@@ -128,11 +134,23 @@ function OrderDetailsBody() {
 
       <OrderJourney orderData={orderData} />
 
-      {isLeaseRenewal ? (
-        <LeaseRenewalOrderView orderData={orderData} />
-      ) : (
-        <OrderGroupsLayout order={view} onEdit={dialogs.setEditorSection} />
-      )}
+      <div className="grid grid-cols-1 items-start gap-5 min-[1500px]:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="min-w-0">
+          {isLeaseRenewal ? (
+            <LeaseRenewalOrderView orderData={orderData} />
+          ) : (
+            <OrderGroupsLayout order={view} onEdit={dialogs.setEditorSection} />
+          )}
+        </div>
+        <OrderHistoryPanel
+          orderData={orderData}
+          canRefund={canRefundPayments}
+          onRefund={() => setRefundOpen(true)}
+          className="min-[1500px]:sticky min-[1500px]:top-0"
+        />
+      </div>
+
+      <RefundDialog open={refundOpen} onOpenChange={setRefundOpen} orderData={orderData} />
 
       <OrderDetailsDialogs id={id} orderData={orderData} view={view} dialogs={dialogs} />
 

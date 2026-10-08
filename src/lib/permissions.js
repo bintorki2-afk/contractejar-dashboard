@@ -46,7 +46,7 @@ export const PERMISSION_SECTIONS = {
   website_images: 'website_images',
 };
 
-export const PERMISSION_ACTIONS = ['view', 'create', 'edit', 'delete', 'retrieve'];
+export const PERMISSION_ACTIONS = ['view', 'create', 'edit', 'delete', 'retrieve', 'refund']; // refund: payments فقط (د9)
 
 /**
  * أعلام الميزات (Feature flags) — عقد إيجار.
@@ -55,7 +55,6 @@ export const PERMISSION_ACTIONS = ['view', 'create', 'edit', 'delete', 'retrieve
  * لإعادة تفعيل ميزة مستقبلًا: احذف مسارها من DISABLED_FEATURE_PREFIXES فقط.
  */
 export const DISABLED_FEATURE_PREFIXES = [
-  '/home/return-orders', // طلبات الاسترجاع (لا يوجد استرجاع بدون بوابة دفع)
   '/home/invoices',      // الفواتير
   '/home/leads',         // العملاء المحتملون
 ];
@@ -260,7 +259,8 @@ export const ROUTE_SECTION_RULES = [
   { prefix: '/home/contract-settings', section: PERMISSION_SECTIONS.settings },
   { prefix: '/home/settings', section: PERMISSION_SECTIONS.settings },
   { prefix: '/home/roles-and-employees', section: ROLES_AND_EMPLOYEES_SECTIONS },
-  { prefix: '/home/return-orders', section: PERMISSION_SECTIONS.returned_request },
+  // د9: «المرتجعات» = عمليات استرجاع Moyasar (payments) + طلبات الاسترجاع القديمة (returned_request).
+  { prefix: '/home/return-orders', section: [PERMISSION_SECTIONS.payments, PERMISSION_SECTIONS.returned_request] },
   { prefix: '/home/lessor-change', section: PERMISSION_SECTIONS.lessor_change },
   { prefix: '/home/orders', section: ORDERS_SECTIONS },
   { prefix: '/home/reports', section: PERMISSION_SECTIONS.analytics },
@@ -330,7 +330,7 @@ export const SIDEBAR_NAV = [
       { label: 'الطلبات مباشر', href: '/home/realtime-orders', section: REALTIME_ORDERS_SECTIONS, badge: 'unreceived' },
       { label: 'العملاء', href: '/home/clients', section: PERMISSION_SECTIONS.users },
       { label: 'العملاء المحتملون', href: '/home/leads', section: PERMISSION_SECTIONS.users },
-      { label: 'طلبات الاسترجاع', href: '/home/return-orders', section: PERMISSION_SECTIONS.returned_request, badge: 'returned' },
+      { label: 'المرتجعات', href: '/home/return-orders', section: [PERMISSION_SECTIONS.payments, PERMISSION_SECTIONS.returned_request] },
       { label: 'الموظفون والأدوار', href: '/home/roles-and-employees', section: ROLES_AND_EMPLOYEES_SECTIONS },
       { label: 'التسويق والمحتوى', href: '/home/marketing-and-content', section: MARKETING_SECTIONS },
       { label: 'التقارير', href: '/home/reports', section: PERMISSION_SECTIONS.analytics },
