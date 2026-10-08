@@ -1,10 +1,12 @@
-import { printHtmlDocument } from "@/src/lib/print";
+import { escapeHtml, printHtmlDocument, safeImageUrl } from "@/src/lib/print";
 
+// Every value here comes from the customer (names, addresses, conditions…) — it
+// is HTML-escaped so it prints as text and can never run as markup/script.
 const display = (value) => {
   if (value === null || value === undefined || value === "") return "---";
-  if (Array.isArray(value)) return value.filter(Boolean).join("، ") || "---";
+  if (Array.isArray(value)) return escapeHtml(value.filter(Boolean).join("، ")) || "---";
   if (typeof value === "boolean") return value ? "نعم" : "لا";
-  return String(value);
+  return escapeHtml(value);
 };
 
 const section = (title, rows) => {
@@ -12,7 +14,7 @@ const section = (title, rows) => {
     .map(
       ([label, value]) => `
       <tr>
-        <td class="label">${label}</td>
+        <td class="label">${escapeHtml(label)}</td>
         <td class="value">${display(value)}</td>
       </tr>`
     )
@@ -20,7 +22,7 @@ const section = (title, rows) => {
 
   return `
     <section class="section">
-      <h2>${title}</h2>
+      <h2>${escapeHtml(title)}</h2>
       <table>${items}</table>
     </section>
   `;
@@ -113,6 +115,7 @@ export function buildContractPrintSections(orderData) {
     summary.copy_power_of_attorney_from_heirs_to_agent,
   ]
     .map(resolveImageUrl)
+    .map(safeImageUrl)
     .filter(Boolean);
 
   const imagesHtml = images.length
@@ -245,7 +248,7 @@ function wrapPrintDocument(title, innerHtml) {
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>${title}</title>
+  <title>${escapeHtml(title)}</title>
   <style>${CONTRACT_PRINT_STYLES}</style>
 </head>
 <body>
@@ -257,7 +260,7 @@ ${innerHtml}
 export function buildContractPrintHtml(orderData) {
   if (!orderData) return "";
   return wrapPrintDocument(
-    `طباعة العقد - ${display(orderData.uuid)}`,
+    `طباعة العقد - ${orderData.uuid ?? "---"}`,
     buildContractPrintSections(orderData)
   );
 }
