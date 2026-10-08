@@ -1,4 +1,5 @@
 "use client"
+import { useConfirm } from "@/components/shared/confirm-provider";
 import React, { useMemo, useState } from 'react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -36,6 +37,7 @@ import { PERMISSION_SECTIONS } from "@/src/lib/permissions"
 export default function ChangeStatusDialog({ orderId, order, queryKey }) {
   // الحذف النهائي: نفس شرط الخادم (all_requests.delete أو مدير النظام).
   const { isAdmin, can } = usePermissions()
+  const confirm = useConfirm()
   const canDeleteOrder = isAdmin || can(PERMISSION_SECTIONS.all_requests, "delete")
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
@@ -202,8 +204,15 @@ export default function ChangeStatusDialog({ orderId, order, queryKey }) {
           disabled={isDeleting}
           onSelect={(e) => {
             e.stopPropagation?.()
-            if (!window.confirm("حذف الطلب نهائياً؟ لا يمكن التراجع.")) return
-            deleteOrder()
+            setTimeout(async () => {
+              const ok = await confirm({
+                title: "نقل الطلب إلى السلة",
+                description: "سيُنقل الطلب إلى السلة ويمكن استعادته خلال 30 يوماً.",
+                confirmLabel: "نقل إلى السلة",
+                destructive: true,
+              })
+              if (ok) deleteOrder()
+            }, 10)
           }}
         >
           <TrashIcon className='text-red-600 size-4' />

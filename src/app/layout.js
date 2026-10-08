@@ -6,6 +6,7 @@ import ReactQueryProvider from '../utils/providers/react-query-provider';
 import StoreHydrator from '@/components/auth/store-hydrator';
 import FirebaseMessagingProvider from '@/components/firebase/firebase-messaging-provider';
 import ThemeProvider from '@/components/theme/theme-provider';
+import { ConfirmProvider } from '@/components/shared/confirm-provider';
 
 const tajawal = localFont({ src: '../fonts/GeistVF.woff', variable: '--font-tajawal', display: 'swap' }); // QA-FONT-STUB
 
@@ -37,7 +38,7 @@ export default function RootLayout({ children }) {
           <ReactQueryProvider>
             <StoreHydrator />
             <FirebaseMessagingProvider />
-            {children}
+            <ConfirmProvider>{children}</ConfirmProvider>
             <Toaster
               position="top-center"
               dir="rtl"

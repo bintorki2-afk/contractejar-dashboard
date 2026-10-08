@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/shared/confirm-provider";
 import Link from "next/link";
 import { AlignJustify, Loader2 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -49,6 +50,7 @@ function SiteSwitch({ checked, disabled, onCheckedChange }) {
 }
 
 export default function GeneralSettingsTab() {
+  const confirm = useConfirm();
   const queryClient = useQueryClient();
   const { can, isReady } = usePermissions();
 
@@ -134,7 +136,15 @@ export default function GeneralSettingsTab() {
                   <SiteSwitch
                     checked={enabled}
                     disabled={isPending}
-                    onCheckedChange={(checked) => mutate({ key: item.key, value: checked })}
+                    onCheckedChange={async (checked) => {
+                      const ok = await confirm({
+                        title: checked ? "تفعيل الإعداد" : "تعطيل الإعداد",
+                        description: `${checked ? "تفعيل" : "تعطيل"} «${item.label}»؟ يُطبَّق فوراً على الموقع والتطبيق.`,
+                        confirmLabel: checked ? "تفعيل" : "تعطيل",
+                        destructive: !checked,
+                      });
+                      if (ok) mutate({ key: item.key, value: checked });
+                    }}
                   />
                 )}
               </div>

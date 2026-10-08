@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/shared/confirm-provider";
 import { useCallback, useRef, useState } from "react";
 import { Inbox, Loader2, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -94,6 +95,7 @@ function isSelectedUnit(unit, data) {
 }
 
 function SingleUnitBlock({ unit, data, index, formRef }) {
+  const confirm = useConfirm();
   const { updateUnit, deleteUnit, isSavingUnit, isDeletingUnit } =
     useSingleOrderContext();
   const selected = isSelectedUnit(unit, data);
@@ -127,9 +129,12 @@ function SingleUnitBlock({ unit, data, index, formRef }) {
 
   const handleDetach = async () => {
     if (unit?.id == null) return;
-    const ok = window.confirm(
-      `فصل الوحدة ${unitLabel} عن هذا العقد؟ لن تُحذف الوحدة من العقار.`
-    );
+    const ok = await confirm({
+      title: "فصل الوحدة",
+      description: `فصل الوحدة ${unitLabel} عن هذا العقد؟ لن تُحذف الوحدة من العقار.`,
+      confirmLabel: "فصل الوحدة",
+      destructive: true,
+    });
     if (!ok) return;
     try {
       await deleteUnit(unit.id);

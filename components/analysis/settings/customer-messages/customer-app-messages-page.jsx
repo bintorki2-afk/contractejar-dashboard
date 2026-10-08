@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/shared/confirm-provider";
 import AddNewMessageForClientDialog from "@/components/analysis/settings/message-for-clients/add-message-for-client";
 import DisplayMessageForClientDialog from "@/components/analysis/settings/message-for-clients/display-message-for-client";
 import PermissionGate from "@/components/auth/permission-gate";
@@ -26,6 +27,7 @@ const HEADERS = [
 ];
 
 export default function CustomerAppMessagesPage() {
+  const confirm = useConfirm();
   const queryClient = useQueryClient();
   const { messages, isLoading } = useCustomerMessages("client");
 
@@ -76,7 +78,7 @@ export default function CustomerAppMessagesPage() {
                     <button
                       type="button"
                       disabled={deleteMutation.isPending}
-                      onClick={() => deleteMutation.mutate(item.id)}
+                      onClick={async () => { if (await confirm({ title: "تأكيد الحذف", description: "حذف هذا العنصر نهائياً؟ لا يمكن التراجع.", confirmLabel: "حذف", destructive: true })) deleteMutation.mutate(item.id); }}
                       className={SETTINGS_DELETE_TRIGGER_CLASS}
                     >
                       حذف

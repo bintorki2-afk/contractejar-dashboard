@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import Loader from "@/components/home/loader";
 import { useProfitSettings, useProfitsReport, useUpdateProfitSettings } from "@/src/hooks/use-reports";
 import { ReportKpiGrid } from "../shared/report-kpi-card";
@@ -17,7 +18,7 @@ export default function ProfitsReportTab({ period, dateFrom, dateTo, contractTyp
     employee
   );
   const { data: settingsData } = useProfitSettings();
-  const { mutate: updateSettings } = useUpdateProfitSettings();
+  const { mutate: updateSettings, isPending: isSavingSettings } = useUpdateProfitSettings();
   const [settings, setSettings] = useState(null);
   const currentSettings = settings ?? settingsData ?? {};
   if (isLoading) return <Loader />;
@@ -30,11 +31,30 @@ export default function ProfitsReportTab({ period, dateFrom, dateTo, contractTyp
     value: Number(item.profit ?? 0),
   }));
   const fields = [["moyasar_fee_percent", "رسوم Moyasar", "%"], ["monthly_salaries", "الرواتب الشهرية", "ريال"], ["operating_budget", "المصاريف التشغيلية", "ريال"], ["marketing_budget", "ميزانية التسويق", "ريال"]];
-  const saveSetting = (key, rawValue) => {
-    const numericValue = rawValue === "" ? null : Number(rawValue);
-    const next = { ...currentSettings, [key]: Number.isNaN(numericValue) ? rawValue : numericValue };
-    setSettings(next);
-    if (numericValue === null || !Number.isNaN(numericValue)) updateSettings(next);
+  // د7: لا حفظ تلقائي مع كل حرف — التعديل محلي حتى يضغط الموظف «حفظ الإعدادات».
+  const toAsciiDigits = (v) => String(v).replace(/[٠-٩]/g, (d) => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[٫,]/g, ".");
+  const editSetting = (key, rawValue) => {
+    setSettings({ ...currentSettings, [key]: toAsciiDigits(rawValue) });
+  };
+  const isDirty = settings != null;
+  const invalidKeys = fields
+    .map(([key]) => key)
+    .filter((key) => {
+      const v = currentSettings[key];
+      return v !== "" && v != null && Number.isNaN(Number(v));
+    });
+  const saveSettings = () => {
+    if (invalidKeys.length) return;
+    const next = Object.fromEntries(
+      Object.entries(currentSettings).map(([key, v]) => [key, v === "" || v == null ? null : Number(v)])
+    );
+    updateSettings(next, {
+      onSuccess: () => {
+        setSettings(null);
+        toast.success("تم حفظ إعدادات الأرباح");
+      },
+      onError: (err) => toast.error(err?.response?.data?.message || "تعذّر حفظ الإعدادات"),
+    });
   };
 
   return (
@@ -51,7 +71,7 @@ export default function ProfitsReportTab({ period, dateFrom, dateTo, contractTyp
         </ReportSectionCard>
       </div>
 
-      <ReportSectionCard title="الإعدادات الحالية (حفظ تلقائي)">
+      <ReportSectionCard title="إعدادات حساب الأرباح">
         <div  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {fields.map(([key, label, unit]) => (
             <label key={key} className="flex flex-col gap-1.5">
@@ -60,13 +80,41 @@ export default function ProfitsReportTab({ period, dateFrom, dateTo, contractTyp
                 <input
                   type="text"
                   value={currentSettings[key] ?? ""}
-                  onChange={(e) => saveSetting(key, e.target.value)}
-                  className="flex-1 h-10 px-3 rounded-lg border border-surface-border-soft text-sm font-semibold text-gray-900 focus:outline-none focus:border-brand-dark dark:bg-[#0F1C16] dark:border-white/10 dark:text-white"
+                  inputMode="decimal"
+                  dir="ltr"
+                  onChange={(e) => editSetting(key, e.target.value)}
+                  aria-invalid={invalidKeys.includes(key) || undefined}
+                  className="flex-1 h-10 px-3 rounded-lg border border-surface-border-soft text-sm font-semibold text-gray-900 tabular-nums text-right focus:outline-none focus:border-brand-dark aria-[invalid]:border-red-500 dark:bg-[#0F1C16] dark:border-white/10 dark:text-white"
                 />
                 <span className="text-xs text-gray-400 shrink-0 dark:text-white/50">{unit}</span>
               </div>
             </label>
           ))}
+        </div>
+        <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
+          {invalidKeys.length ? (
+            <span className="text-xs font-semibold text-red-600">أدخل أرقاماً فقط</span>
+          ) : isDirty ? (
+            <span className="text-xs font-semibold text-amber-700 dark:text-amber-300">تعديلات غير محفوظة</span>
+          ) : null}
+          {isDirty ? (
+            <button
+              type="button"
+              onClick={() => setSettings(null)}
+              disabled={isSavingSettings}
+              className="h-10 px-4 rounded-xl border border-surface-border-soft text-sm font-bold text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:text-white/70"
+            >
+              تراجع
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={saveSettings}
+            disabled={!isDirty || isSavingSettings || invalidKeys.length > 0}
+            className="h-10 px-5 rounded-xl bg-brand-deep text-white text-sm font-bold hover:bg-brand-deep/90 disabled:opacity-50"
+          >
+            {isSavingSettings ? "جاري الحفظ…" : "حفظ الإعدادات"}
+          </button>
         </div>
       </ReportSectionCard>
     </div>

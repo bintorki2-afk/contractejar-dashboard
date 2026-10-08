@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/shared/confirm-provider";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, Home } from "lucide-react";
@@ -13,6 +14,7 @@ import ClientStatsGrid from "./client-details/client-stats-grid";
 import ClientOrdersSection from "./client-details/client-orders-section";
 
 export default function ClientDetailsWrapper() {
+  const confirm = useConfirm();
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -24,14 +26,30 @@ export default function ClientDetailsWrapper() {
   const { mutate: toggleBlock, isPending: isBlocking } = useBlockClient();
   const { mutate: deleteClient, isPending: isDeleting } = useDeleteClient();
 
-  const handleBlock = () => {
+  const handleBlock = async () => {
     if (!clientId) return;
+    const blocking = !client?.blocked;
+    const ok = await confirm({
+      title: blocking ? "حظر العميل" : "إلغاء حظر العميل",
+      description: blocking
+        ? `حظر «${client?.name ?? "العميل"}»؟ لن يتمكن من إنشاء طلبات جديدة.`
+        : `إلغاء حظر «${client?.name ?? "العميل"}»؟`,
+      confirmLabel: blocking ? "حظر" : "إلغاء الحظر",
+      destructive: blocking,
+    });
+    if (!ok) return;
     toggleBlock(clientId);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!clientId) return;
-    if (!window.confirm("هل أنت متأكد من حذف هذا العميل؟ لا يمكن التراجع عن هذا الإجراء.")) {
+    const ok = await confirm({
+      title: "حذف العميل",
+      description: "هل أنت متأكد من حذف هذا العميل؟ لا يمكن التراجع عن هذا الإجراء.",
+      confirmLabel: "حذف العميل",
+      destructive: true,
+    });
+    if (!ok) {
       return;
     }
     deleteClient(clientId, {

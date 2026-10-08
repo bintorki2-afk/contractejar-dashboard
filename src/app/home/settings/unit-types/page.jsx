@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/shared/confirm-provider";
 import { useUnwrapPageProps } from "@/src/hooks/use-unwrap-page-props";
 import AddNewTypeDialog from "@/components/analysis/settings/unit-types/add-new-type-dialog";
 import EditTypeUnitDialog from "@/components/analysis/settings/unit-types/edit-type-unit-dialog";
@@ -28,6 +29,7 @@ import { toast } from "sonner";
 const HEADERS = ["الاسم", "تصنيف الوحدة", "الإجراءات"];
 
 export default function UnitTypesPage(props) {
+  const confirm = useConfirm();
   useUnwrapPageProps(props?.params, props?.searchParams);
 
   const queryClient = useQueryClient();
@@ -79,7 +81,7 @@ export default function UnitTypesPage(props) {
                     <button
                       type="button"
                       disabled={isPending}
-                      onClick={() => deleteItem(item.id)}
+                      onClick={async () => { if (await confirm({ title: "تأكيد الحذف", description: "حذف هذا العنصر نهائياً؟ لا يمكن التراجع.", confirmLabel: "حذف", destructive: true })) deleteItem(item.id); }}
                       className={SETTINGS_DELETE_TRIGGER_CLASS}
                     >
                       حذف

@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/shared/confirm-provider";
 import { useState } from "react";
 import Loader from "@/components/home/loader";
 import { Button } from "@/components/ui/button";
@@ -153,6 +154,7 @@ function EditLabelDialog({ item }) {
 }
 
 export default function InstrumentTypesTab() {
+  const confirm = useConfirm();
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError, error } = useQuery({
@@ -162,6 +164,15 @@ export default function InstrumentTypesTab() {
   });
 
   const items = mergeSettingContracts(extractSettingContracts(data));
+
+  const confirmVisibility = async (item, field, value, where) => {
+    const ok = await confirm({
+      title: value ? "إظهار نوع الصك" : "إخفاء نوع الصك",
+      description: `${value ? "إظهار" : "إخفاء"} «${item.type_name}» ${where}؟ يُطبَّق فوراً على نموذج العميل.`,
+      confirmLabel: value ? "إظهار" : "إخفاء",
+    });
+    if (ok) updateMutation.mutate({ item, field, value });
+  };
 
   const updateMutation = useMutation({
     mutationFn: async ({ item, field, value }) => {
@@ -278,13 +289,7 @@ export default function InstrumentTypesTab() {
                       <VisibilitySwitch
                         checked={item.realestate}
                         disabled={updateMutation.isPending}
-                        onCheckedChange={(value) =>
-                          updateMutation.mutate({
-                            item,
-                            field: "realestate",
-                            value,
-                          })
-                        }
+                        onCheckedChange={(value) => confirmVisibility(item, "realestate", value, "في العقار")}
                       />
                     </div>
                   </td>
@@ -296,13 +301,7 @@ export default function InstrumentTypesTab() {
                       <VisibilitySwitch
                         checked={item.contract}
                         disabled={updateMutation.isPending}
-                        onCheckedChange={(value) =>
-                          updateMutation.mutate({
-                            item,
-                            field: "contract",
-                            value,
-                          })
-                        }
+                        onCheckedChange={(value) => confirmVisibility(item, "contract", value, "في العقد")}
                       />
                     </div>
                   </td>

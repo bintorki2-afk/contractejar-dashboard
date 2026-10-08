@@ -24,6 +24,10 @@ import { cn } from "@/lib/utils";
 import { toSaudiMobileDialDigits } from "@/src/lib/format-phone";
 import { axiosInstance } from "@/src/utils/axios";
 import { printOrderContract } from "@/components/orders/single-order/print-contract";
+import { useConfirm } from "@/components/shared/confirm-provider";
+import { statusRequiresExtraFields } from "@/components/realtime-orders/change-order-status-fields-dialog";
+import { DRAFT_RULE_HINT, statusRequiresDraftFirst } from "@/src/lib/draft-rule";
+import { openDialogAfterMenuClose } from "@/src/lib/open-dialog-after-menu-close";
 
 export default function OrderActionsMenu({
   order,
@@ -36,6 +40,26 @@ export default function OrderActionsMenu({
   canDelete = false,
 }) {
   const [isPrinting, setIsPrinting] = useState(false);
+  const confirm = useConfirm();
+
+  // د7: تغيير الحالة من «⋮» يتطلب تأكيداً (الحالات ذات الحقول الإضافية تفتح نموذجها وهو التأكيد).
+  const requestStatusChange = (status) => {
+    if (statusRequiresExtraFields(status)) {
+      onStatusChange?.(order, status);
+      return;
+    }
+    const label = status.name ?? status.label;
+    openDialogAfterMenuClose(async () => {
+      const ok = await confirm({
+        title: "تغيير حالة الطلب",
+        description: `تغيير حالة الطلب #${order?.uuid ?? ""} إلى «${label}»؟${
+          statusRequiresDraftFirst(status) ? ` (${DRAFT_RULE_HINT})` : ""
+        } سيُشعَر العميل بالتغيير.`,
+        confirmLabel: "تغيير الحالة",
+      });
+      if (ok) onStatusChange?.(order, status);
+    });
+  };
   // حالات قابلة للتغيير من القائمة، مع استبعاد حالات الاسترجاع (معطّلة لعقد إيجار).
   const changeableStatuses = (statuses || []).filter(
     (status) => status && !isReturnContractStatus(status)
@@ -150,10 +174,7 @@ export default function OrderActionsMenu({
                 <DropdownMenuItem
                   key={status.id}
                   disabled={isStatusPending}
-                  onSelect={(event) => {
-                    event.preventDefault();
-                    onStatusChange?.(order, status);
-                  }}
+                  onSelect={() => requestStatusChange(status)}
                   className="rounded-xl px-3 py-2.5 cursor-pointer gap-2.5 focus:bg-[#F3F9F6] dark:focus:bg-white/[0.06]"
                 >
                   <span

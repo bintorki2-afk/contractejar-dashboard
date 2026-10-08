@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/shared/confirm-provider";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -44,6 +45,7 @@ function ComingSoonBadge() {
 }
 
 export default function AppStatusPanel() {
+  const confirm = useConfirm();
   const queryClient = useQueryClient();
   const { can, isReady } = usePermissions();
   const canEdit = isReady && can(PERMISSION_SECTIONS.settings, "edit");
@@ -239,7 +241,17 @@ export default function AppStatusPanel() {
             <Switch
               checked={status.mobile.is_open}
               disabled={!canEdit}
-              onCheckedChange={(value) => mobileToggleMutation.mutate({ value })}
+              onCheckedChange={async (value) => {
+                const ok = await confirm({
+                  title: value ? "فتح التطبيق" : "إغلاق التطبيق",
+                  description: value
+                    ? "فتح التطبيق للعملاء الآن؟"
+                    : "إغلاق التطبيق للعملاء الآن؟ ستظهر لهم رسالة الصيانة فوراً.",
+                  confirmLabel: value ? "فتح" : "إغلاق",
+                  destructive: !value,
+                });
+                if (ok) mobileToggleMutation.mutate({ value });
+              }}
             />
           )}
         </div>

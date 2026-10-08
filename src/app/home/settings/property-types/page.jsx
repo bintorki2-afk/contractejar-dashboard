@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/shared/confirm-provider";
 import {
   useUnwrapPageProps
 } from "@/src/hooks/use-unwrap-page-props";
@@ -33,6 +34,7 @@ const HEADERS = [
 ];
 
 export default function PropertyTypesPage(props) {
+  const confirm = useConfirm();
   useUnwrapPageProps(props?.params, props?.searchParams);
 
   const queryClient = useQueryClient();
@@ -87,7 +89,7 @@ export default function PropertyTypesPage(props) {
                     <button
                       type="button"
                       disabled={isPending}
-                      onClick={() => deleteItem(item.id)}
+                      onClick={async () => { if (await confirm({ title: "تأكيد الحذف", description: "حذف هذا العنصر نهائياً؟ لا يمكن التراجع.", confirmLabel: "حذف", destructive: true })) deleteItem(item.id); }}
                       className={SETTINGS_DELETE_TRIGGER_CLASS}
                     >
                       حذف
