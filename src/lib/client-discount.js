@@ -14,10 +14,12 @@ export const APPLIES_TO_OPTIONS = [
   { value: "commercial", label: "تجاري فقط" },
 ];
 
-// The API has no endpoint for real per-contract fee data, so the impact
-// panel is an illustrative live preview, not a real quote — these are
-// placeholder figures for "a typical first-year contract".
-const PREVIEW_BASE_FEE = 349;
+// The impact panel is an illustrative preview for "a typical first-year
+// contract". The base fee per track comes from the official pricing
+// (`GET /api/v2/pricing` → housing/commercial.first_year, passed in as
+// `prices`); the constants below are only the last-resort fallbacks.
+// The server applies the client discount to the first year only.
+const PREVIEW_FALLBACK_FEES = { housing: 249, commercial: 349 };
 const PREVIEW_MARGIN_RATIO = 0.304;
 
 const PREVIEW_TRACKS = [
@@ -40,23 +42,29 @@ export function computeDiscountedAmount({ type, value, baseAmount }) {
   return { discount, amountAfter: base - discount };
 }
 
-export function getDiscountPreviewRows({ type, value, appliesTo }) {
+function previewBaseFee(prices, key) {
+  const value = Number(prices?.[key]);
+  return Number.isFinite(value) && value > 0 ? value : PREVIEW_FALLBACK_FEES[key];
+}
+
+export function getDiscountPreviewRows({ type, value, appliesTo, prices }) {
   const tracks = PREVIEW_TRACKS.filter(
     (track) => !appliesTo || appliesTo === "all" || track.key === appliesTo
   );
 
   return tracks.map((track) => {
+    const baseFee = previewBaseFee(prices, track.key);
     const { discount, amountAfter } = computeDiscountedAmount({
       type,
       value,
-      baseAmount: PREVIEW_BASE_FEE,
+      baseAmount: baseFee,
     });
-    const margin = PREVIEW_BASE_FEE * PREVIEW_MARGIN_RATIO;
+    const margin = baseFee * PREVIEW_MARGIN_RATIO;
 
     return {
       key: track.key,
       label: track.label,
-      baseFee: PREVIEW_BASE_FEE,
+      baseFee,
       discount,
       amountAfter,
       margin,
