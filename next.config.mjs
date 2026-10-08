@@ -1,5 +1,5 @@
 // Default = صقر ١ backend on Railway. Set API_PROXY_TARGET in Vercel to the
-// production backend. Never point it at aqid.subcodeco.com (separate project).
+// production backend (صقر ١ on Railway) — never another project's server.
 const apiTarget =
   process.env.API_PROXY_TARGET ||
   "https://aqdi-new-backend-main-production.up.railway.app/api";
@@ -84,11 +84,6 @@ const nextConfig = {
   },
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "aqid.subcodeco.com",
-        pathname: "/**",
-      },
       {
         protocol: "https",
         hostname: "aqdi-new-backend-main-production.up.railway.app",
