@@ -231,8 +231,9 @@ export const ROUTE_SECTION_RULES = [
   { prefix: '/home/users', section: PERMISSION_SECTIONS.users },
   { prefix: '/home/real-estates', section: PERMISSION_SECTIONS.real_estates },
   { prefix: '/home/marketing-and-content', section: MARKETING_SECTIONS },
-  { prefix: '/home/clients', section: null },
-  { prefix: '/home/leads', section: null },
+  // العملاء/العملاء المحتملون: الخادم يطلب users.view لـ /admin/users و /admin/leads.
+  { prefix: '/home/clients', section: PERMISSION_SECTIONS.users },
+  { prefix: '/home/leads', section: PERMISSION_SECTIONS.users },
   { prefix: '/home/realtime-orders', section: REALTIME_ORDERS_SECTIONS },
   { prefix: '/home/invoices', section: null },
   // Legacy URL — page redirects into marketing content tab; keep gate for deep links.
@@ -291,8 +292,8 @@ export const SIDEBAR_NAV = [
     group: 'main',
     items: [
       { label: 'الطلبات مباشر', href: '/home/realtime-orders', section: REALTIME_ORDERS_SECTIONS, badge: 'unreceived' },
-      { label: 'العملاء', href: '/home/clients', section: null },
-      { label: 'العملاء المحتملون', href: '/home/leads', section: null },
+      { label: 'العملاء', href: '/home/clients', section: PERMISSION_SECTIONS.users },
+      { label: 'العملاء المحتملون', href: '/home/leads', section: PERMISSION_SECTIONS.users },
       { label: 'طلبات الاسترجاع', href: '/home/return-orders', section: PERMISSION_SECTIONS.returned_request, badge: 'returned' },
       { label: 'الموظفون والأدوار', href: '/home/roles-and-employees', section: ROLES_AND_EMPLOYEES_SECTIONS },
       { label: 'التسويق والمحتوى', href: '/home/marketing-and-content', section: MARKETING_SECTIONS },
