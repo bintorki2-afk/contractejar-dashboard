@@ -338,7 +338,7 @@ export default function RealtimeOrdersToolbar({
               : "border-[#E3E8E6] text-[#33403B] bg-white hover:border-[#CDEBDF] hover:text-[#0B5F4C]"
           )}
         >
-          {isExporting ? "جاري التصدير..." : "تصدير CSV"}
+          {isExporting ? "جاري التصدير..." : "تصدير Excel"}
         </button>
       ) : null}
 
