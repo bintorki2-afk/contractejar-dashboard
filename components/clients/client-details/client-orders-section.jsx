@@ -158,7 +158,7 @@ export default function ClientOrdersSection({ clientId, userId, backUrl }) {
             </button>
 
             <span className="min-w-12 text-center tabular-nums text-gray-900 dark:text-white font-semibold">
-              {ordersPage}/{ordersLastPage}
+              <span dir="ltr">{ordersPage} / {ordersLastPage}</span>
             </span>
 
             <button

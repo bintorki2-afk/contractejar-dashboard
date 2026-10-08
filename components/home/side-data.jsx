@@ -28,6 +28,7 @@ import { HiMiniArrowPathRoundedSquare } from "react-icons/hi2";
 import { LuLogOut } from "react-icons/lu";
 import { useSidebarStore } from "@/src/stores/sidebar-store";
 import { useUserStore } from "@/src/stores/user-store";
+import { roleLabelAr } from "@/src/lib/role-labels";
 import { useUnreceivedOrdersWatcher } from "@/src/hooks/use-unreceived-orders-watcher";
 import { useReturnedOrdersCount } from "@/src/hooks/use-returned-orders-count";
 import { getWorkPeriodLabel } from "@/components/roles-and-employees/shared";
@@ -122,11 +123,7 @@ export default function SideData() {
   const panelWidth = EXPANDED_WIDTH;
 
   const userName = user?.name || 'مستخدم';
-  const userRole =
-    user?.role_title ||
-    user?.role_relation?.name ||
-    user?.role?.name ||
-    '—';
+  const userRole = roleLabelAr(user) || '—';
   const userWorkPeriod = user?.work_period ? getWorkPeriodLabel(user.work_period) : null;
   const userInitial = userName.trim().charAt(0) || 'م';
 
@@ -169,7 +166,7 @@ export default function SideData() {
               >
                 <Image
                   src={logo}
-                  alt="عقدي"
+                  alt="عقد إيجار"
                   width={28}
                   height={36}
                   className="h-7 w-auto object-contain"

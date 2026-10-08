@@ -1,5 +1,6 @@
 "use client";
 
+import { roleLabelAr } from "@/src/lib/role-labels";
 import { BriefcaseBusiness, CalendarDays, Mail, ShieldCheck, ShieldX, Wallet } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa6";
 import AddNoteDialog from "./add-note-dialog";
@@ -137,7 +138,7 @@ export default function EmployeeDetailsCard({ employee, readOnly = false }) {
           tint="amber"
           accent
           label="المسمى الوظيفي"
-          value={employee?.role || "موظف"}
+          value={roleLabelAr(employee) || "موظف"}
         />
       </div>
 

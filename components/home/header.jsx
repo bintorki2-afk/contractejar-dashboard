@@ -1,6 +1,5 @@
 'use client';
 import React from 'react'
-import notificationIcon from '@/public/images/notificationIcon.svg'
 import Link from 'next/link'
 import Image from 'next/image'
 import AvatarImage from '@/components/shared/avatar-image'
@@ -14,7 +13,10 @@ import { useLogout } from '@/src/hooks/use-logout'
 import { usePermissions } from '@/src/hooks/use-permissions'
 import { PERMISSION_SECTIONS } from '@/src/lib/permissions'
 import { toast } from 'sonner'
-import { ChevronDown, ChevronRight, Loader2, PanelLeft } from 'lucide-react'
+import { Bell, ChevronDown, ChevronRight, Loader2, PanelLeft } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { fetchUnreceivedOrdersTotal } from '@/src/hooks/use-unreceived-orders-watcher'
+import { roleLabelAr } from '@/src/lib/role-labels'
 import { LuLogOut } from 'react-icons/lu'
 import { cn } from '@/lib/utils'
 
@@ -38,7 +40,16 @@ export default function Header({
     const { user } = useUserStore();
     const { setDisplayedPart, displayedPart, setOrderId, isSidebarOpen, toggleSidebar } = useSidebarStore();
     const { logout, logoutLoading } = useLogout();
-    const { can } = usePermissions();
+    const { can, canRoute } = usePermissions();
+    // النقطة الحمراء على الجرس فقط عند وجود طلبات مدفوعة بانتظار الاستلام (د6).
+    const canSeeOrders = canRoute('/home/orders') || canRoute('/home/realtime-orders');
+    const { data: unreceivedTotal = 0 } = useQuery({
+        queryKey: ['unReceivedOrdersTotal'],
+        queryFn: fetchUnreceivedOrdersTotal,
+        enabled: canSeeOrders,
+        refetchInterval: 30_000,
+    });
+    const hasUnread = canSeeOrders && unreceivedTotal > 0;
 
     const redirectToEmployeePage = (view) => {
         if (!user?.id) {
@@ -185,18 +196,14 @@ export default function Header({
                         displayedPart === "notification" &&
                           "border-brand-main bg-brand-main text-white hover:bg-brand-main hover:text-white dark:border-emerald-500 dark:bg-emerald-500 dark:text-[#0B1411]"
                     )}
-                    aria-label="الإشعارات"
+                    aria-label={hasUnread ? `الإشعارات (${unreceivedTotal} بانتظار الاستلام)` : 'الإشعارات'}
                 >
-                    <Image
-                        src={notificationIcon}
-                        alt=""
-                        className={cn(
-                            "w-[18px] h-auto object-contain",
-                            displayedPart === "notification"
-                              ? "brightness-0 invert dark:invert-0"
-                              : "dark:brightness-0 dark:invert"
-                        )}
-                    />
+                    <span className="relative inline-flex">
+                        <Bell className="size-[18px]" strokeWidth={2} />
+                        {hasUnread ? (
+                            <span className="absolute -top-1 -end-1 size-2.5 rounded-full bg-[#E5484D] ring-2 ring-white dark:ring-[#0F1C16]" aria-hidden />
+                        ) : null}
+                    </span>
                 </button>
 
                 <DropdownMenu>
@@ -222,7 +229,7 @@ export default function Header({
                                     {user?.name || 'مستخدم'}
                                 </span>
                                 <span className="block truncate text-[10px] text-[#75827C] dark:text-white/45 max-w-[140px]">
-                                    {user?.role_relation?.name || user?.role?.name || '—'}
+                                    {roleLabelAr(user) || '—'}
                                 </span>
                             </span>
                             <ChevronDown className="size-4 shrink-0 text-[#75827C] dark:text-white/45 max-[992px]:hidden" />
@@ -233,9 +240,6 @@ export default function Header({
                         <DropdownMenuGroup>
                             <DropdownMenuItem onClick={() => redirectToEmployeePage('profile')}>
                                 الملف الشخصي
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => redirectToEmployeePage()}>
-                                الفوترة
                             </DropdownMenuItem>
                             {can(PERMISSION_SECTIONS.settings, 'view') && (
                                 <DropdownMenuItem onClick={() => router.push('/home/settings')}>

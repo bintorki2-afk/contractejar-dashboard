@@ -15,7 +15,7 @@ import { useSaveSection } from "@/src/hooks/use-save-section";
 
 const DEFAULT_VALUES = {
   badgeText: "قيمنا",
-  mainTitle: "قيم عقدي",
+  mainTitle: "قيمنا",
   description:
     "يهدف (إيجار) إلى تنظيم قطاع الإيجار العقاري في المملكة العربية السعودية بصورة متوازنة تحفظ حقوق أطراف العملية الإيجارية.",
   cards: [
@@ -76,12 +76,12 @@ export default function AboutValuesSectionForm({ initialData, saveEndpoint, quer
 
   return (
     <SectionFormShell
-      title="قسم قيم عقدي"
+      title="قسم «قيمنا»"
       description="عدل الشارة والعنوان والوصف، ثم حدّث البطاقات الثلاث الأساسية مع إمكانية إضافة بطاقات جديدة."
       form={form}
       onSubmit={onSubmit}
       isPending={isPending}
-      submitLabel="حفظ قسم قيم عقدي"
+      submitLabel="حفظ قسم «قيمنا»"
       formClassName="space-y-8"
     >
       <div className="space-y-5">
@@ -96,7 +96,7 @@ export default function AboutValuesSectionForm({ initialData, saveEndpoint, quer
           control={form.control}
           name="mainTitle"
           label="العنوان الرئيسي"
-          placeholder="مثال: قيم عقدي"
+          placeholder="مثال: قيمنا"
           rules={{ required: "العنوان الرئيسي مطلوب" }}
         />
         <SectionTextField

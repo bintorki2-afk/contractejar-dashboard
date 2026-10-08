@@ -198,7 +198,7 @@ export default function ClientsWrapper() {
               العملاء
             </h1>
             <p className="text-13 text-gray-400 dark:text-white/45 font-medium leading-relaxed">
-              كل عملاء عقدي - اضغط «عرض» لملف العميل الكامل
+              كل عملاء «عقد إيجار» - اضغط «عرض» لملف العميل الكامل
             </p>
           </div>
         </div>
@@ -286,7 +286,7 @@ export default function ClientsWrapper() {
           </button>
 
           <span className="min-w-12 text-center tabular-nums text-gray-900 dark:text-white font-semibold">
-            {page}/{lastPage}
+            <span dir="ltr">{page} / {lastPage}</span>
           </span>
 
           <button

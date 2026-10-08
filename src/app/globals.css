@@ -92,30 +92,36 @@
   }
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar — د6: كان مقبضاً أخضر عريضاً يظهر كخط أخضر على يسار الصفحة (RTL).
+   صار رفيعاً ومحايداً، والأخضر عند التمرير فقط. */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 2px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--main-color);
+  background: rgba(15, 40, 32, 0.16);
   border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--main-hover);
+  background: rgba(11, 90, 60, 0.55);
+  background-clip: padding-box;
 }
 
 .dark ::-webkit-scrollbar-track {
-  background: #13241C;
+  background: transparent;
 }
 .dark ::-webkit-scrollbar-thumb {
-  background: #0B5345;
+  background: rgba(255, 255, 255, 0.14);
+  background-clip: padding-box;
 }
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #10B981;
+  background: rgba(16, 185, 129, 0.6);
+  background-clip: padding-box;
 }
 
 @property --conic-angle {

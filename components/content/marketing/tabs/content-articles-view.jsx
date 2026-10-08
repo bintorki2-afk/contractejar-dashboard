@@ -115,7 +115,7 @@ export default function ArticlesView() {
                 <th>التاريخ</th>
                 <th>كلمات</th>
                 <th>مشاهدات</th>
-                <th>Leads</th>
+                <th>العملاء المحتملون</th>
                 <th>إيراد</th>
                 <th />
               </tr>

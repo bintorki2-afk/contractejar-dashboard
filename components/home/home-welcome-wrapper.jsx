@@ -34,6 +34,7 @@ import {
 import { useHomeRecentActivity } from '@/src/hooks/use-home-recent-activity'
 import { useHomeSummary } from '@/src/hooks/use-home-summary'
 import { usePermissions } from '@/src/hooks/use-permissions'
+import { roleLabelAr } from '@/src/lib/role-labels'
 
 const QUICK_ACTION_ICONS = {
     'realtime-orders': Radio,
@@ -168,7 +169,7 @@ export default function HomeWelcomeWrapper() {
     const router = useRouter()
     const { user } = useUserStore()
     const firstName = getFirstName(user?.name)
-    const roleLabel = user?.role_relation?.name ?? ''
+    const roleLabel = roleLabelAr(user)
 
     // Static copy still comes from the mock (motto + the quick-action link list).
     const { motto, quick_actions: quickActions, primary_cta: cta } = HOME_MOCK

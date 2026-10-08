@@ -17,6 +17,7 @@ const ORDER_LIST_ROOTS = [
   "realtime-new-orders",
   "realtime-orders",
   "all-orders",
+  "client-orders",
 ];
 
 function toKey(queryKey) {
@@ -59,6 +60,8 @@ export function invalidateOrdersCaches(queryClient, { queryKey, orderId } = {}) 
   invalidate(queryClient, ["order-status-count"]);
   invalidate(queryClient, ["unReceivedOrders"]);
   invalidate(queryClient, ["unReceivedOrdersTotal"]);
+  invalidate(queryClient, ["orders-attention"]);
+  invalidate(queryClient, ["orders-status-counts"]);
   invalidate(queryClient, ["dashboard-analytics-quick"]);
 
   invalidateSingleOrder(queryClient, orderId);

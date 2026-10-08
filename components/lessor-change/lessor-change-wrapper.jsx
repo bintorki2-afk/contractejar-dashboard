@@ -189,7 +189,7 @@ export default function LessorChangeWrapper() {
             السابق
           </button>
           <span className="min-w-12 text-center font-semibold tabular-nums text-gray-900 dark:text-white">
-            {page}/{lastPage}
+            <span dir="ltr">{page} / {lastPage}</span>
           </span>
           <button
             type="button"

@@ -20,7 +20,7 @@ export const viewport = {
 export async function generateMetadata() {
   return {
     // لوحة داخلية لـ «عقد إيجار» — لا تُفهرس ولا تشير إلى aqdi.sa (موقع آخر منفصل).
-    title: 'لوحة تحكم عقد إيجار',
+    title: 'عقد إيجار · لوحة الموظفين',
     description: 'لوحة تحكم الموظفين — عقد إيجار',
     robots: { index: false, follow: false },
     other: {

@@ -35,7 +35,7 @@ export default function PixelsTab() {
     const total = utm.accounts.length;
     const connected = utm.accounts.filter((a) => a.configured).length;
     return [
-      { value: total ? `${connected} / ${total}` : "—", label: "حسابات إعلانية مربوطة", tone: "g" },
+      { value: total ? `\u2066${connected} / ${total}\u2069` : "—", label: "حسابات إعلانية مربوطة", tone: "g" },
       { value: String(utm.sources.length || "—"), label: "مصادر UTM معتمدة", tone: "b" },
       { value: String(utm.clickIds.length || "—"), label: "معرّفات نقر متتبَّعة", tone: "e" },
     ];

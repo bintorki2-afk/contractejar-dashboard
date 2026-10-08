@@ -125,7 +125,7 @@ export default function LoginPage() {
           <Link href="/" className="flex items-center gap-3 transition-transform hover:scale-105">
             <Image
               src={logo}
-              alt="عقدي"
+              alt="عقد إيجار"
               width={96}
               height={96}
               className="h-24 w-24 object-contain"

@@ -31,7 +31,7 @@ const ABOUT_CONTENT_TABS = [
   { value: "story", label: "قصتنا", icon: BarChart3, sectionKey: "story", Form: AboutStorySectionForm },
   { value: "vision-mission", label: "الرؤية والرسالة", icon: Telescope, sectionKey: "vision_mission", Form: AboutVisionMissionSectionForm },
   { value: "beneficiaries", label: "المستفيدون", icon: Users, sectionKey: "beneficiaries", Form: AboutBeneficiariesSectionForm },
-  { value: "values", label: "قيم عقدي", icon: HeartHandshake, sectionKey: "values", Form: AboutValuesSectionForm },
+  { value: "values", label: "قيمنا", icon: HeartHandshake, sectionKey: "values", Form: AboutValuesSectionForm },
 ];
 
 export default function AboutContentSections() {

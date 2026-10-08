@@ -246,7 +246,7 @@ export default function BlogForm({ blogId = null, blog = null }) {
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder="مثال: دليلك لتوثيق عقد الإيجار إلكترونيًا | عقدي"
+                    placeholder="مثال: دليلك لتوثيق عقد الإيجار إلكترونيًا | عقد إيجار"
                     className="h-13 rounded-14 border-surface-border bg-white dark:border-white/10 dark:bg-white/[0.04]"
                   />
                 </FormControl>
