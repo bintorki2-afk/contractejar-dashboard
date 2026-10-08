@@ -18,6 +18,7 @@ import HeroContentForm from "@/components/content/home/hero-content-form";
 import OfficialAuthoritiesForm from "@/components/content/home/official-authorities-form";
 import PricingSectionForm from "@/components/content/home/pricing-section-form";
 import PageSeoForm from "@/components/content/page-seo-form";
+import SectionEmptyNote from "@/components/content/section-empty-note";
 import Loader from "@/components/home/loader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePermissions } from "@/src/hooks/use-permissions";
@@ -93,11 +94,14 @@ export default function HomeContentSections() {
               canEdit={canEditSeo}
             />
           ) : (
+            <>
+            <SectionEmptyNote data={sections[tab.sectionKey]} />
             <tab.Form
               initialData={sections[tab.sectionKey]}
               saveEndpoint={CONTENT_PAGE_ENDPOINTS.home}
               queryKey={QUERY_KEY}
             />
+            </>
           )}
         </TabsContent>
       ))}

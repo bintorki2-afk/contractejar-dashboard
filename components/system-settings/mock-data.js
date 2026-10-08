@@ -37,7 +37,7 @@ export const SYSTEM_CATEGORIES = [
   { id: "message-for-property", label: "رسائل توضيحية للعقار", subtitle: "رسائل موجّهة · 1 عنصر", href: "/home/settings/message-for-property", section: "message_alerts" },
   { id: "coupons", label: "الخصومات (الكوبونات)", subtitle: "كوبونات · 5 عنصر", href: "/home/settings/coupons", section: "coupons" },
   { id: "blogs", label: "المدونة", subtitle: "رابط", href: "/home/settings/blogs", section: "blogs" },
-  { id: "faqs", label: "الأسئلة الشائعة", subtitle: "أسئلة وأجوبة · 2 عنصر", href: "/home/settings/faqs", section: "faqs" },
+  { id: "faqs", label: "الأسئلة الشائعة", subtitle: "أسئلة وأجوبة · 2 عنصر", href: "/home/marketing-and-content?tab=content&view=faqs", section: "faqs" },
   { id: "terms", label: "الشروط والأحكام", subtitle: "محتوى نصّي", href: "/home/settings/terms", section: "app_content" },
   { id: "privacy", label: "سياسة الخصوصية", subtitle: "محتوى نصّي", href: "/home/settings/privacy", section: "app_content" },
   { id: "notifications", label: "الإشعارات", subtitle: "إرسال إشعار", href: "/home/settings/notifications", section: "notifications" },
