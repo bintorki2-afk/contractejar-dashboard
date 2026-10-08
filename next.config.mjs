@@ -66,7 +66,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com",
               "connect-src 'self' https: wss:",
-              "frame-src 'self' blob: data:",
+              "frame-src 'self' blob: data: https://maps.google.com https://www.google.com", // خريطة العنوان الوطني في تفاصيل الطلب
               "worker-src 'self' blob:",
               "object-src 'none'",
             ].join("; "),

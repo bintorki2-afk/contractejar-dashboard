@@ -248,6 +248,7 @@ export default function RealtimeOrdersToolbar({
         />
         <input
           type="text"
+          data-orders-search
           value={searchQuery}
           onChange={(e) => onSearchChange?.(e.target.value)}
           placeholder={searchPlaceholder}

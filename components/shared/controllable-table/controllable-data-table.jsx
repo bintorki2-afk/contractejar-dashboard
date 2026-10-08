@@ -111,6 +111,7 @@ export default function ControllableDataTable({
   getRowKey = (row, index) => row?.id ?? index,
   onRowClick,
   getRowHighlight,
+  activeRowId = null,
   emptyMessage = "لا توجد بيانات متوفرة حالياً",
   isLoading = false,
   className,
@@ -258,12 +259,16 @@ export default function ControllableDataTable({
           ) : (
             sortedData.map((row, index) => {
               const highlighted = getRowHighlight?.(row);
+              const isActive = activeRowId != null && String(row?.id) === String(activeRowId);
               return (
                 <tr
                   key={getRowKey(row, index)}
+                  data-row-id={row?.id ?? undefined}
+                  aria-selected={isActive || undefined}
                   onClick={() => onRowClick?.(row)}
                   className={cn(
                     "group transition-colors",
+                    isActive && "outline outline-2 -outline-offset-2 outline-brand-green/70",
                     highlighted
                       ? "bg-[#FFFAF0] dark:bg-[#221D0E]"
                       : "bg-white dark:bg-transparent",

@@ -28,7 +28,7 @@ export default function OrdersCardList({
   canDelete,
   changingOrderId,
   emptyMessage = "لا توجد طلبات مطابقة",
-  activeIndex = -1,
+  activeRowId = null,
 }) {
   if (isLoading && !rows.length) {
     return (
@@ -44,7 +44,7 @@ export default function OrdersCardList({
   }
   return (
     <ul className="flex flex-col gap-2.5" aria-label="الطلبات">
-      {rows.map((row, index) => {
+      {rows.map((row) => {
         const stage = canStage ? nextStageForRow(row) : null;
         const StageIcon = STAGE_ICONS[stage];
         const paid = row?.is_paid === true || row?.is_paid === 1;
@@ -52,10 +52,10 @@ export default function OrdersCardList({
         return (
           <li
             key={row.id}
-            data-row-index={index}
+            data-row-id={row.id}
             className={cn(
               "rounded-2xl border bg-white p-3.5 dark:bg-[#0F1C16]",
-              index === activeIndex ? "border-brand-deep ring-2 ring-brand-deep/15" : "border-brand-line dark:border-white/10"
+              activeRowId != null && String(row.id) === String(activeRowId) ? "border-brand-deep ring-2 ring-brand-deep/15" : "border-brand-line dark:border-white/10"
             )}
           >
             <button type="button" onClick={() => onView?.(row)} className="block w-full text-start">

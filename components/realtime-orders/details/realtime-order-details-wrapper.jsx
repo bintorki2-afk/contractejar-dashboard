@@ -23,6 +23,10 @@ import OrderStageBar from "./order-stage-bar";
 import OrderHistoryPanel from "./order-history-panel";
 import RefundDialog from "./refund-dialog";
 import { InlineEditProvider } from "./inline-edit";
+import ShortcutsHelp from "@/components/orders/shortcuts-help";
+import { ORDER_DETAIL_SHORTCUTS, useOrderDetailShortcuts } from "@/src/hooks/use-orders-shortcuts";
+import { toSaudiMobileDialDigits } from "@/src/lib/format-phone";
+import { toast } from "sonner";
 
 function resolveBackLink(from) {
   if (from === "/home/realtime-orders" || from?.startsWith("/home/realtime-orders")) {
@@ -69,6 +73,24 @@ function OrderDetailsBody() {
   });
   const [expandedViewOpen, setExpandedViewOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
+  // د19: S = المرحلة التالية، W = واتساب العميل، ? = المساعدة.
+  const detailShortcuts = useOrderDetailShortcuts({
+    enabled: Boolean(orderData),
+    onStage: () => {
+      const btn = document.querySelector('[aria-label="الخطوة التالية"] button.h-12');
+      if (btn) {
+        btn.scrollIntoView({ block: "center", behavior: "smooth" });
+        btn.click();
+      } else toast.message("لا توجد مرحلة متبقية لهذا الطلب");
+    },
+    onWhatsApp: () => {
+      const digits = toSaudiMobileDialDigits(
+        orderData?.user?.contact_mobile || orderData?.user?.mobile || orderData?.user_mobile || orderData?.tenant_mobile || ""
+      );
+      if (!digits) toast.error("لا يوجد رقم جوال للعميل");
+      else window.open(`https://wa.me/${digits}`, "_blank", "noopener,noreferrer");
+    },
+  });
 
   useEffect(() => {
     setOrderId(id);
@@ -156,6 +178,7 @@ function OrderDetailsBody() {
       </div>
 
       <RefundDialog open={refundOpen} onOpenChange={setRefundOpen} orderData={orderData} />
+      <ShortcutsHelp open={detailShortcuts.helpOpen} onOpenChange={detailShortcuts.setHelpOpen} items={ORDER_DETAIL_SHORTCUTS} />
 
       <OrderDetailsDialogs id={id} orderData={orderData} view={view} dialogs={dialogs} />
 

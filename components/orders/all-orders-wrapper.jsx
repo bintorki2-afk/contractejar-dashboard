@@ -21,6 +21,11 @@ import { cn } from "@/lib/utils";
 import OrderStatusTabs from "./order-status-tabs";
 import StageActionDialog from "./stage-action-dialog";
 import OrdersCardList from "./orders-card-list";
+import ShortcutsHelp from "./shortcuts-help";
+import { useOrdersShortcuts } from "@/src/hooks/use-orders-shortcuts";
+import { toSaudiMobileDialDigits } from "@/src/lib/format-phone";
+import { toast } from "sonner";
+import { Keyboard } from "lucide-react";
 import { PAYMENT_FILTERS } from "@/src/hooks/use-all-orders-wrapper";
 
 function PaymentFilterChips({ value = "all", onChange }) {
@@ -55,6 +60,21 @@ export default function AllOrdersWrapper() {
   const vm = useAllOrdersWrapper();
   const selection = useRowSelection();
   const [stageOrder, setStageOrder] = useState(null);
+  // د19: اختصارات لوحة المفاتيح على القائمة.
+  const shortcuts = useOrdersShortcuts({
+    rows: vm.tableOrders,
+    onOpen: vm.goToDetails,
+    onStage: (row) => (vm.canStage ? setStageOrder(row) : toast.error("ليست لديك صلاحية تنفيذ المراحل")),
+    onWhatsApp: (row) => {
+      const digits = toSaudiMobileDialDigits(row?.user_mobile ?? "");
+      if (!digits) {
+        toast.error("لا يوجد رقم جوال للعميل");
+        return;
+      }
+      window.open(`https://wa.me/${digits}`, "_blank", "noopener,noreferrer");
+    },
+    onSearch: () => document.querySelector("[data-orders-search]")?.focus(),
+  });
 
   // Drop stale selections whenever the underlying query (page/filters/search) changes.
   const clearSelection = selection.clear;
@@ -158,7 +178,17 @@ export default function AllOrdersWrapper() {
           onChange={vm.setTab}
           isLoading={vm.statusTabsLoading}
         />
-        <PaymentFilterChips value={vm.paymentFilter} onChange={vm.setPaymentFilter} />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <PaymentFilterChips value={vm.paymentFilter} onChange={vm.setPaymentFilter} />
+          <button
+            type="button"
+            onClick={() => shortcuts.setHelpOpen(true)}
+            className="hidden md:inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-[12px] font-bold text-[#6B7570] hover:bg-white hover:text-brand-deep"
+            title="اختصارات لوحة المفاتيح (?)"
+          >
+            <Keyboard className="size-4" /> الاختصارات <kbd dir="ltr" className="rounded border border-brand-line bg-white px-1.5 text-[11px]">?</kbd>
+          </button>
+        </div>
       </div>
 
       <TableBatchActionsBar
@@ -190,6 +220,7 @@ export default function AllOrdersWrapper() {
           canDelete={vm.canDelete}
           changingOrderId={vm.isChangingStatus ? vm.changingStatusId?.orderId : null}
           emptyMessage="لا توجد طلبات مطابقة للبحث"
+          activeRowId={shortcuts.activeId}
         />
       </div>
 
@@ -203,6 +234,7 @@ export default function AllOrdersWrapper() {
         emptyMessage="لا توجد طلبات مطابقة للبحث"
         onRowClick={vm.goToDetails}
         getRowHighlight={isDraftOrderRow}
+        activeRowId={shortcuts.activeId}
         defaultSort={{ id: "receivedSince", direction: "asc" }}
       />
       </div>
@@ -242,6 +274,8 @@ export default function AllOrdersWrapper() {
         canAddStatus={vm.canAddStatus}
         canEditStatus={vm.canEditStatus}
       />
+
+      <ShortcutsHelp open={shortcuts.helpOpen} onOpenChange={shortcuts.setHelpOpen} />
 
       <StageActionDialog
         order={stageOrder}
