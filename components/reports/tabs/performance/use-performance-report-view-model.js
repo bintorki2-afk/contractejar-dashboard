@@ -25,7 +25,8 @@ function buildKpis(k) {
     ["done", "موثّقة", pick(k, "documented_count", "done_count", "completed_count"), "checkCircle"],
     ["working", "قيد العمل", pick(k, "working_count", "active_count"), "activity", "warning"],
     ["canceled", "ملغاة", pick(k, "canceled_count", "cancelled_count"), "xCircle", "danger"],
-    ["refunded", "مسترجعة", pick(k, "refunded_count"), "undo", "muted"],
+    // د3: refunded_count = طلبات استرجاع مؤكدة (refundable_contracts) — يختلف عن «مسترجعة» (حالة الطلب) في تبويب الطلبات.
+    ["refunded", "طلبات استرجاع مؤكدة", pick(k, "refunded_count"), "undo", "muted"],
     ["revenue", "الإيرادات (ريال)", pick(k, "revenue", "revenue_total"), "wallet"],
   ].map(([key, label, value, icon, tone]) => ({ key, label, value: value ?? 0, icon, tone }));
 }
@@ -77,11 +78,15 @@ function buildOperationalItems(operational) {
       value: `${pick(operational, "late_over_30m", "late_over_30_count") ?? 0} طلب`,
       tone: Number(pick(operational, "late_over_30m", "late_over_30_count")) > 0 ? "red" : undefined,
     },
-    {
-      label: "نسبة الالتزام (خلال 15 دقيقة)",
-      value: `${pick(operational, "sla_percent", "sla_15m_percent") ?? 0}%`,
-      tone: Number(pick(operational, "sla_percent", "sla_15m_percent")) >= 80 ? "green" : "gold",
-    },
+    (() => {
+      // د3: لا استلامات ⇒ الخادم يرسل null ⇒ «—» (كانت تظهر 100% أو 0% مضلِّلة).
+      const sla = pick(operational, "sla_percent", "sla_15m_percent");
+      return {
+        label: "نسبة الالتزام (خلال 15 دقيقة)",
+        value: sla == null ? "—" : `${sla}%`,
+        tone: sla == null ? undefined : Number(sla) >= 80 ? "green" : "gold",
+      };
+    })(),
     {
       label: "مرّات التراجع عن الاستلام",
       value: `${pick(operational, "unclaim_count", "unreceive_count") ?? 0} مرة`,
@@ -115,7 +120,10 @@ export function usePerformanceReportViewModel(data, period) {
     const k = data?.kpis ?? {};
     const operational = data?.operational_metrics ?? data?.receive_queue ?? {};
 
+    // د3: funnel_summary من الخادم = المصدر الموحّد (بدأ − مدفوع = التسرّب).
+    const fs = data?.funnel_summary;
     const leakage =
+      (fs ? { count: fs.drop_off, percent: fs.drop_off_percent, started: fs.started, completed: fs.completed } : null) ??
       data?.conversion_leakage ??
       (data?.leakage
         ? { count: data.leakage.count ?? data.leakage.value, percent: data.leakage.percent ?? data.leakage.pct }

@@ -8,7 +8,8 @@ import Loader from "@/components/home/loader";
 import { useOrdersReport } from "@/src/hooks/use-reports";
 import { formatDurationMinutes } from "@/src/lib/format-duration";
 
-const KPI_FIELDS = [["total", "إجمالي الطلبات", "file"], ["new", "طلبات جديدة", "filePlus", "danger"], ["paid", "مدفوعة", "creditCard"], ["draft", "مسودة عقد", "fileEdit", "warning"], ["incomplete", "غير مكتمل", "xCircle", "warning"], ["canceled", "ملغية", "xCircle", "danger"], ["returned", "مسترجعة", "undo", "muted"]];
+// د3: «غير مكتمل» هنا = غير المدفوعة (تبويب «غير مكتمل» في القوائم = مسودات الخطوة < 4)، و«مسودة عقد» أُزيلت (دائماً 0 ولا تطابق أي قائمة).
+const KPI_FIELDS = [["total", "إجمالي الطلبات", "file"], ["new", "حالة «جديد»", "filePlus", "danger"], ["paid", "مدفوعة", "creditCard"], ["incomplete", "غير مدفوعة", "xCircle", "warning"], ["canceled", "ملغاة", "xCircle", "danger"], ["returned", "مسترجعة", "undo", "muted"]];
 
 export default function OrdersReportTab({ period, dateFrom, dateTo, contractType, employee }) {
   const { data, isLoading, isError, error, refetch } = useOrdersReport(period, dateFrom, dateTo, contractType, employee);
@@ -20,7 +21,7 @@ export default function OrdersReportTab({ period, dateFrom, dateTo, contractType
   const colorize = (items = []) => items.map((item, index) => ({ ...item, label: item.label ?? item.stage, color: ["#0B5345", "#1E40AF", "#CA8A04", "#DC2626"][index % 4] }));
   return (
     <div className="flex flex-col gap-5" dir="rtl">
-      <ReportKpiGrid items={kpis} columns="grid-cols-2 sm:grid-cols-4 2xl:grid-cols-8" />
+      <ReportKpiGrid items={kpis} columns="grid-cols-2 sm:grid-cols-4 2xl:grid-cols-7" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <ReportSectionCard title="الطلبات حسب الموظف">
