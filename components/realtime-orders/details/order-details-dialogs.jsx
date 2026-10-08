@@ -16,6 +16,7 @@ import CorrectionRequestDialog from "../correction-request-dialog";
 import EjarDocumentationDialog from "../ejar-documentation-dialog";
 import SectionEditorDialog from "./section-editor-dialog";
 import OrderSectionErrorDialog from "@/components/orders/messages/order-section-error-dialog";
+import { isSendDraftStatus } from "@/src/lib/draft-rule";
 
 export default function OrderDetailsDialogs({ id, orderData, view, dialogs }) {
   const {
@@ -124,6 +125,8 @@ export default function OrderDetailsDialogs({ id, orderData, view, dialogs }) {
             statusId: pendingStatusChange.status.id,
             extraValues,
             fields: getStatusCaseFields(pendingStatusChange.status),
+            // بعد نجاح «إرسال المسودة» نفتح واتساب العميل برسالة جاهزة.
+            openWhatsApp: isSendDraftStatus(pendingStatusChange.status),
           });
         }}
       />

@@ -47,6 +47,26 @@ import {
 import { getOrderContractUuid } from "@/components/orders/messages/order-section-message-utils";
 import { fetchContractPaymentLink } from "@/components/orders/shared/payment-gateway";
 import { getSendErrorTitle } from "@/components/orders/messages/order-send-error-utils";
+import { DRAFT_RULE_HINT, statusRequiresDraftFirst } from "@/src/lib/draft-rule";
+
+/** إجراءات سريعة لرحلة «المسودة قبل التوثيق» (ف2) — تغيّر حالة الطلب عبر نموذج الحالة. */
+const QUICK_STATUS_PILLS = [
+  {
+    id: "quick_send_draft",
+    label: "إرسال المسودة عبر واتساب",
+    Icon: Send,
+    className:
+      "border-[#25D366] bg-[#25D366]/10 text-[#128C4B] hover:bg-[#25D366]/20 dark:text-[#6EE7B7]",
+  },
+  {
+    id: "quick_notarized",
+    label: "تم التوثيق",
+    Icon: BadgeCheck,
+    hint: DRAFT_RULE_HINT,
+    className:
+      "border-[#15803D] bg-[#15803D]/10 text-[#15803D] hover:bg-[#15803D]/20 dark:text-green-300",
+  },
+];
 
 const ACTION_PILLS = [
   {
@@ -125,6 +145,8 @@ export default function OrderDetailsHeader({
   onSendDraft,
   onMissingAttachment,
   onEjarDocumentation,
+  onQuickSendDraft,
+  onQuickNotarized,
   onSendSectionError,
   onViewExpanded,
   statuses = [],
@@ -466,7 +488,32 @@ export default function OrderDetailsHeader({
         </DropdownMenu>
       </div>
 
-      <div className="border-t border-[#EEF2F0] dark:border-white/5 pt-3 flex flex-wrap gap-2">
+      <div className="border-t border-[#EEF2F0] dark:border-white/5 pt-3 flex flex-wrap items-center gap-2">
+        {QUICK_STATUS_PILLS.map((pill) => {
+          const Icon = pill.Icon;
+          return (
+            <span key={pill.id} className="inline-flex items-center gap-1.5">
+              <button
+                type="button"
+                disabled={!canChangeStatus || isStatusPending}
+                onClick={() =>
+                  pill.id === "quick_send_draft" ? onQuickSendDraft?.() : onQuickNotarized?.()
+                }
+                title={pill.hint}
+                className={cn(pillBase, "font-bold disabled:opacity-60", pill.className)}
+              >
+                <Icon className="size-3.5 shrink-0" />
+                {pill.label}
+              </button>
+              {pill.hint ? (
+                <span className="text-[10px] font-semibold text-[#92400E] dark:text-amber-300">
+                  ({pill.hint})
+                </span>
+              ) : null}
+            </span>
+          );
+        })}
+        <span className="h-5 w-px bg-[#E5E7EB] dark:bg-white/10" aria-hidden />
         {ACTION_PILLS.map((pill) => {
           const Icon = pill.Icon;
           return (
@@ -543,7 +590,19 @@ function StatusSelect({ order, statuses = [], onStatusChange, disabled }) {
                       : "text-gray-700 dark:text-white/80"
                   )}
                 >
-                  {label}
+                  <span className="flex flex-col gap-0.5">
+                    <span>{label}</span>
+                    {statusRequiresDraftFirst(status) ? (
+                      <span
+                        className={cn(
+                          "text-[10.5px] font-semibold",
+                          active ? "text-white/80" : "text-[#B45309] dark:text-amber-300"
+                        )}
+                      >
+                        {DRAFT_RULE_HINT}
+                      </span>
+                    ) : null}
+                  </span>
                 </DropdownMenuItem>
               );
             })
@@ -561,7 +620,9 @@ function StatusSelect({ order, statuses = [], onStatusChange, disabled }) {
           pendingStatus
             ? `هل تريد تغيير حالة الطلب إلى «${
                 pendingStatus.name ?? pendingStatus.label
-              }»؟`
+              }»؟${
+                statusRequiresDraftFirst(pendingStatus) ? ` (${DRAFT_RULE_HINT})` : ""
+              }`
             : ""
         }
         confirmLabel="تغيير الحالة"

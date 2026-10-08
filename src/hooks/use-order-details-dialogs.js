@@ -15,6 +15,12 @@ import {
 import { openDialogAfterMenuClose } from "@/src/lib/open-dialog-after-menu-close";
 import { statusRequiresExtraFields } from "@/components/realtime-orders/change-order-status-fields-dialog";
 import { useChangeOrderStatus } from "@/src/hooks/use-change-order-status";
+import {
+  buildDraftWhatsAppUrl,
+  findNotarizeStatus,
+  findSendDraftStatus,
+  isSendDraftStatus,
+} from "@/src/lib/draft-rule";
 
 const EMPTY_PAYMENT_LINK = {
   paymentUrl: "",
@@ -24,7 +30,42 @@ const EMPTY_PAYMENT_LINK = {
   payment: null,
 };
 
-export function useOrderDetailsDialogs({ orderData, id, canReturn, refetch }) {
+function toMenuStatus(status) {
+  return {
+    id: status.id,
+    name: status.name ?? status.label,
+    label: status.label ?? status.name,
+    color: status.color,
+    status_case: status.status_case ?? null,
+  };
+}
+
+/** يفتح واتساب العميل برسالة المسودة؛ إن منع المتصفح النافذة نعرض زراً في التنبيه. */
+function openDraftWhatsApp(orderData, extraValues) {
+  const url = buildDraftWhatsAppUrl(orderData, extraValues);
+  if (!url) {
+    toast.error("لا يوجد رقم جوال للعميل لفتح واتساب");
+    return;
+  }
+  const win = typeof window !== "undefined" ? window.open(url, "_blank", "noopener,noreferrer") : null;
+  if (!win) {
+    toast("افتح واتساب لإرسال المسودة للعميل", {
+      action: {
+        label: "فتح واتساب",
+        onClick: () => window.open(url, "_blank", "noopener,noreferrer"),
+      },
+      duration: 15000,
+    });
+  }
+}
+
+export function useOrderDetailsDialogs({
+  orderData,
+  id,
+  canReturn,
+  refetch,
+  statuses = [],
+}) {
   const [editorSection, setEditorSection] = useState(null);
   const [sectionErrorContext, setSectionErrorContext] = useState(null);
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
@@ -40,7 +81,8 @@ export function useOrderDetailsDialogs({ orderData, id, canReturn, refetch }) {
 
   const { mutate: changeStatus, isPending: isChangingStatus } = useChangeOrderStatus({
     queryKey: ["single-order", id],
-    onSuccess: () => {
+    onSuccess: (_res, vars) => {
+      if (vars?.openWhatsApp) openDraftWhatsApp(orderData, vars.extraValues);
       setStatusFieldsOpen(false);
       setPendingStatusChange(null);
       refetch();
@@ -66,13 +108,7 @@ export function useOrderDetailsDialogs({ orderData, id, canReturn, refetch }) {
   };
 
   const handleStatusChange = (_row, status) => {
-    const menuStatus = {
-      id: status.id,
-      name: status.name ?? status.label,
-      label: status.label ?? status.name,
-      color: status.color,
-      status_case: status.status_case ?? null,
-    };
+    const menuStatus = toMenuStatus(status);
 
     if (isReturnContractStatus(menuStatus)) {
       // Same as the "رفع طلب استرجاع" pill: create a request, or block if one exists.
@@ -87,6 +123,28 @@ export function useOrderDetailsDialogs({ orderData, id, canReturn, refetch }) {
     }
 
     changeStatus({ orderId: orderData.id, statusId: status.id });
+  };
+
+  /** إجراء سريع: يفتح نموذج تغيير الحالة معبّأً بالحالة المطلوبة (الحقول الإلزامية تبقى). */
+  const openQuickStatus = (kind) => {
+    if (!orderData?.id) return;
+    const status =
+      kind === "send_draft" ? findSendDraftStatus(statuses) : findNotarizeStatus(statuses);
+    if (!status) {
+      toast.error("الحالة غير متوفرة في قائمة الحالات النشطة");
+      return;
+    }
+    const menuStatus = toMenuStatus(status);
+    if (statusRequiresExtraFields(menuStatus)) {
+      setPendingStatusChange({ orderId: orderData.id, status: menuStatus });
+      setStatusFieldsOpen(true);
+      return;
+    }
+    changeStatus({
+      orderId: orderData.id,
+      statusId: status.id,
+      openWhatsApp: isSendDraftStatus(menuStatus),
+    });
   };
 
   const handlePayLink = async () => {
@@ -142,6 +200,7 @@ export function useOrderDetailsDialogs({ orderData, id, canReturn, refetch }) {
     changeStatus,
     openReturn,
     handleStatusChange,
+    openQuickStatus,
     handlePayLink,
   };
 }
