@@ -59,6 +59,12 @@ export const DISABLED_FEATURE_PREFIXES = [
   '/home/leads',         // العملاء المحتملون
 ];
 
+/**
+ * د4: سجل «صور الموقع (SEO)» يخص الموقع القديم (aqdi.sa) — موقع contractejar.com لا يقرأه
+ * (صور المقالات والصفحات تُدار من محرراتها). الكود باقٍ؛ لإظهاره غيّر القيمة إلى true.
+ */
+export const WEBSITE_IMAGES_REGISTRY_ENABLED = false;
+
 /** true إذا كان المسار (أو الـ href) يخص ميزة مُخفاة. */
 export function isFeatureDisabled(pathOrHref = '') {
   if (!pathOrHref) return false;

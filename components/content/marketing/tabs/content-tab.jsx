@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { usePermissions } from "@/src/hooks/use-permissions";
-import { PERMISSION_SECTIONS } from "@/src/lib/permissions";
+import { PERMISSION_SECTIONS, WEBSITE_IMAGES_REGISTRY_ENABLED } from "@/src/lib/permissions";
 
 const VIEWS = [
   {
@@ -22,6 +22,8 @@ const VIEWS = [
     value: "images",
     label: "صور الموقع (SEO)",
     section: PERMISSION_SECTIONS.website_images,
+    // د4: مخفي — يخص الموقع القديم aqdi.sa (انظر WEBSITE_IMAGES_REGISTRY_ENABLED).
+    enabled: WEBSITE_IMAGES_REGISTRY_ENABLED,
   },
   { value: "articles", label: "المقالات", section: PERMISSION_SECTIONS.blogs },
   {
@@ -62,7 +64,7 @@ export default function ContentTab() {
   const visibleViews = useMemo(
     () =>
       isReady
-        ? VIEWS.filter((item) => !item.section || can(item.section, "view"))
+        ? VIEWS.filter((item) => item.enabled !== false && (!item.section || can(item.section, "view")))
         : [],
     [can, isReady]
   );
@@ -98,6 +100,12 @@ export default function ContentTab() {
         ))}
       </div>
 
+      {requestedView === "images" && !WEBSITE_IMAGES_REGISTRY_ENABLED ? (
+        <div role="note" className="mb-4 rounded-2xl border border-[#F3DFA9] bg-[#FFF8E6] px-4 py-3 text-[13px] text-[#7A5600] dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200">
+          <b>«صور الموقع (SEO)» مخفية:</b> هذا السجل يخص الموقع القديم ولا يستخدمه موقع «عقد إيجار» (contractejar.com).
+          صور المقالات والصفحات والأقسام تُدار من محرراتها في «إدارة المحتوى».
+        </div>
+      ) : null}
       {ActivePanel ? <ActivePanel /> : null}
     </div>
   );
