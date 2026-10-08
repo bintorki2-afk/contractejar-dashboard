@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
+import AvatarImage from "@/components/shared/avatar-image";
 import { ImageUp, Loader2 } from "lucide-react";
 import { axiosInstance } from "@/src/utils/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -184,7 +184,7 @@ export default function AddEmployeeForm({ isEdit = false, employee, onSuccess })
                 <FormLabel className="cursor-pointer">
                   <div className="flex items-center gap-4 rounded-[13px] border border-dashed border-[#d5e3dc] dark:border-[#2c5648] bg-[#fbfdfc] dark:bg-[#0f241d] p-4 transition-colors hover:border-brand-main dark:hover:border-emerald-500">
                     {preview ? (
-                      <Image
+                      <AvatarImage
                         width={100}
                         height={100}
                         src={preview}

@@ -1,6 +1,24 @@
+// Default = صقر ١ backend on Railway. Set API_PROXY_TARGET in Vercel to the
+// production backend. Never point it at aqid.subcodeco.com (separate project).
+const apiTarget =
+  process.env.API_PROXY_TARGET ||
+  "https://aqdi-new-backend-main-production.up.railway.app/api";
+
+const originOf = (value) => {
+  try {
+    return new URL(value).origin;
+  } catch {
+    return "";
+  }
+};
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
+  env: {
+    // أصل الخادم لروابط الملفات (/storage/...) — الخادم يبنيها على دومين اللوحة خلف البروكسي.
+    BACKEND_ASSET_ORIGIN: process.env.BACKEND_ASSET_ORIGIN || originOf(apiTarget),
+  },
   allowedDevOrigins: [
     "192.168.1.7",
     "192.168.1.4",
@@ -13,12 +31,6 @@ const nextConfig = {
     optimizePackageImports: ["lucide-react", "react-icons"],
   },
   async rewrites() {
-    // Default = صقر ١ backend on Railway. Set API_PROXY_TARGET in Vercel to the
-    // production backend. Never point it at aqid.subcodeco.com (separate project).
-    const apiTarget =
-      process.env.API_PROXY_TARGET ||
-      "https://aqdi-new-backend-main-production.up.railway.app/api";
-
     return [
       {
         source: "/api/:path*",

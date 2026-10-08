@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import AvatarImage from "@/components/shared/avatar-image";
 import {
   Building2,
   CheckCircle2,
@@ -27,8 +27,8 @@ export default function UserDetailsCard({ user, backUrl }) {
       <div dir="rtl" className="grid grid-cols-3 gap-4 mt-4">
         <div className="bg-gray-100 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
           <div className="relative size-28 rounded-full overflow-hidden border border-gray-200">
-            <Image
-              src={user?.photo_path || "/images/defaultUser.jpg"}
+            <AvatarImage
+              src={user?.photo_path}
               width={112}
               height={112}
               alt={user?.full_name || user?.name || "avatar"}
