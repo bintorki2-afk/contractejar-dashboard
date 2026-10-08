@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { mapRealtimeTableOrder } from "@/components/realtime-orders/map-realtime-order";
 import { ALL_ORDERS_QUERY_KEY } from "@/src/hooks/use-realtime-new-orders";
+import { toast } from "sonner";
 import { exportRefundContractsToExcel } from "@/components/orders/shared/orders-export";
 import {
   buildRefundsLookup,
@@ -126,9 +127,13 @@ export function useReturnOrdersWrapper() {
       const enriched = filteredRefundRows
         .map((row) => ensureReturnOrderRefund(row, refundsLookup))
         .filter(Boolean);
-      await exportRefundContractsToExcel(enriched, {
+      const exported = await exportRefundContractsToExcel(enriched, {
         filename: "الطلبات-المسترجعة",
       });
+      if (exported) toast.success(`تم تصدير ${enriched.length} سجل بنجاح`);
+      else toast.error("لا توجد بيانات للتصدير");
+    } catch (error) {
+      toast.error(error?.message ? `تعذر تصدير البيانات: ${error.message}` : "تعذر تصدير البيانات");
     } finally {
       setIsExporting(false);
     }
