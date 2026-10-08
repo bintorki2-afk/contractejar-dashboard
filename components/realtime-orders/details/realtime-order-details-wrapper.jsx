@@ -18,6 +18,7 @@ import OrderGroupsLayout from "./order-groups-layout";
 import OrderDetailsDialogs from "./order-details-dialogs";
 import ContractExpandedViewDialog from "./contract-expanded-view-dialog";
 import { mapOrderDetailView } from "./map-order-detail";
+import OrderJourney from "./order-journey";
 
 function resolveBackLink(from) {
   if (from === "/home/realtime-orders" || from?.startsWith("/home/realtime-orders")) {
@@ -120,6 +121,8 @@ function OrderDetailsBody() {
         canAddStatus={canAddStatus}
         isStatusPending={dialogs.isChangingStatus}
       />
+
+      <OrderJourney orderData={orderData} />
 
       {isLeaseRenewal ? (
         <LeaseRenewalOrderView orderData={orderData} />
