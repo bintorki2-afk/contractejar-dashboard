@@ -210,9 +210,27 @@ axiosInstance.interceptors.request.use((config) => {
     return config;
 });
 
+export const SERVER_ERROR_MESSAGE = "حدث خطأ في الخادم، حاول مرة أخرى أو تواصل مع الدعم";
+
+/**
+ * أخطاء 5xx من الخادم قد تحمل نص الاستثناء الداخلي («حدث خطأ: SQLSTATE…»)، وكل
+ * الشاشات تعرض `response.data.message` في التنبيه كما هو. نستبدله برسالة عامة
+ * ونُبقي الأصل في `server_message` (للتشخيص فقط، لا يُعرض).
+ */
+export function sanitizeServerErrorMessage(error) {
+    const status = error?.response?.status;
+    const data = error?.response?.data;
+    if (status >= 500 && data && typeof data === "object" && typeof data.message === "string") {
+        if (data.server_message === undefined) data.server_message = data.message;
+        data.message = SERVER_ERROR_MESSAGE;
+    }
+    return error;
+}
+
 axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
+        sanitizeServerErrorMessage(error);
         const originalRequest = error.config;
         const status = error.response?.status;
 

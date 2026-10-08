@@ -14,6 +14,7 @@ import {
   newLocalId,
 } from "@/src/lib/content-admin";
 import { useSaveSection } from "@/src/hooks/use-save-section";
+import { firstYearPriceForCard, usePublicPricing } from "@/src/hooks/use-public-pricing";
 
 const DEFAULT_VALUES = {
   badgeText: "الأسعار",
@@ -123,6 +124,8 @@ function PricingFeaturesFields({ control, cardIndex }) {
 export default function PricingSectionForm({ initialData, saveEndpoint, queryKey }) {
   const form = useForm({ defaultValues: DEFAULT_VALUES });
   const { saveSection, isPending } = useSaveSection({ saveEndpoint, queryKey });
+  // السعر الظاهر في الموقع يأتي دائماً من الأسعار الرسمية (CROSS-D1) — الحقل هنا للعرض فقط.
+  const { data: pricing } = usePublicPricing();
   const cards = form.watch("cards");
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -268,7 +271,12 @@ export default function PricingSectionForm({ initialData, saveEndpoint, queryKey
                     name={`cards.${cardIndex}.price`}
                     label="السعر"
                     size="sm"
-                    rules={{ required: "السعر مطلوب" }}
+                    readOnly
+                    description={
+                      firstYearPriceForCard(pricing, cardIndex) != null
+                        ? `يُدار من «إعدادات النظام ← الأسعار والرسوم» — السعر الحالي في الموقع: ${firstYearPriceForCard(pricing, cardIndex)} ريال`
+                        : "يُدار من «إعدادات النظام ← الأسعار والرسوم» ويظهر في الموقع تلقائياً"
+                    }
                   />
                   <SectionTextField
                     control={form.control}

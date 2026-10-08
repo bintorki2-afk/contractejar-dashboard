@@ -1,7 +1,7 @@
 'use client'
 import logo from "@/public/images/logo.svg";
-import defaultUser from "@/public/images/defaultUser.jpg";
 import Image from "next/image";
+import AvatarImage from "@/components/shared/avatar-image";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -241,17 +241,14 @@ export default function SideData() {
                     title={userName}
                     className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white/10 text-sm font-bold text-sidebar-foreground transition-colors hover:bg-white/[0.14] ring-1 ring-white/10"
                   >
-                    {user?.profile_image ? (
-                      <Image
-                        src={user.profile_image}
-                        alt=""
-                        width={44}
-                        height={44}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      userInitial
-                    )}
+                    <AvatarImage
+                      src={user?.profile_image}
+                      alt=""
+                      width={44}
+                      height={44}
+                      fallback={userInitial}
+                      className="h-full w-full object-cover"
+                    />
                   </button>
                   <button
                     type="button"
@@ -275,8 +272,8 @@ export default function SideData() {
                     className="flex w-full min-w-0 items-center gap-2.5 rounded-xl p-1 -m-1 text-start transition-colors hover:bg-white/[0.06]"
                   >
                     <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-accent/20 text-sm font-bold text-brand-accent ring-2 ring-brand-accent/25">
-                      <Image
-                        src={user?.profile_image || defaultUser}
+                      <AvatarImage
+                        src={user?.profile_image}
                         alt=""
                         width={44}
                         height={44}

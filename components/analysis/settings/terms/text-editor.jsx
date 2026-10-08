@@ -12,7 +12,7 @@ import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import CharacterCount from '@tiptap/extension-character-count';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   AlignCenter,
   AlignJustify,
@@ -36,7 +36,30 @@ import {
   Underline as UnderlineIcon,
   Undo2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { compressImageFile } from '@/src/lib/editor-image';
+
+// يضغط الصورة (≤ ٣٠٠ ك.ب) ثم يدرجها؛ عند الفشل يظهر خطأ واضح بدل إدراج صورة ضخمة.
+async function insertCompressedImage(editor, file, pos) {
+  if (!editor || !file) return;
+  const toastId = toast.loading('جارٍ تجهيز الصورة...');
+  try {
+    const src = await compressImageFile(file);
+    const chain = editor.chain().focus();
+    if (typeof pos === 'number') {
+      chain.insertContentAt(pos, { type: 'image', attrs: { src } }).run();
+    } else {
+      chain.setImage({ src }).run();
+    }
+    toast.dismiss(toastId);
+  } catch (error) {
+    toast.error(error?.message || 'تعذّر إدراج الصورة', { id: toastId });
+  }
+}
+
+const imageFilesOf = (fileList) =>
+  Array.from(fileList || []).filter((file) => String(file.type || '').startsWith('image/'));
 
 const FontSize = Extension.create({
   name: 'fontSize',
@@ -157,12 +180,7 @@ function Toolbar({ editor, compact = false }) {
     input.onchange = () => {
       const file = input.files?.[0];
       if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        editor.chain().focus().setImage({ src: reader.result }).run();
-      };
-      reader.readAsDataURL(file);
+      insertCompressedImage(editor, file);
     };
 
     input.click();
@@ -483,6 +501,7 @@ export default function TextEditor({
   compact = false,
   className = '',
 }) {
+  const editorRef = useRef(null);
   const editor = useEditor({
     immediatelyRender: false,
 
@@ -496,7 +515,8 @@ export default function TextEditor({
       TextStyle,
       Color,
       FontSize,
-      Image,
+      // allowBase64: المقالات القديمة فيها صور base64 — بدونه تُحذف عند فتحها وتضيع عند الحفظ.
+      Image.configure({ allowBase64: true }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -516,6 +536,23 @@ export default function TextEditor({
           ? 'min-h-[160px] p-3 outline-none prose prose-sm max-w-none'
           : 'min-h-[300px] p-4 outline-none prose prose-sm max-w-none',
       },
+      // لصق/سحب ملف صورة: يُضغط قبل الإدراج بدل حفظه بحجمه الأصلي.
+      handlePaste: (view, event) => {
+        const files = imageFilesOf(event.clipboardData?.files);
+        if (!files.length) return false;
+        event.preventDefault();
+        files.forEach((file) => insertCompressedImage(editorRef.current, file));
+        return true;
+      },
+      handleDrop: (view, event, _slice, moved) => {
+        if (moved) return false;
+        const files = imageFilesOf(event.dataTransfer?.files);
+        if (!files.length) return false;
+        event.preventDefault();
+        const pos = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos;
+        files.forEach((file) => insertCompressedImage(editorRef.current, file, pos));
+        return true;
+      },
     },
 
     onUpdate: ({ editor: currentEditor }) => {
@@ -525,6 +562,10 @@ export default function TextEditor({
       });
     },
   });
+
+  useEffect(() => {
+    editorRef.current = editor;
+  }, [editor]);
 
   if (!editor) return null;
 

@@ -87,8 +87,16 @@ export function useAllOrdersWrapper({
     can(PERMISSION_SECTIONS.returned_request, "create") ||
     can(PERMISSION_SECTIONS.returned_request, "edit");
 
+  const {
+    activeItems: statusItems,
+    returnedStatusId,
+    canceledStatusId,
+  } = useContractStatuses();
+
   const visiblePills = ALL_ORDERS_FILTER_PILLS.filter((pill) => {
     if (lockedFilter && STATUS_PILLS.includes(pill.id)) return false;
+    // لا توجد حالة «استرجاع» بالاسم → لا نعرض الفلتر (بدل الاحتياط بحالة أخرى).
+    if (pill.id === "returned" && returnedStatusId == null) return false;
     const section = PILL_PERMISSIONS[pill.id];
     if (!section) return true;
     return isAdmin || can(section, "view");
@@ -109,12 +117,6 @@ export function useAllOrdersWrapper({
   const [statusFieldsOpen, setStatusFieldsOpen] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] = useState(null);
   const [manageStatusesOpen, setManageStatusesOpen] = useState(false);
-
-  const {
-    activeItems: statusItems,
-    returnedStatusId,
-    canceledStatusId,
-  } = useContractStatuses();
 
   const extraStatuses = useMemo(
     () => (lockedFilter ? [] : getAllOrdersExtraFilterStatuses(statusItems)),

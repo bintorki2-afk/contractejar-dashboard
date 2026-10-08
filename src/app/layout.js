@@ -19,25 +19,10 @@ export const viewport = {
 
 export async function generateMetadata() {
   return {
-    title: 'Aakdi',
-    description: 'Aakdi',
-    keywords: 'Aakdi',
-    openGraph: {
-      title: 'Aakdi',
-      description: 'Aakdi',
-      url: 'https://aqdi.sa',
-      siteName: 'Aakdi',
-      images: [
-        {
-          url: 'https://aqdi.sa/website/asset/images/logo.svg',
-          width: 1200,
-          height: 630,
-          alt: 'Aakdi',
-        },
-      ],
-      type: 'website',
-      locale: 'ar_SA',
-    },
+    // لوحة داخلية لـ «عقد إيجار» — لا تُفهرس ولا تشير إلى aqdi.sa (موقع آخر منفصل).
+    title: 'لوحة تحكم عقد إيجار',
+    description: 'لوحة تحكم الموظفين — عقد إيجار',
+    robots: { index: false, follow: false },
     other: {
       viewport: 'width=device-width, initial-scale=0.80, minimum-scale=0.80, maximum-scale=1, user-scalable=no',
     },

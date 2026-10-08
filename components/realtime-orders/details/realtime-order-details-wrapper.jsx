@@ -52,7 +52,13 @@ function OrderDetailsBody() {
     can(PERMISSION_SECTIONS.returned_request, "create") ||
     can(PERMISSION_SECTIONS.returned_request, "edit");
 
-  const dialogs = useOrderDetailsDialogs({ orderData, id, canReturn, refetch });
+  const dialogs = useOrderDetailsDialogs({
+    orderData,
+    id,
+    canReturn,
+    refetch,
+    statuses,
+  });
   const [expandedViewOpen, setExpandedViewOpen] = useState(false);
 
   useEffect(() => {
@@ -105,6 +111,8 @@ function OrderDetailsBody() {
         onSendDraft={() => dialogs.setSendDraftOpen(true)}
         onMissingAttachment={() => dialogs.setCorrectionRequestOpen(true)}
         onEjarDocumentation={() => dialogs.setEjarDocumentationOpen(true)}
+        onQuickSendDraft={() => dialogs.openQuickStatus("send_draft")}
+        onQuickNotarized={() => dialogs.openQuickStatus("notarized")}
         onSendSectionError={dialogs.setSectionErrorContext}
         onViewExpanded={() => setExpandedViewOpen(true)}
         statuses={statuses}

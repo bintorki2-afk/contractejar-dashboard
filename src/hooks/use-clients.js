@@ -3,6 +3,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { axiosInstance } from "@/src/utils/axios";
+import { normalizeAdminSearch } from "@/src/lib/search-term";
 
 export const CLIENTS_API = "/admin/users";
 export const CLIENTS_QUERY_KEY = "clients";
@@ -66,7 +67,8 @@ export function mapUserToClientRow(user = {}) {
 
 export function useClientsList({ page = 1, perPage = 25, search = "" } = {}) {
   const params = { page, per_page: perPage };
-  if (search) params.search = search;
+  const term = normalizeAdminSearch(search);
+  if (term) params.search = term;
 
   const query = useQuery({
     queryKey: [CLIENTS_QUERY_KEY, params],

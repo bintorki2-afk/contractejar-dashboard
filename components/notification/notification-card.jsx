@@ -4,6 +4,8 @@ import React from "react";
 import { Hand, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useReceiveContract } from "@/src/hooks/use-receive-contract";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import { PERMISSION_SECTIONS } from "@/src/lib/permissions";
 import { getWaitingMinutes } from "@/components/realtime-orders/map-realtime-order";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +15,9 @@ const OVERDUE_HOURS = 12;
 
 export default function NotifictionCard({ order }) {
   const router = useRouter();
+  // الاستلام = POST /admin/received-contracts ويتطلب all_requests.edit في الخادم.
+  const { can, isAdmin } = usePermissions();
+  const canReceive = isAdmin || can(PERMISSION_SECTIONS.all_requests, "edit");
   const { mutate: acceptOrder, isPending } = useReceiveContract({
     onSuccess: () => {
       router.push(`/home/orders/${order?.id}`);
@@ -101,6 +106,7 @@ export default function NotifictionCard({ order }) {
         >
           استعراض
         </button>
+        {canReceive ? (
         <button
           type="button"
           onClick={() => acceptOrder(order)}
@@ -118,6 +124,7 @@ export default function NotifictionCard({ order }) {
           )}
           <span>استلام</span>
         </button>
+        ) : null}
       </div>
     </div>
   );

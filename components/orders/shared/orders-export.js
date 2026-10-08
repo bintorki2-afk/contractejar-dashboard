@@ -1,5 +1,6 @@
 import { axiosInstance } from "@/src/utils/axios";
 import { writeExcelFile } from "@/src/lib/xlsx-export";
+import { formatSaudiMobileDisplay } from "@/src/lib/format-phone";
 import {
   getOrderAdminApprovalStatus,
   isAdminRefundApproved,
@@ -19,17 +20,30 @@ function formatPaymentValue(row) {
   return row?.amount_payment ?? "";
 }
 
-function formatDateValue(dateString) {
+/** ميلادي بأرقام لاتينية «YYYY-MM-DD HH:mm» (توقيت الرياض) — قابل للفرز في Excel. */
+export function formatDateValue(dateString) {
   if (!dateString) return "";
   const date = new Date(dateString);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString("ar-SA", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Riyadh",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })
+      .formatToParts(date)
+      .map((part) => [part.type, part.value])
+  );
+  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
+}
+
+/** الجوال بصيغة 05XXXXXXXX في ملفات التصدير. */
+function exportMobile(value) {
+  return value ? formatSaudiMobileDisplay(value) : "";
 }
 
 function formatCustomerRefunded(value) {
@@ -92,7 +106,7 @@ export async function fetchAllPaginatedOrders(buildUrl) {
 export function mapOrderToExportRow(order, { showStatusColumn = true } = {}) {
   const row = {
     "رقم الطلب": order?.uuid ?? "",
-    "رقم جوال العميل": order?.user_mobile ?? "",
+    "رقم جوال العميل": exportMobile(order?.user_mobile),
     "نوع العقد": order?.contract_type ?? "",
     "نوع الوثيقة": order?.instrument_type ?? "",
     الدفع: formatPaymentValue(order),
@@ -115,7 +129,7 @@ export function mapReturnOrderToExportRow(row = {}) {
 
   return {
     "رقم الطلب": row?.uuid ?? "",
-    "رقم جوال العميل": row?.user_mobile ?? "",
+    "رقم جوال العميل": exportMobile(row?.user_mobile),
     "نوع العقد": row?.contract_type ?? "",
     الدفع: formatPaymentValue(row),
     "المبلغ المطالب استرجاعه": row?.refund_amount ?? "",
@@ -128,7 +142,7 @@ export function mapReturnOrderToExportRow(row = {}) {
 
 export function mapWhatsappCompletedToExportRow(row = {}) {
   return {
-    "رقم جوال العميل": row?.mobile_number ?? "",
+    "رقم جوال العميل": exportMobile(row?.mobile_number),
     "قيمة المبلغ": row?.amount_paid_by_client ?? "",
     "نوع العقد": row?.contract_type ?? "",
     "هل تم توثيق العقد":
@@ -139,7 +153,7 @@ export function mapWhatsappCompletedToExportRow(row = {}) {
 
 export function mapWhatsappIncompletedToExportRow(row = {}) {
   return {
-    "رقم جوال العميل": row?.mobile_number ?? "",
+    "رقم جوال العميل": exportMobile(row?.mobile_number),
     ملاحظات: row?.notes ?? "",
     التاريخ: formatDateValue(row?.date),
   };
@@ -149,7 +163,7 @@ export function mapRefundContractToExportRow(item) {
   if (item?.orderUuid != null || item?.refundId != null) {
     return {
       "رقم الطلب": item.orderUuid ?? "",
-      "رقم جوال العميل": item.userMobile ?? "",
+      "رقم جوال العميل": exportMobile(item.userMobile),
       "نوع العقد": item.contractType ?? "",
       الدفع: item.isPaid
         ? item.amountPayment ?? ""

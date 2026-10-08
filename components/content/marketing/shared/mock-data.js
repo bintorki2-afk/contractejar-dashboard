@@ -449,68 +449,30 @@ export const PIXELS_STATS = [
   { value: "4 / 5", label: "حسابات إعلانية", tone: "y" },
 ];
 
+// حالة الربط الحقيقية غير متاحة من اللوحة بعد (لا يوجد مسار خادم) — لذلك لا نعرض
+// «مربوط» ولا معرّفات أو أعداد أحداث وهمية؛ كانت سابقاً أرقاماً تجريبية (وبعضها لـ aqdi.sa).
 export const AD_PIXELS = [
-  {
-    name: "إكس بكسل (تويتر)",
-    connected: false,
-    id: null,
-    events: [],
-    lastEvent: "غير مربوط",
-  },
-  {
-    name: "سناب بكسل",
-    connected: true,
-    id: "a1b2c3d4-***",
-    events: ["PURCHASE", "SIGN_UP", "PAGE_VIEW"],
-    lastEvent: "6,120 حدث · آخر حدث قبل 22 دقيقة",
-  },
+  { name: "إكس بكسل (تويتر)", connected: false, id: null, events: [] },
+  { name: "سناب بكسل", connected: false, id: null, events: ["PURCHASE", "SIGN_UP", "PAGE_VIEW"] },
   {
     name: "ميتا بكسل (فيسبوك/إنستغرام)",
-    connected: true,
-    id: "318742***",
-    badge: "+ Conversions API (خادمي)",
+    connected: false,
+    id: null,
     events: ["Purchase", "Lead", "PageView"],
-    lastEvent: "20,310 حدث · آخر حدث قبل 6 دقائق",
   },
   {
     name: "تيك توك بكسل",
-    connected: true,
-    id: "C8QF3ARC77U***",
-    badge: "+ Conversions API (خادمي)",
+    connected: false,
+    id: null,
     events: ["CompletePayment", "Lead", "ViewContent", "PageView"],
-    lastEvent: "12,840 حدث · آخر حدث قبل 3 دقائق",
   },
 ];
 
 export const ANALYTICS_SOURCES = [
-  {
-    name: "Google Search Console",
-    connected: true,
-    id: "aqdi.sa",
-    note: "مصدر بيانات SEO (النقرات والترتيب)",
-    lastEvent: "9,300 حدث · آخر حدث قبل 5 دقائق",
-  },
-  {
-    name: "Google Tag Manager",
-    connected: true,
-    id: "GTM-P4X***",
-    note: "حاوية الوسوم – تدير كل البكسلات من مكان واحد",
-    lastEvent: "48,200 حدث · آخر حدث قبل دقيقة",
-  },
-  {
-    name: "Google Ads – تتبع التحويل",
-    connected: true,
-    id: "AW-1129***",
-    events: ["purchase", "conversion"],
-    lastEvent: "9,300 حدث · آخر حدث قبل 5 دقائق",
-  },
-  {
-    name: "Google Analytics 4",
-    connected: false,
-    id: "G-7QX***",
-    events: ["purchase", "generate_lead", "page_view"],
-    lastEvent: "مصدر بيانات نشط",
-  },
+  { name: "Google Search Console", connected: false, id: null, note: "مصدر بيانات SEO (النقرات والترتيب)" },
+  { name: "Google Tag Manager", connected: false, id: null, note: "حاوية الوسوم – تدير كل البكسلات من مكان واحد" },
+  { name: "Google Ads – تتبع التحويل", connected: false, id: null, events: ["purchase", "conversion"] },
+  { name: "Google Analytics 4", connected: false, id: null, events: ["purchase", "generate_lead", "page_view"] },
 ];
 
 export const TRACKED_EVENTS = [
@@ -522,7 +484,7 @@ export const TRACKED_EVENTS = [
 ];
 
 export const UTM_DEFAULTS = {
-  url: "https://aqdi.sa",
+  url: "https://contractejar.com",
   source: "google",
   medium: "cpc",
   campaign: "summer_launch",

@@ -137,3 +137,37 @@ describe("APPLIES_TO_OPTIONS", () => {
     expect(APPLIES_TO_OPTIONS.map((o) => o.value)).toEqual(["all", "housing", "commercial"]);
   });
 });
+
+describe("getDiscountPreviewRows — base fee from the official pricing (CROSS-D2)", () => {
+  it("uses each track's first-year price instead of 349 for both", () => {
+    const rows = getDiscountPreviewRows({
+      type: "percentage",
+      value: 10,
+      appliesTo: "all",
+      prices: { housing: 249, commercial: 349 },
+    });
+    const byKey = Object.fromEntries(rows.map((r) => [r.key, r]));
+    expect(byKey.housing.baseFee).toBe(249);
+    expect(byKey.housing.discount).toBeCloseTo(24.9);
+    expect(byKey.housing.amountAfter).toBeCloseTo(224.1);
+    expect(byKey.commercial.baseFee).toBe(349);
+  });
+
+  it("follows a price change made in the settings", () => {
+    const rows = getDiscountPreviewRows({
+      type: "fixed",
+      value: 50,
+      appliesTo: "housing",
+      prices: { housing: 299, commercial: 399 },
+    });
+    expect(rows[0].baseFee).toBe(299);
+    expect(rows[0].amountAfter).toBe(249);
+  });
+
+  it("falls back to 249 (housing) / 349 (commercial) only when pricing is unavailable", () => {
+    const rows = getDiscountPreviewRows({ type: "percentage", value: 0, appliesTo: "all" });
+    const byKey = Object.fromEntries(rows.map((r) => [r.key, r]));
+    expect(byKey.housing.baseFee).toBe(249);
+    expect(byKey.commercial.baseFee).toBe(349);
+  });
+});

@@ -1,9 +1,9 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import Header from './header'
-import defaultUser from '@/public/images/defaultUser.jpg'
 import logo from '@/public/images/logo.svg'
 import Image from 'next/image'
+import AvatarImage from '@/components/shared/avatar-image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useUserStore } from '@/src/stores/user-store'
@@ -339,8 +339,8 @@ export default function HomeWelcomeWrapper() {
                                             aria-hidden
                                             className="absolute -inset-1 rounded-full bg-gradient-to-br from-[#0c6055] to-[#10B981] opacity-90 dark:from-emerald-400 dark:to-teal-600"
                                         />
-                                        <Image
-                                            src={user?.profile_image || defaultUser}
+                                        <AvatarImage
+                                            src={user?.profile_image}
                                             alt={user?.name ?? 'المستخدم'}
                                             width={72}
                                             height={72}

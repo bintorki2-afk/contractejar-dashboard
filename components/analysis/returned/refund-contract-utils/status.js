@@ -1,7 +1,7 @@
 import { extractRefundContractId } from "./ids";
 
-/** Contract status id for "استرجاع" — required before submitting a refund request. */
-export const RETURN_CONTRACT_STATUS_ID = 2;
+// حالة «الاسترجاع» تُعرف بالاسم فقط. كان هنا احتياط بالرقم 2، وهو في «عقد إيجار»
+// حالة «قيد المراجعة» — فكان اختيار «قيد المراجعة» يفتح طلب استرجاع بدل تغيير الحالة.
 
 export function mapCreatedAtFilter(id) {
   if (!id || id === "total") return "all";
@@ -74,8 +74,7 @@ export function parseManagementApprovalCounts(summary) {
 
 export function isReturnContractStatus(status) {
   if (!status) return false;
-  if (Number(status.id) === RETURN_CONTRACT_STATUS_ID) return true;
-  const name = String(status?.name || "").trim();
+  const name = String(status?.name || status?.label || "").trim();
   return name === "استرجاع" || name.includes("استرجاع") || name.includes("مسترجع");
 }
 
@@ -91,13 +90,12 @@ export function getOrderContractStatusDisplay(order) {
 }
 
 export function isOrderInReturnStatus(order) {
-  const { id } = getOrderContractStatusDisplay(order);
-  return Number(id) === RETURN_CONTRACT_STATUS_ID;
+  const { name } = getOrderContractStatusDisplay(order);
+  return isReturnContractStatus({ name: name === "—" ? "" : name });
 }
 
 export function isReturnContractOrder(order) {
   if (order?.return_contract === true) return true;
-  if (Number(order?.contract_status_id) === RETURN_CONTRACT_STATUS_ID) return true;
   const statusName = order?.status?.name ?? order?.contract_status_name ?? "";
   return isReturnContractStatus({ name: statusName });
 }

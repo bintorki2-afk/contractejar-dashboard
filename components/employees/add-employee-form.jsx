@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
+import AvatarImage from "@/components/shared/avatar-image";
 import { ImageUp, Loader2 } from "lucide-react";
 import { axiosInstance } from "@/src/utils/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -58,9 +58,13 @@ const employeeSchema = (isEdit) =>
   z.object({
     firstName: z.string().min(2, "الإسم يجب أن يكون على الأقل حرفين"),
     lastName: z.string().min(2, "الاسم الأخير يجب أن يكون على الأقل حرفين"),
+    // نفس شرط الخادم (min:8) حتى لا يُرفض الحفظ برسالة من الخادم.
     password: isEdit
-      ? z.string().optional()
-      : z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
+      ? z
+          .string()
+          .optional()
+          .refine((value) => !value || value.length >= 8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل")
+      : z.string().min(8, "كلمة المرور يجب أن تكون 8 أحرف على الأقل"),
     email: z.string().email("البريد الإلكتروني غير صحيح"),
     phone: z.string().min(10, "رقم الهاتف غير صحيح"),
     base_salary: z.string().min(1, "الراتب الأساسي مطلوب"),
@@ -180,7 +184,7 @@ export default function AddEmployeeForm({ isEdit = false, employee, onSuccess })
                 <FormLabel className="cursor-pointer">
                   <div className="flex items-center gap-4 rounded-[13px] border border-dashed border-[#d5e3dc] dark:border-[#2c5648] bg-[#fbfdfc] dark:bg-[#0f241d] p-4 transition-colors hover:border-brand-main dark:hover:border-emerald-500">
                     {preview ? (
-                      <Image
+                      <AvatarImage
                         width={100}
                         height={100}
                         src={preview}

@@ -28,25 +28,8 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
-export function buildInvoicePrintHtml(invoice, customerName) {
-  if (!invoice) return "";
-
-  const name = (customerName || invoice.customerName || "").trim();
-  const customerLine = name
-    ? `${name} (${invoice.mobile})`
-    : invoice.mobile;
-  const typeLabel = invoice.contractType ? TYPE_LABEL[invoice.contractType] : null;
-  const statusLabel = STATUS_LABEL[invoice.status] || invoice.status || "—";
-  const isPaid = invoice.status === "success";
-  const amount = Number(invoice.amount).toLocaleString("en-US");
-  const description = getInvoiceItemDescription(invoice.contractType);
-
-  return `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <title>فاتورة ${escapeHtml(invoice.invoiceNo)}</title>
-  <style>
+function invoiceStyles(isPaid) {
+  return `  <style>
     * { box-sizing: border-box; }
     body {
       font-family: Tahoma, Arial, sans-serif;
@@ -112,13 +95,38 @@ export function buildInvoicePrintHtml(invoice, customerName) {
       font-size: 13px;
     }
     .status-wrap { text-align: center; }
-  </style>
+    .lines td.amount { text-align: left; white-space: nowrap; font-weight: 700; }
+    .lines td.discount { color: #B91C1C; }
+    .sum { display: flex; justify-content: space-between; padding: 8px 14px; font-size: 13px; color: #374151; }
+    .sum .free { color: #15803D; font-weight: 800; }
+  </style>`;
+}
+
+export function buildInvoicePrintHtml(invoice, customerName) {
+  if (!invoice) return "";
+
+  const name = (customerName || invoice.customerName || "").trim();
+  const customerLine = name
+    ? `${name} (${invoice.mobile})`
+    : invoice.mobile;
+  const typeLabel = invoice.contractType ? TYPE_LABEL[invoice.contractType] : null;
+  const statusLabel = STATUS_LABEL[invoice.status] || invoice.status || "—";
+  const isPaid = invoice.status === "success";
+  const amount = Number(invoice.amount).toLocaleString("en-US");
+  const description = getInvoiceItemDescription(invoice.contractType);
+
+  return `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>فاتورة ${escapeHtml(invoice.invoiceNo)}</title>
+${invoiceStyles(isPaid)}
 </head>
 <body>
   <div class="sheet">
     <div class="top">
       <div class="brand">
-        <h1>عقدي</h1>
+        <h1>عقد إيجار</h1>
         <p>منصة توثيق عقود الإيجار</p>
       </div>
       <div class="meta">
@@ -171,4 +179,91 @@ export function buildInvoicePrintHtml(invoice, customerName) {
 export function printInvoice(invoice, customerName) {
   const html = buildInvoicePrintHtml(invoice, customerName);
   return printHtmlDocument(html);
+}
+
+/**
+ * طباعة فاتورة الخادم (ف1): البنود والمجاميع كما وصلت من ContractPricing — بلا أي حساب هنا.
+ * `invoice` هو ناتج normalizeApiInvoice().
+ */
+export function buildApiInvoicePrintHtml(invoice) {
+  if (!invoice) return "";
+  const isPaid = invoice.isPaid;
+  const customer = [invoice.customerName, invoice.customerPhone].filter(Boolean).join(" — ") || "—";
+  const rows = invoice.items
+    .map(
+      (item) => `<tr>
+          <td>${escapeHtml(item.index)}</td>
+          <td>${escapeHtml(item.description)}</td>
+          <td class="amount${item.isDiscount ? " discount" : ""}">${escapeHtml(item.amountLabel)}</td>
+        </tr>`
+    )
+    .join("");
+  const discountRow =
+    invoice.discount && invoice.discount !== 0
+      ? `<div class="sum"><span>الخصم${invoice.couponCode ? ` (${escapeHtml(invoice.couponCode)})` : ""}</span><span>${escapeHtml(invoice.discountLabel)}</span></div>`
+      : "";
+  const vatIsFree = !invoice.vat;
+
+  return `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>فاتورة ${escapeHtml(invoice.invoiceNumber || "")}</title>
+${invoiceStyles(isPaid)}
+</head>
+<body>
+  <div class="sheet">
+    <div class="top">
+      <div class="brand">
+        <h1>${escapeHtml(invoice.platformName)}</h1>
+        <p>${escapeHtml(invoice.platformSubtitle)}</p>
+      </div>
+      <div class="meta">
+        <div>رقم الفاتورة ${escapeHtml(invoice.invoiceNumber || "—")}</div>
+        <div>التاريخ ${escapeHtml(invoice.date || "—")}</div>
+        <div>الرقم المرجعي ${escapeHtml(invoice.referenceNumber || "—")}</div>
+      </div>
+    </div>
+    <hr class="rule" />
+    <div class="boxes">
+      <div class="box">
+        <p class="label">العميل</p>
+        <p class="value">${escapeHtml(customer)}</p>
+      </div>
+      <div class="box">
+        <p class="label">رقم الطلب</p>
+        <p class="value">${escapeHtml(invoice.orderNumber || "—")}</p>
+      </div>
+      <div class="box">
+        <p class="label">نوع العقد</p>
+        <p class="value">${escapeHtml(invoice.contractTypeLabel || "—")}</p>
+      </div>
+    </div>
+    <table class="lines">
+      <thead>
+        <tr>
+          <th style="width:56px">#</th>
+          <th>الوصف</th>
+          <th style="text-align:left">المبلغ</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="sum"><span>المجموع الفرعي</span><span>${escapeHtml(invoice.subtotalLabel)}</span></div>
+    ${discountRow}
+    <div class="sum"><span>ضريبة القيمة المضافة</span><span class="${vatIsFree ? "free" : ""}">${escapeHtml(invoice.vatLabel)}</span></div>
+    <div class="total">
+      <span>${escapeHtml(invoice.totalDueLabel)}</span>
+      <span>${escapeHtml(invoice.totalLabel)}</span>
+    </div>
+    <div class="status-wrap">
+      <span class="status">${escapeHtml(invoice.statusLabel || (isPaid ? "مدفوعة" : "غير مدفوعة"))}${isPaid ? " ✓" : ""}</span>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+export function printApiInvoice(invoice) {
+  return printHtmlDocument(buildApiInvoicePrintHtml(invoice));
 }

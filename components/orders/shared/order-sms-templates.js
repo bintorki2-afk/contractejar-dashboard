@@ -5,10 +5,14 @@
  * and the SMS compose dialog.
  */
 
+import { buildOrderSmartLink } from "@/src/lib/customer-site";
+
+/**
+ * رابط الطلب للعميل على موقع «عقد إيجار» (يتضمن «ادفع الآن» إن لم يُدفع).
+ * كان سابقاً يشير خطأً إلى aqdi.sa (موقع آخر منفصل).
+ */
 export function buildOrderPaymentUrl(uuid) {
-  const id = String(uuid ?? "").trim();
-  if (!id) return "";
-  return `https://aqdi.sa/pay/${id}`;
+  return buildOrderSmartLink(uuid);
 }
 
 export function getOrderSmsTemplates(uuid) {
@@ -29,7 +33,7 @@ export function getOrderSmsTemplates(uuid) {
     {
       id: "draft_ready",
       label: "مسودة العقد جاهزة للمراجعة",
-      body: `مرحبًا، مسودة عقدكم رقم ${id} جاهزة للمراجعة. بعد موافقتكم يمكنكم إتمام الدفع مباشرة.`,
+      body: `مرحبًا، مسودة عقدكم رقم ${id} جاهزة وأرسلناها لكم عبر واتساب للاطلاع عليها. لن نوثّق العقد في إيجار إلا بعد اطلاعكم على المسودة.`,
     },
   ];
 }

@@ -1,10 +1,13 @@
-import { printHtmlDocument } from "@/src/lib/print";
+import { escapeHtml, printHtmlDocument, safeImageUrl } from "@/src/lib/print";
+import { formatSaudiMobileDisplay } from "@/src/lib/format-phone";
 
+// Every value here comes from the customer (names, addresses, conditions…) — it
+// is HTML-escaped so it prints as text and can never run as markup/script.
 const display = (value) => {
   if (value === null || value === undefined || value === "") return "---";
-  if (Array.isArray(value)) return value.filter(Boolean).join("، ") || "---";
+  if (Array.isArray(value)) return escapeHtml(value.filter(Boolean).join("، ")) || "---";
   if (typeof value === "boolean") return value ? "نعم" : "لا";
-  return String(value);
+  return escapeHtml(value);
 };
 
 const section = (title, rows) => {
@@ -12,7 +15,7 @@ const section = (title, rows) => {
     .map(
       ([label, value]) => `
       <tr>
-        <td class="label">${label}</td>
+        <td class="label">${escapeHtml(label)}</td>
         <td class="value">${display(value)}</td>
       </tr>`
     )
@@ -20,7 +23,7 @@ const section = (title, rows) => {
 
   return `
     <section class="section">
-      <h2>${title}</h2>
+      <h2>${escapeHtml(title)}</h2>
       <table>${items}</table>
     </section>
   `;
@@ -113,6 +116,7 @@ export function buildContractPrintSections(orderData) {
     summary.copy_power_of_attorney_from_heirs_to_agent,
   ]
     .map(resolveImageUrl)
+    .map(safeImageUrl)
     .filter(Boolean);
 
   const imagesHtml = images.length
@@ -126,7 +130,7 @@ export function buildContractPrintSections(orderData) {
     <h1>عقد إيجار - تفاصيل الطلب</h1>
     <p>رقم الطلب: ${display(orderData.uuid)}</p>
     <p>حالة الطلب: ${display(summary.contract_status_name)}</p>
-    <p>رقم جوال العميل: ${display(user.mobile)}</p>
+    <p>رقم جوال العميل: ${display(formatSaudiMobileDisplay(user.mobile ?? orderData.user_mobile))}</p>
     <p>تاريخ الطباعة: ${new Date().toLocaleString("ar-SA")}</p>
   </div>
 
@@ -134,7 +138,7 @@ export function buildContractPrintSections(orderData) {
     ["اسم المالك", summary.name_owner],
     ["رقم الهوية", summary.property_owner_id_num],
     ["تاريخ الميلاد", summary.property_owner_dob],
-    ["رقم الجوال", summary.property_owner_mobile],
+    ["رقم الجوال", formatSaudiMobileDisplay(summary.property_owner_mobile)],
    // ["ايبان المالك", summary.property_owner_iban],
     ["المنطقة", summary.relation_labels?.property_region],
     ["المدينة", summary.relation_labels?.property_city],
@@ -147,7 +151,7 @@ export function buildContractPrintSections(orderData) {
         ["اسم الوكيل", summary.name_owner],
         ["رقم الهوية", summary.id_num_of_property_owner_agent],
         ["تاريخ الميلاد", summary.dob_of_property_owner_agent],
-        ["رقم الجوال", summary.mobile_of_property_owner_agent],
+        ["رقم الجوال", formatSaudiMobileDisplay(summary.mobile_of_property_owner_agent)],
       ])
     : ""}
 
@@ -217,7 +221,7 @@ export function buildContractPrintSections(orderData) {
     })()],
     ["رقم هوية المستأجر", step3.tenant_id_num],
     ["تاريخ ميلاد المستأجر", step3.tenant_dob],
-    ["رقم جوال المستأجر", step3.tenant_mobile],
+    ["رقم جوال المستأجر", formatSaudiMobileDisplay(step3.tenant_mobile)],
   ])}
 
   ${section("البيانات المالية", [
@@ -245,7 +249,7 @@ function wrapPrintDocument(title, innerHtml) {
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>${title}</title>
+  <title>${escapeHtml(title)}</title>
   <style>${CONTRACT_PRINT_STYLES}</style>
 </head>
 <body>
@@ -257,7 +261,7 @@ ${innerHtml}
 export function buildContractPrintHtml(orderData) {
   if (!orderData) return "";
   return wrapPrintDocument(
-    `طباعة العقد - ${display(orderData.uuid)}`,
+    `طباعة العقد - ${orderData.uuid ?? "---"}`,
     buildContractPrintSections(orderData)
   );
 }

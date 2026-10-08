@@ -3,6 +3,8 @@ import { getContractTypeLabel } from "@/src/lib/contract-period-utils";
 import { getOrderClientPhone } from "@/components/orders/messages/order-section-message-utils";
 import { formatSaudiMobileDisplay, toSaudiMobileDialDigits } from "@/src/lib/format-phone";
 import { fileNameFromUrl, resolveImageUrl, resolveNationalAddress } from "./national-address-utils";
+import { normalizeApiInvoice } from "@/src/lib/invoice-lines";
+import { isPaymentNeedsReview } from "@/src/lib/payment-status";
 
 function pick(...values) {
   for (const value of values) {
@@ -14,6 +16,49 @@ function pick(...values) {
 
 function isPaidValue(value) {
   return value === true || value === 1 || value === "1" || value === "paid";
+}
+
+const SUCCESS_PAYMENT_STATUSES = new Set(["success", "succeeded", "paid", "captured"]);
+
+/**
+ * المبلغ المدفوع فعلياً من سجل الدفعات (الناجحة فقط).
+ * null عندما لا يرسل الخادم السجل (فنعتمد `amount_payment` كما هو).
+ * سبب ذلك: طلب `is_completed` بدفعة وحيدة فاشلة كان يُعرض «مدفوع 895».
+ */
+export function successfulPaymentsTotal(orderData = {}) {
+  const list = orderData?.payment_and_admin?.contract_payments;
+  if (!Array.isArray(list)) return null;
+  return list
+    .filter((payment) => SUCCESS_PAYMENT_STATUSES.has(String(payment?.status ?? "").toLowerCase()))
+    .reduce((sum, payment) => sum + toAmount(payment?.amount), 0);
+}
+
+/** دفعات «مراجعة:» المعلّقة (مبلغ لا يطابق المستحق) — تُعرض للمراجعة ولا تُحسب دفعاً. */
+export function reviewPayments(orderData = {}) {
+  const list = orderData?.payment_and_admin?.contract_payments;
+  return Array.isArray(list) ? list.filter(isPaymentNeedsReview) : [];
+}
+
+function paidAmountFields(summary, orderData, paid) {
+  const apiAmount = pick(summary.amount_payment, orderData.amount_payment);
+  const review = reviewPayments(orderData);
+  const reviewFields = {
+    payment_review_count: review.length,
+    payment_review_amount: review.reduce((sum, p) => sum + toAmount(p?.amount), 0),
+  };
+  const successfulTotal = successfulPaymentsTotal(orderData);
+  if (successfulTotal == null) return { fees: apiAmount, fees_paid: paid, ...reviewFields };
+  if (successfulTotal > 0) {
+    return { fees: Math.round(successfulTotal * 100) / 100, fees_paid: true, ...reviewFields };
+  }
+  if (review.length) return { fees: "بحاجة لمراجعة", fees_paid: false, ...reviewFields };
+  return { fees: paid ? "لا توجد دفعة ناجحة مسجّلة" : "لم يتم الدفع", fees_paid: false, ...reviewFields };
+}
+
+/** user.contact_mobile (زائر) ثم user.mobile — بدون الرجوع لجوال المالك/المستأجر. */
+export function customerWhatsapp(orderData = {}) {
+  const user = orderData?.user ?? {};
+  return pick(user.contact_mobile, user.mobile, orderData.user_contact_mobile) || "";
 }
 
 function isCompanyEntity(value) {
@@ -217,6 +262,9 @@ export function mapOrderDetailView(orderData = {}) {
     user_mobile_dial: toSaudiMobileDialDigits(
       pick(getOrderClientPhone(orderData), orderData.user_mobile, summary.user_mobile)
     ),
+    // جوال واتساب الذي كتبه العميل (الزائر) في الموقع — هو رقم التواصل مع صاحب الطلب.
+    customer_whatsapp: formatSaudiMobileDisplay(customerWhatsapp(orderData)),
+    customer_whatsapp_dial: toSaudiMobileDialDigits(customerWhatsapp(orderData)),
     employee_name: pick(summary.employee_name, orderData.employee_name, "—"),
     received_at: pick(orderData.received_at, summary.received_at),
     received_since: pick(orderData.received_since, summary.received_since),
@@ -320,9 +368,9 @@ export function mapOrderDetailView(orderData = {}) {
       // العداد المشترك (بند عقد — ليس ضمن رسومنا).
       shared_meters: buildSharedMeters(units, step4, orderData),
       // Amount actually paid to the platform for documentation (number when paid,
-      // otherwise the API sends a label such as "لم يتم الدفع").
-      fees: pick(summary.amount_payment, orderData.amount_payment),
-      fees_paid: paid,
+      // otherwise the API sends a label such as "لم يتم الدفع"). When the payment
+      // log is present, only successful payments count (a failed attempt is not "paid").
+      ...paidAmountFields(summary, orderData, paid),
     },
     terms: buildTerms(step4, orderData),
     units: units.map((unit, index) => ({
@@ -349,5 +397,7 @@ export function mapOrderDetailView(orderData = {}) {
       furnished: unit.furnished === true || unit.furnished === 1 ? "نعم" : unit.furnished === false || unit.furnished === 0 ? "لا" : unit.furnished,
     })),
     units_count: orderData.units_count ?? units.length,
+    // فاتورة الطلب من الخادم (ف1): البنود والمجاميع من ContractPricing — null قبل الدفع.
+    invoice: normalizeApiInvoice(orderData.invoice),
   };
 }

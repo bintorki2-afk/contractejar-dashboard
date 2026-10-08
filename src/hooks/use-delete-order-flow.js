@@ -7,6 +7,7 @@ import { openDialogAfterMenuClose } from "@/src/lib/open-dialog-after-menu-close
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { invalidateOrdersCaches } from "@/src/lib/invalidate-orders-caches";
 import { postOrderDelete } from "@/src/lib/order-delete-api";
+import { PERMISSION_SECTIONS } from "@/src/lib/permissions";
 
 /**
  * Shared "delete order(s)" flow for the order list pages
@@ -14,13 +15,14 @@ import { postOrderDelete } from "@/src/lib/order-delete-api";
  *
  * Supports a single-order delete (from the row menu) and a bulk delete
  * (from the selection bar). Deletion is destructive and irreversible, so:
- *  - it is limited to admins (canDelete),
+ *  - it needs `all_requests.delete` (same as the server) or a system admin (canDelete),
+ *  - paid orders are refused by the server (422) — its message is shown as is,
  *  - it always goes through a confirmation dialog,
  *  - the backend removes each order together with its related rows.
  */
 export function useDeleteOrderFlow({ queryKey } = {}) {
-  const { isAdmin } = usePermissions();
-  const canDelete = Boolean(isAdmin);
+  const { isAdmin, can } = usePermissions();
+  const canDelete = Boolean(isAdmin || can(PERMISSION_SECTIONS.all_requests, "delete"));
   const queryClient = useQueryClient();
 
   // target = { ids: number[], label: string }
@@ -68,12 +70,15 @@ export function useDeleteOrderFlow({ queryKey } = {}) {
     setIsDeletingOrder(true);
     let deleted = 0;
     let failed = 0;
+    let firstError = null;
     for (const id of ids) {
       try {
         await postOrderDelete(id);
         deleted += 1;
-      } catch {
+      } catch (error) {
         failed += 1;
+        // مثال: 422 «لا يمكن حذف طلب مدفوع» — نعرض سبب الخادم بدل رسالة عامة.
+        if (!firstError) firstError = error?.response?.data?.message || null;
       }
     }
     invalidateOrdersCaches(queryClient, { queryKey });
@@ -85,9 +90,11 @@ export function useDeleteOrderFlow({ queryKey } = {}) {
     if (failed === 0) {
       toast.success(ids.length > 1 ? `تم حذف ${deleted} طلب` : "تم حذف الطلب");
     } else if (deleted === 0) {
-      toast.error("تعذر حذف الطلبات، حاول مرة أخرى");
+      toast.error(firstError || "تعذر حذف الطلبات، حاول مرة أخرى");
     } else {
-      toast.error(`تم حذف ${deleted} طلب، وتعذر حذف ${failed}`);
+      toast.error(
+        `تم حذف ${deleted} طلب، وتعذر حذف ${failed}${firstError ? ` — ${firstError}` : ""}`
+      );
     }
   };
 

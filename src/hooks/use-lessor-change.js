@@ -3,6 +3,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { axiosInstance } from "@/src/utils/axios";
+import { normalizeAdminSearch } from "@/src/lib/search-term";
 
 /**
  * طلبات تغيير المؤجر (لوحة التحكم).
@@ -66,7 +67,8 @@ export function normalizeLessorChangeList(response) {
 export function useLessorChangeList({ page = 1, perPage = 20, status = "", search = "" } = {}) {
   const params = { page, per_page: perPage };
   if (status) params.status = status;
-  if (search) params.search = search;
+  const term = normalizeAdminSearch(search);
+  if (term) params.search = term;
 
   const query = useQuery({
     queryKey: [LESSOR_CHANGE_LIST_KEY, params],

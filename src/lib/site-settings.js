@@ -61,7 +61,6 @@ export const PRICING_KEYS = PRICING_FIELDS.map((field) => field.key);
 
 export const SOCIAL_FIELDS = [
   { key: "whatsapp", label: "واتساب (الرقم العام)", placeholder: "9665xxxxxxxx", dir: "ltr" },
-  { key: "whatsapp_contact", label: "واتساب التواصل", placeholder: "9665xxxxxxxx", dir: "ltr" },
   { key: "whatsapp_contract", label: "واتساب العقود", placeholder: "9665xxxxxxxx", dir: "ltr" },
   { key: "instagram", label: "إنستقرام", placeholder: "https://instagram.com/…", dir: "ltr" },
   { key: "twitter", label: "إكس (تويتر)", placeholder: "https://x.com/…", dir: "ltr" },
@@ -173,4 +172,127 @@ export function validatePricingForm(form = {}) {
     }
   }
   return errors;
+}
+
+/* ------------------------------------------------------------------ */
+/* رقم الدعم (ف18) — `whatsapp_contact` هو مصدر رقم الدعم في الموقع والتطبيق. */
+
+export const SUPPORT_DEFAULT_NUMBER = "966597500014";
+export const SUPPORT_DEFAULT_NUMBER_LOCAL = "0597500014";
+
+export function extractSupportSettings(response) {
+  const data = unwrapSettings(response);
+  const social = data?.social && typeof data.social === "object" ? data.social : {};
+  const support = data?.support && typeof data.support === "object" ? data.support : {};
+  return {
+    form: { whatsapp_contact: toInputValue(social.whatsapp_contact) },
+    effective: toInputValue(support.whatsapp) || SUPPORT_DEFAULT_NUMBER,
+    effectiveLocal: toInputValue(support.whatsapp_local) || SUPPORT_DEFAULT_NUMBER_LOCAL,
+    fallback: toInputValue(support.default) || SUPPORT_DEFAULT_NUMBER,
+  };
+}
+
+/** يقبل 05XXXXXXXX أو 9665XXXXXXXX أو +966…؛ الفارغ = الرجوع للرقم الافتراضي. */
+export function validateSupportNumber(value) {
+  const digits = normalizeNumericInput(value).replace(/\D/g, "");
+  if (!digits) return null;
+  if (/^05\d{8}$/.test(digits) || /^9665\d{8}$/.test(digits) || /^009665\d{8}$/.test(digits)) {
+    return null;
+  }
+  return "أدخل رقم جوال سعودي صحيح (مثل 0597500014)";
+}
+
+export function buildSupportPayload(form = {}) {
+  const digits = normalizeNumericInput(form.whatsapp_contact ?? "").replace(/\D/g, "");
+  return { whatsapp_contact: digits };
+}
+
+/* ------------------------------------------------------------------ */
+/* إصدارات التطبيق والتحديث الإجباري — تقرأها التطبيقات من GET /api/v2/app/version. */
+
+export const APP_VERSION_PLATFORMS = [
+  {
+    id: "ios",
+    title: "آيفون (App Store)",
+    fields: [
+      { key: "app_ios_min_version", label: "أقل إصدار مسموح", placeholder: "2.1.0", kind: "version" },
+      { key: "app_ios_latest_version", label: "أحدث إصدار", placeholder: "2.2.0", kind: "version" },
+      { key: "app_ios_store_url", label: "رابط المتجر", placeholder: "https://apps.apple.com/…", kind: "url" },
+    ],
+  },
+  {
+    id: "android",
+    title: "أندرويد (Google Play)",
+    fields: [
+      { key: "app_android_min_version", label: "أقل إصدار مسموح", placeholder: "2.1.0", kind: "version" },
+      { key: "app_android_latest_version", label: "أحدث إصدار", placeholder: "2.2.0", kind: "version" },
+      { key: "app_android_store_url", label: "رابط المتجر", placeholder: "https://play.google.com/store/apps/details?id=…", kind: "url" },
+    ],
+  },
+];
+
+export const APP_VERSION_MESSAGE_KEY = "app_force_update_message";
+
+export const APP_VERSION_KEYS = [
+  ...APP_VERSION_PLATFORMS.flatMap((platform) => platform.fields.map((field) => field.key)),
+  APP_VERSION_MESSAGE_KEY,
+];
+
+export function extractAppVersionSettings(response) {
+  const data = unwrapSettings(response);
+  const section = data?.app_version && typeof data.app_version === "object" ? data.app_version : {};
+  return APP_VERSION_KEYS.reduce((acc, key) => {
+    acc[key] = toInputValue(section[key]);
+    return acc;
+  }, {});
+}
+
+const VERSION_PATTERN = /^\d+(\.\d+){0,3}$/;
+
+function compareVersions(a, b) {
+  const pa = String(a).split(".").map(Number);
+  const pb = String(b).split(".").map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i += 1) {
+    const diff = (pa[i] || 0) - (pb[i] || 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+}
+
+export function validateAppVersionForm(form = {}) {
+  const errors = {};
+  for (const platform of APP_VERSION_PLATFORMS) {
+    for (const field of platform.fields) {
+      const value = String(form[field.key] ?? "").trim();
+      if (!value) continue;
+      if (field.kind === "version" && !VERSION_PATTERN.test(value)) {
+        errors[field.key] = "صيغة الإصدار مثل 2.1.0";
+      }
+      if (field.kind === "url" && !/^https:\/\//i.test(value)) {
+        errors[field.key] = "يجب أن يبدأ الرابط بـ https://";
+      }
+    }
+    const [minField, latestField] = platform.fields;
+    const min = String(form[minField.key] ?? "").trim();
+    const latest = String(form[latestField.key] ?? "").trim();
+    if (
+      min &&
+      latest &&
+      !errors[minField.key] &&
+      !errors[latestField.key] &&
+      compareVersions(min, latest) > 0
+    ) {
+      errors[minField.key] = "أقل إصدار لا يمكن أن يكون أحدث من «أحدث إصدار»";
+    }
+  }
+  return errors;
+}
+
+/** يرسل كل مفاتيح الإصدار؛ الفارغ يُرسل null (يمسح القيمة). */
+export function buildAppVersionPayload(form = {}) {
+  return APP_VERSION_KEYS.reduce((acc, key) => {
+    const value = typeof form[key] === "string" ? form[key].trim() : "";
+    acc[key] = value === "" ? null : value;
+    return acc;
+  }, {});
 }

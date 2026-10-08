@@ -61,11 +61,8 @@ export function useRealtimeOrdersWrapper() {
     can(PERMISSION_SECTIONS.all_requests, "view") ||
     can(PERMISSION_SECTIONS.completed_request, "view");
   const canViewNewRequests = isAdmin || can(PERMISSION_SECTIONS.all_requests, "view");
-  const canReceive =
-    isAdmin ||
-    can(PERMISSION_SECTIONS.all_requests, "edit") ||
-    can(PERMISSION_SECTIONS.all_requests, "retrieve") ||
-    can(PERMISSION_SECTIONS.completed_request, "edit");
+  // يطابق الخادم: POST /admin/received-contracts يتطلب all_requests.edit فقط.
+  const canReceive = isAdmin || can(PERMISSION_SECTIONS.all_requests, "edit");
   const canChangeStatus =
     isAdmin ||
     can(PERMISSION_SECTIONS.request_classification, "edit") ||
@@ -87,7 +84,17 @@ export function useRealtimeOrdersWrapper() {
     can(PERMISSION_SECTIONS.returned_request, "create") ||
     can(PERMISSION_SECTIONS.returned_request, "edit");
 
+  const {
+    activeItems: statusItems,
+    receivedStatusId,
+    newStatusId,
+    returnedStatusId,
+    canceledStatusId,
+  } = useContractStatuses();
+
   const visiblePills = STATUS_FILTER_PILLS.filter((pill) => {
+    // لا توجد حالة «استرجاع» بالاسم → لا نعرض الفلتر (بدل الاحتياط بحالة أخرى).
+    if (pill.id === "returned" && returnedStatusId == null) return false;
     const section = PILL_PERMISSIONS[pill.id];
     if (!section) return true;
     return isAdmin || can(section, "view");
@@ -112,14 +119,6 @@ export function useRealtimeOrdersWrapper() {
 
   const activeFilters = activeSection ? [activeSection] : [];
   const inSectionMode = Boolean(activeSection);
-
-  const {
-    activeItems: statusItems,
-    receivedStatusId,
-    newStatusId,
-    returnedStatusId,
-    canceledStatusId,
-  } = useContractStatuses();
 
   const statusChips = useMemo(
     () => getRealtimeStatusChipStatuses(statusItems, receivedStatusId),

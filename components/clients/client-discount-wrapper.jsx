@@ -12,6 +12,7 @@ import {
   useDeactivateClientCoupon,
 } from "@/src/hooks/use-client-discount";
 import { DISCOUNT_TYPES, getDiscountPreviewRows } from "@/src/lib/client-discount";
+import { usePublicPricing } from "@/src/hooks/use-public-pricing";
 import ActiveDiscountBadge from "./active-discount-badge";
 import ClientDiscountForm from "./client-discount-form";
 import DiscountHistoryList from "./discount-history-list";
@@ -55,7 +56,15 @@ export default function ClientDiscountWrapper() {
     });
   }, []);
 
-  const previewRows = getDiscountPreviewRows(previewValues);
+  // أساس المعاينة = سعر السنة الأولى الرسمي لكل نوع (لا 349 للنوعين).
+  const { data: pricing } = usePublicPricing();
+  const previewRows = getDiscountPreviewRows({
+    ...previewValues,
+    prices: {
+      housing: pricing?.housing?.first_year,
+      commercial: pricing?.commercial?.first_year,
+    },
+  });
 
   const handleDeactivate = (couponId) => {
     if (!couponId) return;

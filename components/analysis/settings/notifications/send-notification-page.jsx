@@ -23,10 +23,12 @@ import {
 import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 import {
+  CUSTOMER_NOTIFICATION_KINDS,
   NOTIFICATION_TARGETS,
   useSendNotification,
 } from "@/src/hooks/use-send-notification";
 import RecipientPicker from "./recipient-picker";
+import NotificationDispatchLog from "./dispatch-log";
 import { cn } from "@/lib/utils";
 import PermissionGate from "@/components/auth/permission-gate";
 import { PERMISSION_SECTIONS } from "@/src/lib/permissions";
@@ -39,7 +41,20 @@ const INITIAL_FORM = {
   body: "",
   userId: "",
   employeeId: "",
+  kind: "offer",
+  url: "",
 };
+
+function isValidOptionalUrl(value) {
+  const url = String(value ?? "").trim();
+  if (!url) return true;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
 
 export default function SendNotificationPage() {
   const [target, setTarget] = useState("all-users");
@@ -48,6 +63,7 @@ export default function SendNotificationPage() {
   const config = NOTIFICATION_TARGETS[target];
   const needsUser = config?.needsUser;
   const needsEmployee = config?.needsEmployee;
+  const isCustomer = config?.isCustomer;
 
   const mutation = useSendNotification({
     onSuccess: () => setForm(INITIAL_FORM),
@@ -81,6 +97,10 @@ export default function SendNotificationPage() {
       toast.error("يرجى اختيار الموظف");
       return;
     }
+    if (isCustomer && !isValidOptionalUrl(form.url)) {
+      toast.error("الرابط غير صالح — يجب أن يبدأ بـ https://");
+      return;
+    }
 
     mutation.mutate({
       target,
@@ -89,6 +109,8 @@ export default function SendNotificationPage() {
         body: form.body,
         userId: form.userId,
         employeeId: form.employeeId,
+        kind: form.kind,
+        url: form.url,
       },
     });
   };
@@ -139,6 +161,40 @@ export default function SendNotificationPage() {
             </label>
           ) : null}
 
+          {isCustomer ? (
+            <>
+              <label className="flex flex-col gap-1.5">
+                <SettingsFieldLabel required>نوع الإشعار</SettingsFieldLabel>
+                <Select dir="rtl" value={form.kind} onValueChange={(value) => updateField("kind", value)}>
+                  <SelectTrigger className={settingsFieldClass}>
+                    <SelectValue placeholder="اختر نوع الإشعار" />
+                  </SelectTrigger>
+                  <SelectContent dir="rtl">
+                    {CUSTOMER_NOTIFICATION_KINDS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </label>
+
+              <label className="flex flex-col gap-1.5">
+                <SettingsFieldLabel>رابط عند الضغط (اختياري)</SettingsFieldLabel>
+                <Input
+                  className={settingsFieldClass}
+                  placeholder="https://contractejar.com/..."
+                  dir="ltr"
+                  value={form.url}
+                  onChange={(e) => updateField("url", e.target.value)}
+                />
+                <span className="text-[11.5px] font-medium text-[#8a978f] dark:text-white/45">
+                  يفتح الصفحة في الموقع أو التطبيق عند ضغط العميل على الإشعار.
+                </span>
+              </label>
+            </>
+          ) : null}
+
           <label className="flex flex-col gap-1.5">
             <SettingsFieldLabel required>العنوان</SettingsFieldLabel>
             <Input
@@ -179,6 +235,10 @@ export default function SendNotificationPage() {
           </PermissionGate>
         </form>
       </SettingsContentCard>
+
+      <PermissionGate section={PERMISSION_SECTIONS.notifications} action="view">
+        <NotificationDispatchLog />
+      </PermissionGate>
     </SettingsPageShell>
   );
 }

@@ -2,6 +2,7 @@
 
 import { FaWhatsapp } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
+import AvatarImage from "@/components/shared/avatar-image";
 import { formatJoinedShort, whatsappHref } from "./client-details-format";
 import { formatSaudiMobileDisplay } from "@/src/lib/format-phone";
 
@@ -18,12 +19,12 @@ export default function ClientProfileCard({ client }) {
     >
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5">
         <div className="size-16 sm:size-[72px] shrink-0 rounded-full bg-[#DBEAFE] dark:bg-sky-500/20 flex items-center justify-center text-[28px] font-bold text-[#1D4ED8] dark:text-sky-300 overflow-hidden">
-          {client.photo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={client.photo} alt={client.name} className="size-full object-cover" />
-          ) : (
-            (client.name || "؟").trim().charAt(0)
-          )}
+          <AvatarImage
+            src={client.photo}
+            alt={client.name}
+            fallback={(client.name || "؟").trim().charAt(0)}
+            className="size-full object-cover"
+          />
         </div>
 
         <div className="flex-1 min-w-0 flex flex-col gap-2.5">

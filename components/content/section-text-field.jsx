@@ -41,6 +41,7 @@ export default function SectionTextField({
   size = "md",
   dir,
   className,
+  readOnly = false,
 }) {
   const controlClass =
     className || (multiline ? TEXTAREA_CLASS[size] : INPUT_CLASS[size]);
@@ -61,7 +62,9 @@ export default function SectionTextField({
               {...field}
               placeholder={placeholder}
               dir={dir}
-              className={controlClass}
+              readOnly={readOnly}
+              aria-readonly={readOnly || undefined}
+              className={readOnly ? `${controlClass} cursor-not-allowed opacity-70` : controlClass}
             />
           </FormControl>
           {description ? (

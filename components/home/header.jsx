@@ -1,9 +1,9 @@
 'use client';
 import React from 'react'
 import notificationIcon from '@/public/images/notificationIcon.svg'
-import defaultUser from '@/public/images/defaultUser.jpg'
 import Link from 'next/link'
 import Image from 'next/image'
+import AvatarImage from '@/components/shared/avatar-image'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useRouter, usePathname } from 'next/navigation'
 import { isOrdersRelatedPath } from '@/src/lib/order-routes'
@@ -210,8 +210,8 @@ export default function Header({
                                 "max-[992px]:size-11 max-[992px]:p-0 max-[992px]:justify-center max-[992px]:pe-0"
                             )}
                         >
-                            <Image
-                                src={user?.profile_image || defaultUser}
+                            <AvatarImage
+                                src={user?.profile_image}
                                 alt=""
                                 width={36}
                                 height={36}

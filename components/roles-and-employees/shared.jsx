@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import AvatarImage from "@/components/shared/avatar-image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -77,22 +77,7 @@ export function RoleBadge({ role, colorIndex = 0, className }) {
 export function EmployeeAvatar({ name, image, size = "sm" }) {
   const sizeClass = size === "sm" ? "size-8 text-xs" : "size-10 text-sm";
 
-  if (image) {
-    const px = size === "sm" ? 32 : 40;
-    return (
-      <div className={cn("rounded-full overflow-hidden border border-neutral-200 shrink-0", sizeClass)}>
-        <Image
-          src={image}
-          alt={name || ""}
-          width={px}
-          height={px}
-          className="size-full object-cover"
-        />
-      </div>
-    );
-  }
-
-  return (
+  const initials = (
     <div
       className={cn(
         "rounded-full bg-[#D1FAE5] text-[#047857] font-bold flex items-center justify-center shrink-0",
@@ -101,6 +86,20 @@ export function EmployeeAvatar({ name, image, size = "sm" }) {
     >
       {getInitials(name)}
     </div>
+  );
+
+  if (!image) return initials;
+
+  const px = size === "sm" ? 32 : 40;
+  return (
+    <AvatarImage
+      src={image}
+      alt={name || ""}
+      width={px}
+      height={px}
+      fallback={initials}
+      className={cn("rounded-full border border-neutral-200 shrink-0 object-cover", sizeClass)}
+    />
   );
 }
 
