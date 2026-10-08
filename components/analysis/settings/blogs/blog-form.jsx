@@ -155,7 +155,10 @@ export default function BlogForm({ blogId = null, blog = null }) {
   const { mutate: saveBlog, isPending } = useMutation({
     mutationFn: (formDataPayload) => {
       if (isEdit) {
-        return axiosInstance.put(`/admin/blogs/${blogId}`, formDataPayload, {
+        // PHP لا يقرأ جسم multipart في طلب PUT، فكان الخادم يرد «تم التحديث بنجاح»
+        // دون أن يتغير شيء. نرسل POST مع _method=PUT (Laravel يوجّهه لمسار التحديث).
+        formDataPayload.append("_method", "PUT");
+        return axiosInstance.post(`/admin/blogs/${blogId}`, formDataPayload, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }
