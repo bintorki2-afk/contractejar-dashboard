@@ -296,3 +296,35 @@ export function buildAppVersionPayload(form = {}) {
     return acc;
   }, {});
 }
+
+/* ── الإسناد التلقائي (دفعة د — د15) ─────────────────────────────────────────
+ * GET /admin/settings → data.auto_assign = { enabled, strategy, strategies[], employee_ids[], eligible_employees[], note }
+ * POST /admin/settings { auto_assign_orders, auto_assign_strategy, auto_assign_employee_ids[] }
+ */
+export function extractAutoAssignSettings(response) {
+  const data = response?.data ?? response ?? {};
+  const raw = data?.auto_assign ?? data?.data?.auto_assign ?? {};
+  return {
+    form: {
+      enabled: Boolean(raw.enabled),
+      strategy: raw.strategy || "round_robin",
+      employee_ids: Array.isArray(raw.employee_ids) ? raw.employee_ids.map(Number) : [],
+    },
+    strategies: Array.isArray(raw.strategies) && raw.strategies.length
+      ? raw.strategies
+      : [
+          { value: "round_robin", label: "بالدور" },
+          { value: "least_load", label: "الأقل طلبات مفتوحة" },
+        ],
+    eligible: Array.isArray(raw.eligible_employees) ? raw.eligible_employees : [],
+    note: raw.note ?? null,
+  };
+}
+
+export function buildAutoAssignPayload(form = {}) {
+  return {
+    auto_assign_orders: Boolean(form.enabled),
+    auto_assign_strategy: form.strategy || "round_robin",
+    auto_assign_employee_ids: Array.isArray(form.employee_ids) ? form.employee_ids.map(Number) : [],
+  };
+}
