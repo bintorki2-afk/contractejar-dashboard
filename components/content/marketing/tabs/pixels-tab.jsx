@@ -146,7 +146,7 @@ export default function PixelsTab() {
                   {item.name}
                 </div>
               </div>
-              <div className="mkt-pixid">{item.id ? `ID: ${item.id}` : "غير مربوط"}</div>
+              <div className="mkt-pixid">{item.id ? `ID: ${item.id}` : "حالة الربط غير متاحة من اللوحة بعد"}</div>
               {item.events?.length ? (
                 <div className="mkt-pixev">
                   {item.events.map((event) => (
@@ -344,7 +344,7 @@ function UtmBuilderCard({ utm }) {
           }}
         >
           <Field label="الرابط">
-            <input type="text" className="mk-mini" dir="ltr" value={values.url} onChange={set("url")} placeholder="https://aqdi.sa" />
+            <input type="text" className="mk-mini" dir="ltr" value={values.url} onChange={set("url")} placeholder="https://contractejar.com" />
           </Field>
           <Field label="المصدر (source)">
             <select className="mk-mini" dir="rtl" value={values.source} onChange={set("source")}>
