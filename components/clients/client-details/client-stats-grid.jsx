@@ -5,7 +5,7 @@ import { STAT_DEFS, formatMoney } from "./client-details-format";
 
 export default function ClientStatsGrid({ client }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-2.5">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-9 gap-2.5">
       {STAT_DEFS.map((def) => (
         <div
           key={def.key}

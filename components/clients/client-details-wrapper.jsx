@@ -1,13 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, Home } from "lucide-react";
 import { cn, safeInternalPath } from "@/lib/utils";
 import Loader from "@/components/home/loader";
 import { useClientDetail, useBlockClient, useDeleteClient } from "@/src/hooks/use-clients";
-import { classifyOrderStatus, formatJoinedLabel } from "./client-details/client-details-format";
+import { formatJoinedLabel } from "./client-details/client-details-format";
 import ClientHeaderActions from "./client-details/client-header-actions";
 import ClientProfileCard from "./client-details/client-profile-card";
 import ClientStatsGrid from "./client-details/client-stats-grid";
@@ -21,14 +20,9 @@ export default function ClientDetailsWrapper() {
   const from = searchParams.get("from") || "/home/clients";
   const backUrl = safeInternalPath(from, "/home/clients");
 
-  const { client, contracts, isLoading, isError } = useClientDetail(clientId);
+  const { client, isLoading, isError } = useClientDetail(clientId);
   const { mutate: toggleBlock, isPending: isBlocking } = useBlockClient();
   const { mutate: deleteClient, isPending: isDeleting } = useDeleteClient();
-
-  const orders = useMemo(
-    () => (contracts ?? []).map((order) => ({ ...order, statusKey: classifyOrderStatus(order) })),
-    [contracts]
-  );
 
   const handleBlock = () => {
     if (!clientId) return;
@@ -111,7 +105,7 @@ export default function ClientDetailsWrapper() {
 
       <ClientStatsGrid client={client} />
 
-      <ClientOrdersSection orders={orders} clientId={clientId} backUrl={backUrl} />
+      <ClientOrdersSection clientId={clientId} userId={client.id} backUrl={backUrl} />
 
       <section className="flex flex-col gap-3">
         <div className="inline-flex items-center gap-2">

@@ -366,8 +366,8 @@ export default function ClientsWrapper() {
               <th className={cn(TH, "text-right")}>رقم العميل</th>
               <th className={cn(TH, "text-right")}>اسم العميل</th>
               <th className={cn(TH, "text-right")}>رقم الجوال</th>
-              <th className={cn(TH, "text-center px-2.5")}>مكتمل</th>
-              <th className={cn(TH, "text-center px-2.5")}>مسودة</th>
+              <th className={cn(TH, "text-center px-2.5")}>الطلبات</th>
+              <th className={cn(TH, "text-center px-2.5")}>مدفوعة</th>
               <th className={cn(TH, "text-center px-2.5")}>عقارات</th>
               <th className={cn(TH, "text-center px-2.5")}>وحدات</th>
               <th className={cn(TH, "text-center px-2.5")}>مسترجع</th>
@@ -462,10 +462,10 @@ export default function ClientsWrapper() {
                     </td>
 
                     <td className="px-2.5 py-3.5 text-center">
-                      <CountBadge value={row.completed} tone="completed" />
+                      <CountBadge value={row.ordersCount} tone="completed" />
                     </td>
                     <td className="px-2.5 py-3.5 text-center">
-                      <CountBadge value={row.draft} tone="draft" />
+                      <CountBadge value={row.completed} tone="draft" />
                     </td>
                     <td className="px-2.5 py-3.5 text-center">
                       <CountBadge value={row.properties} tone="property" />

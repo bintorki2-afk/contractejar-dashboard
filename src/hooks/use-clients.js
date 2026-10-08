@@ -54,6 +54,9 @@ export function mapUserToClientRow(user = {}) {
     completed: user.completed_orders_count ?? user.completed ?? 0,
     draft: user.draft_orders_count ?? user.draft ?? 0,
     incomplete: user.incomplete_orders_count ?? user.uncompleted_orders_count ?? 0,
+    // دفعة د (د2): نفس عدّادات GET /admin/orders?user_id= و status-counts?user_id=
+    ordersCount: user.orders_count ?? (user.completed_orders_count ?? 0) + (user.incomplete_orders_count ?? 0),
+    incompleteDrafts: user.incomplete_drafts_count ?? 0,
     properties: user.real_estate_count ?? user.properties_count ?? user.real_estates ?? 0,
     units: user.units_count ?? user.units ?? 0,
     refundedAmount: refunded,
