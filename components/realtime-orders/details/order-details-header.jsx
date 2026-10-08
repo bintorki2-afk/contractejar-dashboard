@@ -49,24 +49,8 @@ import { fetchContractPaymentLink } from "@/components/orders/shared/payment-gat
 import { getSendErrorTitle } from "@/components/orders/messages/order-send-error-utils";
 import { DRAFT_RULE_HINT, statusRequiresDraftFirst } from "@/src/lib/draft-rule";
 
-/** إجراءات سريعة لرحلة «المسودة قبل التوثيق» (ف2) — تغيّر حالة الطلب عبر نموذج الحالة. */
-const QUICK_STATUS_PILLS = [
-  {
-    id: "quick_send_draft",
-    label: "إرسال المسودة عبر واتساب",
-    Icon: Send,
-    className:
-      "border-[#25D366] bg-[#25D366]/10 text-[#128C4B] hover:bg-[#25D366]/20 dark:text-[#6EE7B7]",
-  },
-  {
-    id: "quick_notarized",
-    label: "تم التوثيق",
-    Icon: BadgeCheck,
-    hint: DRAFT_RULE_HINT,
-    className:
-      "border-[#15803D] bg-[#15803D]/10 text-[#15803D] hover:bg-[#15803D]/20 dark:text-green-300",
-  },
-];
+// د16: أزرار «إرسال المسودة عبر واتساب / تم التوثيق» السريعة استُبدلت بشريط «الخطوة التالية»
+// (OrderStageBar) الذي يستدعي مراحل الخادم ويفتح واتساب برسالة القالب.
 
 const ACTION_PILLS = [
   {
@@ -500,31 +484,6 @@ export default function OrderDetailsHeader({
       </div>
 
       <div className="border-t border-[#EEF2F0] dark:border-white/5 pt-3 flex flex-wrap items-center gap-2">
-        {QUICK_STATUS_PILLS.map((pill) => {
-          const Icon = pill.Icon;
-          return (
-            <span key={pill.id} className="inline-flex items-center gap-1.5">
-              <button
-                type="button"
-                disabled={!canChangeStatus || isStatusPending}
-                onClick={() =>
-                  pill.id === "quick_send_draft" ? onQuickSendDraft?.() : onQuickNotarized?.()
-                }
-                title={pill.hint}
-                className={cn(pillBase, "font-bold disabled:opacity-60", pill.className)}
-              >
-                <Icon className="size-3.5 shrink-0" />
-                {pill.label}
-              </button>
-              {pill.hint ? (
-                <span className="text-[10px] font-semibold text-[#92400E] dark:text-amber-300">
-                  ({pill.hint})
-                </span>
-              ) : null}
-            </span>
-          );
-        })}
-        <span className="h-5 w-px bg-[#E5E7EB] dark:bg-white/10" aria-hidden />
         {ACTION_PILLS.map((pill) => {
           const Icon = pill.Icon;
           return (

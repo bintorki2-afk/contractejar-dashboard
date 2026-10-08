@@ -148,6 +148,16 @@ const SPECIAL_DOC_DEFS = [
   { key: "copy_of_guardians_power_of_attorney_for_agent", label: "وكالة النظّار للوكيل" },
 ];
 
+function receiverFromActivities(orderData = {}) {
+  const list = Array.isArray(orderData.activities) ? orderData.activities : [];
+  const hit = [...list]
+    .reverse()
+    .find((a) => ["stage_received", "received", "assigned"].includes(a?.action) && a?.actor_type === "employee");
+  if (hit?.actor_name) return hit.actor_name;
+  const assigned = [...list].reverse().find((a) => a?.action === "assigned");
+  return assigned?.after?.employee_name ?? null;
+}
+
 function buildSpecialDocs(summary = {}, orderData = {}) {
   return SPECIAL_DOC_DEFS.map(({ key, label }) => {
     const url = resolveImageUrl(pick(summary[key], orderData[key]));
@@ -265,7 +275,8 @@ export function mapOrderDetailView(orderData = {}) {
     // جوال واتساب الذي كتبه العميل (الزائر) في الموقع — هو رقم التواصل مع صاحب الطلب.
     customer_whatsapp: formatSaudiMobileDisplay(customerWhatsapp(orderData)),
     customer_whatsapp_dial: toSaudiMobileDialDigits(customerWhatsapp(orderData)),
-    employee_name: pick(summary.employee_name, orderData.employee_name, "—"),
+    // الخادم لا يرسل employee_name بعد الاستلام عبر المراحل أحياناً — نأخذه من سجل النشاط.
+    employee_name: pick(summary.employee_name, orderData.employee_name, receiverFromActivities(orderData), "—"),
     received_at: pick(orderData.received_at, summary.received_at),
     received_since: pick(orderData.received_since, summary.received_since),
     banner: pick(summary.notes_edits, orderData.notes_edits, summary.client_explanation),

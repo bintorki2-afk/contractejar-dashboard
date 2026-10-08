@@ -19,6 +19,7 @@ import OrderDetailsDialogs from "./order-details-dialogs";
 import ContractExpandedViewDialog from "./contract-expanded-view-dialog";
 import { mapOrderDetailView } from "./map-order-detail";
 import OrderJourney from "./order-journey";
+import OrderStageBar from "./order-stage-bar";
 
 function resolveBackLink(from) {
   if (from === "/home/realtime-orders" || from?.startsWith("/home/realtime-orders")) {
@@ -46,6 +47,7 @@ function OrderDetailsBody() {
     isAdmin ||
     can(PERMISSION_SECTIONS.request_classification, "edit") ||
     can(PERMISSION_SECTIONS.all_requests, "edit");
+  const canEditOrder = isAdmin || can(PERMISSION_SECTIONS.all_requests, "edit");
   const canAddStatus =
     isAdmin || can(PERMISSION_SECTIONS.request_classification, "create");
   const canReturn =
@@ -121,6 +123,8 @@ function OrderDetailsBody() {
         canAddStatus={canAddStatus}
         isStatusPending={dialogs.isChangingStatus}
       />
+
+      <OrderStageBar orderId={orderData.id ?? id} canEdit={canEditOrder} />
 
       <OrderJourney orderData={orderData} />
 

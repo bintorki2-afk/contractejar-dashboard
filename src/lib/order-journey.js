@@ -138,7 +138,7 @@ export function buildOrderJourney(order = {}) {
       done: rank >= 5 || Boolean(notarizedActivity),
       at: notarizedActivity?.at ?? notarizedTimeline?.created_at ?? null,
       who: who(notarizedActivity),
-      note: order.deed_number ? `رقم العقد ${order.deed_number}` : null,
+      note: order.deed_number ? `رقم الصك ${order.deed_number}` : null,
     },
     completed: {
       done: rank >= 6,

@@ -41,8 +41,15 @@ export function stageErrorMessage(error) {
 export function openStageWhatsApp(whatsapp) {
   const url = whatsapp?.url;
   if (!url || typeof window === "undefined") return false;
-  const win = window.open(url, "_blank", "noopener,noreferrer");
-  if (!win) {
+  // بدون "noopener" في الميزات: window.open يرجع null دائماً معها فيظهر تنبيه «النافذة محجوبة» خطأً.
+  const win = window.open(url, "_blank");
+  if (win) {
+    try {
+      win.opener = null;
+    } catch {
+      // ignore
+    }
+  } else {
     toast("افتح واتساب لإرسال الرسالة للعميل", {
       action: { label: "فتح واتساب", onClick: () => window.open(url, "_blank", "noopener,noreferrer") },
       duration: 15000,

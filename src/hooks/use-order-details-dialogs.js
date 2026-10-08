@@ -47,8 +47,14 @@ function openDraftWhatsApp(orderData, extraValues) {
     toast.error("لا يوجد رقم جوال للعميل لفتح واتساب");
     return;
   }
-  const win = typeof window !== "undefined" ? window.open(url, "_blank", "noopener,noreferrer") : null;
-  if (!win) {
+  const win = typeof window !== "undefined" ? window.open(url, "_blank") : null;
+  if (win) {
+    try {
+      win.opener = null;
+    } catch {
+      // ignore
+    }
+  } else {
     toast("افتح واتساب لإرسال المسودة للعميل", {
       action: {
         label: "فتح واتساب",
