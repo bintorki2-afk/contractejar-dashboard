@@ -11,6 +11,7 @@ import {
   useRunOrderStage,
 } from "@/src/hooks/use-order-stage";
 import { formatSaudiMobileDisplay } from "@/src/lib/format-phone";
+import { EjarCopyButtons } from "./ejar-copy";
 
 const STAGE_ICONS = { received: Hand, draft_sent: Send, notarized: BadgeCheck };
 
@@ -290,21 +291,25 @@ export default function OrderStageBar({ orderId, canEdit = true, className }) {
           ) : null}
         </div>
 
-        {!allDone ? (
-          <div className="flex shrink-0 flex-col items-stretch gap-1.5 lg:w-[220px]">
-            <button
-              type="button"
-              onClick={submit}
-              disabled={!canEdit || run.isPending}
-              title={!canEdit ? "ليست لديك صلاحية تعديل الطلبات" : undefined}
-              className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-brand-deep px-5 text-[15px] font-extrabold text-white shadow-sm hover:bg-brand-deep/90 disabled:opacity-60 dark:bg-emerald-500 dark:text-[#0B1411]"
-            >
-              {run.isPending ? <Loader2 className="size-5 animate-spin" /> : <Icon className="size-5" />}
-              {stages.next_stage_label ?? STAGE_LABELS[nextStage]}
-            </button>
-            <span className="text-center text-[11px] font-semibold text-[#8A958F] dark:text-white/40">يفتح واتساب برسالة جاهزة</span>
-          </div>
-        ) : null}
+        <div className="flex shrink-0 flex-col items-stretch gap-1.5 lg:w-[240px]">
+          {!allDone ? (
+            <>
+              <button
+                type="button"
+                onClick={submit}
+                disabled={!canEdit || run.isPending}
+                title={!canEdit ? "ليست لديك صلاحية تعديل الطلبات" : undefined}
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-brand-deep px-5 text-[15px] font-extrabold text-white shadow-sm hover:bg-brand-deep/90 disabled:opacity-60 dark:bg-emerald-500 dark:text-[#0B1411]"
+              >
+                {run.isPending ? <Loader2 className="size-5 animate-spin" /> : <Icon className="size-5" />}
+                {stages.next_stage_label ?? STAGE_LABELS[nextStage]}
+              </button>
+              <span className="text-center text-[11px] font-semibold text-[#8A958F] dark:text-white/40">يفتح واتساب برسالة جاهزة</span>
+            </>
+          ) : null}
+          {/* د17: نسخ بيانات الطلب بترتيب منصة إيجار */}
+          <EjarCopyButtons orderId={orderId} className="justify-center lg:mt-1" />
+        </div>
       </div>
     </section>
   );
