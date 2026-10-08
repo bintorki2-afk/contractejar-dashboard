@@ -53,3 +53,11 @@ describe("order detail — «المبلغ المدفوع» counts successful pay
     expect(view.financial.fees_paid).toBe(false);
   });
 });
+
+describe("order detail — guest customer's WhatsApp", () => {
+  it("shows user.contact_mobile in 05 format", () => {
+    const view = mapOrderDetailView(base({ user: { mobile: null, contact_mobile: "00966551234567", is_guest: true } }));
+    expect(view.customer_whatsapp).toBe("0551234567");
+    expect(view.customer_whatsapp_dial).toBe("966551234567");
+  });
+});

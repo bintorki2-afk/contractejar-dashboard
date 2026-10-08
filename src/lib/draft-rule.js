@@ -70,6 +70,7 @@ export function buildDraftWhatsAppUrl(orderData, extraValues = {}) {
     extraValues?.contact_number_mode === "another" ? extraValues?.contact_number : null;
   const mobile =
     alternate ||
+    orderData?.user?.contact_mobile ||
     orderData?.user?.mobile ||
     orderData?.user_mobile ||
     orderData?.step3?.tenant_mobile ||

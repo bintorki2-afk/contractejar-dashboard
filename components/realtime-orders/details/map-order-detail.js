@@ -55,6 +55,12 @@ function paidAmountFields(summary, orderData, paid) {
   return { fees: paid ? "لا توجد دفعة ناجحة مسجّلة" : "لم يتم الدفع", fees_paid: false, ...reviewFields };
 }
 
+/** user.contact_mobile (زائر) ثم user.mobile — بدون الرجوع لجوال المالك/المستأجر. */
+export function customerWhatsapp(orderData = {}) {
+  const user = orderData?.user ?? {};
+  return pick(user.contact_mobile, user.mobile, orderData.user_contact_mobile) || "";
+}
+
 function isCompanyEntity(value) {
   return value === "company" || value === "institution" || value === "org";
 }
@@ -256,6 +262,9 @@ export function mapOrderDetailView(orderData = {}) {
     user_mobile_dial: toSaudiMobileDialDigits(
       pick(getOrderClientPhone(orderData), orderData.user_mobile, summary.user_mobile)
     ),
+    // جوال واتساب الذي كتبه العميل (الزائر) في الموقع — هو رقم التواصل مع صاحب الطلب.
+    customer_whatsapp: formatSaudiMobileDisplay(customerWhatsapp(orderData)),
+    customer_whatsapp_dial: toSaudiMobileDialDigits(customerWhatsapp(orderData)),
     employee_name: pick(summary.employee_name, orderData.employee_name, "—"),
     received_at: pick(orderData.received_at, summary.received_at),
     received_since: pick(orderData.received_since, summary.received_since),

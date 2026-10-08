@@ -46,3 +46,14 @@ describe("draft-before-notarize rule (ف2) in the dashboard", () => {
     expect(buildDraftWhatsAppUrl({ uuid: "1" })).toBeNull();
   });
 });
+
+describe("draft WhatsApp goes to the guest customer's WhatsApp number", () => {
+  it("prefers user.contact_mobile over the tenant's mobile", () => {
+    const order = {
+      uuid: "201425",
+      user: { mobile: null, contact_mobile: "00966551234567", is_guest: true },
+      step3: { tenant_mobile: "0559876543" },
+    };
+    expect(buildDraftWhatsAppUrl(order)).toMatch(/^https:\/\/wa\.me\/966551234567\?/);
+  });
+});

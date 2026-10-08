@@ -189,6 +189,8 @@ export default function OrderDetailsHeader({
     order.user_mobile_dial ||
     (order.user_mobile ? String(order.user_mobile).replace(/\D/g, "") : "");
   const mobileDisplay = order.user_mobile || "";
+  // زر واتساب يفتح رقم العميل صاحب الطلب إن عُرف، وإلا الجوال المعروض.
+  const whatsappDigits = order.customer_whatsapp_dial || mobileDigits;
 
   const copyText = async (text, successMessage) => {
     if (!text?.trim()) {
@@ -341,9 +343,18 @@ export default function OrderDetailsHeader({
           </a>
         ) : null}
 
-        {mobileDigits ? (
+        {order.customer_whatsapp && order.customer_whatsapp !== mobileDisplay ? (
+          <span
+            className="h-7 px-3 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 text-[12.5px] font-bold text-gray-700 dark:text-white/80 inline-flex items-center gap-1.5 tabular-nums"
+            title="رقم واتساب العميل صاحب الطلب"
+          >
+            واتساب العميل: <span dir="ltr">{order.customer_whatsapp}</span>
+          </span>
+        ) : null}
+
+        {whatsappDigits ? (
           <a
-            href={`https://wa.me/${mobileDigits}`}
+            href={`https://wa.me/${whatsappDigits}`}
             target="_blank"
             rel="noreferrer"
             aria-label="واتساب"
