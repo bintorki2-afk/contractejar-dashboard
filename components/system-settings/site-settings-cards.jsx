@@ -12,6 +12,14 @@ import { PERMISSION_SECTIONS } from "@/src/lib/permissions";
 import { mapApiValidationErrors } from "@/src/lib/contract-update/payload";
 import { METER_FEE_SETTINGS_QUERY_KEY } from "@/src/lib/meter-fee-settings";
 import {
+  APP_VERSION_MESSAGE_KEY,
+  APP_VERSION_PLATFORMS,
+  buildAppVersionPayload,
+  buildSupportPayload,
+  extractAppVersionSettings,
+  extractSupportSettings,
+  validateAppVersionForm,
+  validateSupportNumber,
   buildPricingPayload,
   buildSocialPayload,
   emptyPricingForm,
@@ -286,6 +294,183 @@ export function SocialSettingsCard({ data, canEdit }) {
   );
 }
 
+export function SupportNumberCard({ data, canEdit }) {
+  const [value, setValue] = useState("");
+  const [fieldError, setFieldError] = useState(null);
+  const [syncedData, setSyncedData] = useState(null);
+
+  const support = extractSupportSettings(data);
+  if (data && data !== syncedData) {
+    setSyncedData(data);
+    setValue(support.form.whatsapp_contact);
+    setFieldError(null);
+  }
+
+  const mutation = useSaveSiteSettings({
+    successMessage: "تم حفظ رقم الدعم بنجاح",
+    errorFallback: "تعذر حفظ رقم الدعم",
+    onValidationError: (errors) => setFieldError(errors?.whatsapp_contact ?? null),
+  });
+
+  const dirty = (value ?? "") !== (support.form.whatsapp_contact ?? "");
+
+  const handleSave = () => {
+    const error = validateSupportNumber(value);
+    if (error) {
+      setFieldError(error);
+      toast.error(error);
+      return;
+    }
+    mutation.mutate(buildSupportPayload({ whatsapp_contact: value }));
+  };
+
+  return (
+    <CardShell
+      title="رقم الدعم (واتساب)"
+      description="الرقم الذي يظهر للعملاء في الموقع والتطبيق لأزرار واتساب والدعم. اتركه فارغاً لاستخدام الرقم الافتراضي."
+      badge={
+        <SaveButton
+          onClick={handleSave}
+          disabled={!canEdit || mutation.isPending || !dirty}
+          pending={mutation.isPending}
+          label="حفظ الرقم"
+        />
+      }
+    >
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5 text-right">
+          <label htmlFor="support-whatsapp-contact" className="text-xs font-bold text-gray-700 dark:text-white/80">
+            رقم واتساب الدعم
+          </label>
+          <Input
+            id="support-whatsapp-contact"
+            type="tel"
+            inputMode="tel"
+            dir="ltr"
+            value={value}
+            disabled={!canEdit}
+            onChange={(e) => {
+              setValue(e.target.value);
+              setFieldError(null);
+            }}
+            placeholder={support.fallback}
+            className={cn(INPUT_CLASS, "text-left", fieldError && "border-red-400")}
+          />
+          <HelperText>يُحفظ بالصيغة الدولية تلقائياً (05XXXXXXXX ← 9665XXXXXXXX).</HelperText>
+          <FieldError message={fieldError} />
+        </div>
+        <div className="rounded-xl bg-[#F3F9F6] dark:bg-white/[0.04] px-4 py-3 text-right">
+          <p className="text-[11.5px] font-bold text-[#8a978f] dark:text-white/45">الرقم المعروض للعملاء الآن</p>
+          <p className="mt-1 text-[15px] font-black text-brand-dark dark:text-emerald-300 tabular-nums" dir="ltr">
+            {support.effectiveLocal}
+          </p>
+        </div>
+      </div>
+    </CardShell>
+  );
+}
+
+export function AppVersionCard({ data, canEdit }) {
+  const [form, setForm] = useState(() => extractAppVersionSettings(null));
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [syncedData, setSyncedData] = useState(null);
+
+  const serverForm = extractAppVersionSettings(data);
+  if (data && data !== syncedData) {
+    setSyncedData(data);
+    setForm(serverForm);
+    setFieldErrors({});
+  }
+
+  const mutation = useSaveSiteSettings({
+    successMessage: "تم حفظ إعدادات إصدار التطبيق",
+    errorFallback: "تعذر حفظ إعدادات إصدار التطبيق",
+    onValidationError: setFieldErrors,
+  });
+
+  const dirty = isDirty(form, serverForm);
+
+  const updateField = (key, next) => {
+    setForm((current) => ({ ...current, [key]: next }));
+    setFieldErrors((current) => {
+      if (!current[key]) return current;
+      const copy = { ...current };
+      delete copy[key];
+      return copy;
+    });
+  };
+
+  const handleSave = () => {
+    const errors = validateAppVersionForm(form);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      toast.error("تحقق من القيم المدخلة");
+      return;
+    }
+    mutation.mutate(buildAppVersionPayload(form));
+  };
+
+  return (
+    <CardShell
+      title="إصدار التطبيق والتحديث الإجباري"
+      description="أي جهاز يعمل بإصدار أقدم من «أقل إصدار مسموح» يُطلب منه التحديث قبل المتابعة. «أحدث إصدار» يظهر كتحديث اختياري."
+      badge={
+        <SaveButton
+          onClick={handleSave}
+          disabled={!canEdit || mutation.isPending || !dirty}
+          pending={mutation.isPending}
+          label="حفظ الإصدارات"
+        />
+      }
+    >
+      <div className="space-y-5">
+        {APP_VERSION_PLATFORMS.map((platform) => (
+          <div key={platform.id} className="space-y-3">
+            <p className="text-[12.5px] font-black text-gray-900 dark:text-white">{platform.title}</p>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {platform.fields.map((field) => (
+                <div key={field.key} className="space-y-1.5 text-right">
+                  <label htmlFor={`appver-${field.key}`} className="text-xs font-bold text-gray-700 dark:text-white/80">
+                    {field.label}
+                  </label>
+                  <Input
+                    id={`appver-${field.key}`}
+                    type="text"
+                    dir="ltr"
+                    inputMode={field.kind === "version" ? "decimal" : "url"}
+                    value={form[field.key] ?? ""}
+                    disabled={!canEdit}
+                    onChange={(e) => updateField(field.key, e.target.value)}
+                    placeholder={field.placeholder}
+                    className={cn(INPUT_CLASS, "text-left", fieldErrors[field.key] && "border-red-400")}
+                  />
+                  <FieldError message={fieldErrors[field.key]} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <div className="space-y-1.5 text-right">
+          <label htmlFor="appver-message" className="text-xs font-bold text-gray-700 dark:text-white/80">
+            رسالة التحديث الإجباري
+          </label>
+          <textarea
+            id="appver-message"
+            rows={2}
+            value={form[APP_VERSION_MESSAGE_KEY] ?? ""}
+            disabled={!canEdit}
+            onChange={(e) => updateField(APP_VERSION_MESSAGE_KEY, e.target.value)}
+            placeholder="يرجى تحديث التطبيق لمتابعة الاستخدام"
+            className={cn(INPUT_CLASS, "h-auto min-h-[72px] w-full rounded-xl border px-3 py-2.5 resize-none")}
+          />
+          <FieldError message={fieldErrors[APP_VERSION_MESSAGE_KEY]} />
+        </div>
+      </div>
+    </CardShell>
+  );
+}
+
 /** الحاوية التي تُدرج في تبويب «الإعدادات العامة». */
 export default function SiteSettingsCards() {
   const { can, isReady } = usePermissions();
@@ -314,7 +499,9 @@ export default function SiteSettingsCards() {
   return (
     <div className="flex flex-col gap-4">
       <PricingSettingsCard data={data} canEdit={canEdit} />
+      <SupportNumberCard data={data} canEdit={canEdit} />
       <SocialSettingsCard data={data} canEdit={canEdit} />
+      <AppVersionCard data={data} canEdit={canEdit} />
     </div>
   );
 }
