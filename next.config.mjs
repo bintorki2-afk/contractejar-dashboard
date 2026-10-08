@@ -13,9 +13,8 @@ const nextConfig = {
     optimizePackageImports: ["lucide-react", "react-icons"],
   },
   async rewrites() {
-    // NOTE (test deployment): default to the Railway TEST backend so the test
-    // dashboard never talks to production. A real API_PROXY_TARGET still wins.
-    // Revert to "https://aqid.subcodeco.com/api" before shipping to production.
+    // Default = صقر ١ backend on Railway. Set API_PROXY_TARGET in Vercel to the
+    // production backend. Never point it at aqid.subcodeco.com (separate project).
     const apiTarget =
       process.env.API_PROXY_TARGET ||
       "https://aqdi-new-backend-main-production.up.railway.app/api";
