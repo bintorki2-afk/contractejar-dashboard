@@ -3,6 +3,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "@/src/utils/axios";
 import { NEW_CONTRACT_STATUS_ID } from "@/src/lib/contract-statuses";
+import { normalizeAdminSearch } from "@/src/lib/search-term";
 
 export const REALTIME_NEW_ORDERS_QUERY_KEY = "realtime-new-orders";
 export const REALTIME_ORDERS_QUERY_KEY = "realtime-orders";
@@ -43,7 +44,8 @@ export function buildAdminOrdersParams({
   const resolvedStatusId =
     statusId != null && statusId !== "" ? statusId : contractStatusId;
 
-  if (search) params.search = search;
+  const term = normalizeAdminSearch(search);
+  if (term) params.search = term;
   if (resolvedStatusId != null && resolvedStatusId !== "") {
     params.status_id = resolvedStatusId;
   }
