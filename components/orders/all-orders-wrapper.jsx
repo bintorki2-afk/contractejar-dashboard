@@ -20,6 +20,7 @@ import { isDraftOrderRow } from "@/src/lib/draft-contract-statuses";
 import { cn } from "@/lib/utils";
 import OrderStatusTabs from "./order-status-tabs";
 import StageActionDialog from "./stage-action-dialog";
+import OrdersCardList from "./orders-card-list";
 import { PAYMENT_FILTERS } from "@/src/hooks/use-all-orders-wrapper";
 
 function PaymentFilterChips({ value = "all", onChange }) {
@@ -124,7 +125,7 @@ export default function AllOrdersWrapper() {
 
   return (
     <div
-      className="flex flex-col gap-4 min-h-full transition-colors -m-[45px] p-[45px] max-[1700px]:-m-[30px] max-[1700px]:p-[30px] bg-[#F4F6F5] dark:bg-[#0B1411]"
+      className="flex flex-col gap-4 min-h-full transition-colors -m-[45px] p-[45px] max-[1700px]:-m-[30px] max-[1700px]:p-[30px] max-md:-m-4 max-md:p-4 bg-[#F4F6F5] dark:bg-[#0B1411]"
       dir="rtl"
     >
       <RealtimeOrdersToolbar
@@ -174,6 +175,25 @@ export default function AllOrdersWrapper() {
         dark={vm.isDark}
       />
 
+      {/* د14: بطاقات مكدّسة على الجوال بدل الجدول */}
+      <div className="md:hidden">
+        <OrdersCardList
+          rows={vm.tableOrders}
+          isLoading={vm.tableLoading}
+          onView={vm.goToDetails}
+          onStage={(row) => setStageOrder(row)}
+          canStage={vm.canStage}
+          statuses={vm.statusItems}
+          onStatusChange={vm.handleStatusChange}
+          canChangeStatus={vm.canChangeStatus}
+          onDelete={vm.requestDeleteOrder}
+          canDelete={vm.canDelete}
+          changingOrderId={vm.isChangingStatus ? vm.changingStatusId?.orderId : null}
+          emptyMessage="لا توجد طلبات مطابقة للبحث"
+        />
+      </div>
+
+      <div className="hidden md:block">
       <ControllableDataTable
         columns={columns}
         data={vm.tableOrders}
@@ -185,6 +205,7 @@ export default function AllOrdersWrapper() {
         getRowHighlight={isDraftOrderRow}
         defaultSort={{ id: "receivedSince", direction: "asc" }}
       />
+      </div>
 
       <AllOrdersPagination
         pagination={vm.pagination}

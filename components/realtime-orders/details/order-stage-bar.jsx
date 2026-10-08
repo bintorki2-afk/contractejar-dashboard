@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { BadgeCheck, Check, ExternalLink, Hand, Loader2, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useConfirm } from "@/components/shared/confirm-provider";
@@ -155,6 +155,7 @@ export default function OrderStageBar({ orderId, canEdit = true, className }) {
   const [errors, setErrors] = useState({});
   const [lastWhatsApp, setLastWhatsApp] = useState(null);
   const [lastStageLabel, setLastStageLabel] = useState(null);
+  const sectionRef = useRef(null);
 
   const nextStage = stages?.next_stage ?? null;
   const fields = useMemo(() => stages?.next_stage_required_fields ?? [], [stages]);
@@ -197,7 +198,11 @@ export default function OrderStageBar({ orderId, canEdit = true, className }) {
     if (!nextStage) return;
     const errs = validateStageValues(fields, values);
     setErrors(errs);
-    if (Object.keys(errs).length) return;
+    if (Object.keys(errs).length) {
+      // د14: من الشريط السفلي على الجوال — نعيد الموظف إلى الحقول الناقصة.
+      sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     const label = stages.next_stage_label ?? STAGE_LABELS[nextStage];
     const ok = await confirm({
       title: `تأكيد: ${label}`,
@@ -214,7 +219,9 @@ export default function OrderStageBar({ orderId, canEdit = true, className }) {
   };
 
   return (
+    <>
     <section
+      ref={sectionRef}
       aria-label="الخطوة التالية"
       className={cn(
         "rounded-2xl border bg-white p-4 sm:p-5 dark:bg-[#0F1C16]",
@@ -312,5 +319,21 @@ export default function OrderStageBar({ orderId, canEdit = true, className }) {
         </div>
       </div>
     </section>
+
+    {/* د14: شريط إجراء ثابت أسفل الشاشة على الجوال */}
+    {!allDone ? (
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-brand-line bg-white/95 px-4 pb-[max(env(safe-area-inset-bottom),12px)] pt-3 backdrop-blur md:hidden dark:bg-[#0F1C16]/95 dark:border-white/10" dir="rtl">
+        <button
+          type="button"
+          onClick={submit}
+          disabled={!canEdit || run.isPending}
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-deep text-[15px] font-extrabold text-white disabled:opacity-60 dark:bg-emerald-500 dark:text-[#0B1411]"
+        >
+          {run.isPending ? <Loader2 className="size-5 animate-spin" /> : <Icon className="size-5" />}
+          {stages.next_stage_label ?? STAGE_LABELS[nextStage]}
+        </button>
+      </div>
+    ) : null}
+    </>
   );
 }

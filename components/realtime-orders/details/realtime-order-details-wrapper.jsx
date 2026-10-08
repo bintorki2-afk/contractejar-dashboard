@@ -104,7 +104,7 @@ function OrderDetailsBody() {
 
   return (
     <div
-      className="flex flex-col gap-5 min-h-full transition-colors -m-[45px] p-[45px] max-[1700px]:-m-[30px] max-[1700px]:p-[30px] bg-[#F4F6F5] dark:bg-[#0B1411]"
+      className="flex flex-col gap-5 min-h-full transition-colors -m-[45px] p-[45px] max-[1700px]:-m-[30px] max-[1700px]:p-[30px] max-md:-m-4 max-md:p-4 max-md:pb-28 bg-[#F4F6F5] dark:bg-[#0B1411]"
       dir="rtl"
     >
       <OrderDetailsHeader
