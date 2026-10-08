@@ -17,6 +17,35 @@ import { getStatusCaseFields } from "@/components/realtime-orders/change-order-s
 import { ALL_ORDERS_QUERY_KEY } from "@/src/hooks/use-realtime-new-orders";
 import { useAllOrdersWrapper } from "@/src/hooks/use-all-orders-wrapper";
 import { isDraftOrderRow } from "@/src/lib/draft-contract-statuses";
+import { cn } from "@/lib/utils";
+import OrderStatusTabs from "./order-status-tabs";
+import { PAYMENT_FILTERS } from "@/src/hooks/use-all-orders-wrapper";
+
+function PaymentFilterChips({ value = "all", onChange }) {
+  return (
+    <div className="flex items-center gap-2 text-[12px] font-bold" dir="rtl">
+      <span className="text-[#6B7570] dark:text-white/50">الدفع:</span>
+      <div className="inline-flex rounded-full border border-brand-line bg-white p-0.5 dark:bg-white/[0.04] dark:border-white/10">
+        {PAYMENT_FILTERS.map((f) => (
+          <button
+            key={f.id}
+            type="button"
+            aria-pressed={value === f.id}
+            onClick={() => onChange?.(f.id)}
+            className={cn(
+              "h-7 px-3 rounded-full transition-colors",
+              value === f.id
+                ? "bg-brand-mint text-brand-deep dark:bg-emerald-500/15 dark:text-emerald-300"
+                : "text-[#4B5753] hover:text-brand-deep dark:text-white/60"
+            )}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const TABLE_STORAGE_KEY = "all-orders-table-prefs";
 
@@ -98,12 +127,8 @@ export default function AllOrdersWrapper() {
         searchPlaceholder="بحث: رقم الطلب / الجوال / الاسم..."
         searchQuery={vm.searchQuery}
         onSearchChange={vm.setSearchQuery}
-        activeFilters={vm.activeFilters}
-        onToggleFilter={vm.handleToggleFilter}
-        filterPills={vm.visiblePills}
-        extraStatuses={vm.extraStatuses}
-        extraStatusId={vm.extraStatusId}
-        onExtraStatusChange={vm.handleExtraStatusChange}
+        filterPills={[]}
+        extraStatuses={[]}
         contractType={vm.contractType}
         onContractTypeChange={vm.setContractType}
         columns={columns}
@@ -119,6 +144,16 @@ export default function AllOrdersWrapper() {
         canManageStatuses={vm.canManageStatuses}
         onManageStatuses={() => vm.setManageStatusesOpen(true)}
       />
+
+      <div className="flex flex-col gap-3">
+        <OrderStatusTabs
+          tabs={vm.statusTabs}
+          value={vm.tab}
+          onChange={vm.setTab}
+          isLoading={vm.statusTabsLoading}
+        />
+        <PaymentFilterChips value={vm.paymentFilter} onChange={vm.setPaymentFilter} />
+      </div>
 
       <TableBatchActionsBar
         count={selection.selectedCount}

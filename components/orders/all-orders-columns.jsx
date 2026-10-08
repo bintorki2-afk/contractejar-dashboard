@@ -7,6 +7,8 @@ import greenRial from "@/public/images/greenRial.svg";
 import { cn } from "@/lib/utils";
 import { RT } from "@/components/realtime-orders/theme";
 import OrderActionsMenu from "@/components/realtime-orders/order-actions-menu";
+import { DelayBadge, StatusPill } from "./status-pill";
+import { formatSaudiMobileDisplay } from "@/src/lib/format-phone";
 
 function formatRelativeShort(dateString) {
   if (!dateString) return null;
@@ -83,6 +85,34 @@ export function buildAllOrderColumns({
       ),
     },
     {
+      id: "status",
+      label: "الحالة",
+      hideable: true,
+      cell: (row) => (
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <StatusPill order={row} />
+          <DelayBadge order={row} compact />
+        </div>
+      ),
+    },
+    {
+      id: "customer",
+      label: "العميل",
+      hideable: true,
+      cell: (row) => (
+        <div className="flex flex-col leading-tight min-w-0">
+          <span className={cn("font-bold truncate max-w-[160px]", dark ? "text-white/85" : "text-[#22302C]")}>
+            {row?.user_name || "—"}
+          </span>
+          {row?.user_mobile ? (
+            <span className={cn("text-[11px] tabular-nums", dark ? "text-white/45" : "text-[#7A8580]")} dir="ltr">
+              {formatSaudiMobileDisplay(row.user_mobile)}
+            </span>
+          ) : null}
+        </div>
+      ),
+    },
+    {
       id: "payment",
       label: "الدفع",
       hideable: true,
@@ -100,7 +130,7 @@ export function buildAllOrderColumns({
             ) : null}
             {paid ? (
               <span
-                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-11 font-bold"
+                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-11 font-bold whitespace-nowrap"
                 style={{ backgroundColor: RT.successBg, color: RT.success }}
               >
                 <Check className="size-3" strokeWidth={2.75} />
@@ -108,7 +138,7 @@ export function buildAllOrderColumns({
               </span>
             ) : (
               <span
-                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-11 font-bold"
+                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-11 font-bold whitespace-nowrap"
                 style={{ backgroundColor: RT.dangerBg, color: RT.danger }}
               >
                 <X className="size-3" strokeWidth={2.75} />

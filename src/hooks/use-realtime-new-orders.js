@@ -39,6 +39,8 @@ export function buildAdminOrdersParams({
   employeeId,
   contractType,
   userId,
+  statusKey,
+  tab,
 } = {}) {
   const params = { page, per_page: perPage };
   const resolvedStatusId =
@@ -62,6 +64,9 @@ export function buildAdminOrdersParams({
   }
   if (contractType) params.contract_type = contractType;
   if (userId != null && userId !== "") params.user_id = userId;
+  // دفعة د: فلترة بمفتاح الحالة الثابت (status_key) أو تبويب «غير مكتمل».
+  if (statusKey) params.status_key = statusKey;
+  if (tab) params.tab = tab;
 
   return params;
 }

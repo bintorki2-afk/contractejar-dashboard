@@ -74,6 +74,13 @@ module.exports = {
 					'accent-hover': '#0E9F6E',
 					// text color used on top of the brand-dark/emerald accent in dark mode
 					ink: '#0B1411',
+					// ── هوية الموقع (contractejar.com) — دفعة د ──
+					deep: '#0B5A3C',      // الأخضر الأساسي للموقع
+					green: '#169963',     // الأخضر الثانوي (أزرار/روابط)
+					mint: '#E9FBF5',      // سطح نعناعي ناعم
+					'mint-strong': '#D3F2E6',
+					surface: '#F5F7F6',   // خلفية الصفحات
+					line: '#E3ECE8',      // حدود البطاقات
 				},
 				// recurring "content card" surface used by the client-detail-style pages
 				panel: {
