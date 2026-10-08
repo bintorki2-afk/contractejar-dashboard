@@ -51,15 +51,15 @@ export default function TenantFinancialGroup({ order, onEdit }) {
       >
         {order.tenant?.is_company ? (
           <div className="space-y-2">
-            <Field label="جوال المستأجر" value={order.tenant?.phone} />
-            <Field label="رقم السجل الموحّد" value={order.tenant?.registry_number} />
+            <Field label="جوال المستأجر" value={order.tenant?.phone} editKey="tenant_mobile" />
+            <Field label="رقم السجل الموحّد" value={order.tenant?.registry_number} editKey="tenant_entity_unified_registry_number" />
             <Field label="المنطقة" value={order.tenant?.region} />
             <Field label="المدينة" value={order.tenant?.city} />
           </div>
         ) : (
           <div className="space-y-2">
-            <Field label="هوية المستأجر" value={order.tenant?.id_num} />
-            <Field label="جوال المستأجر" value={order.tenant?.phone} />
+            <Field label="هوية المستأجر" value={order.tenant?.id_num} editKey="tenant_id_num" />
+            <Field label="جوال المستأجر" value={order.tenant?.phone} editKey="tenant_mobile" />
           </div>
         )}
       </AccentCard>

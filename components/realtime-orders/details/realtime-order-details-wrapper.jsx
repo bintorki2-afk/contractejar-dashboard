@@ -22,6 +22,7 @@ import OrderJourney from "./order-journey";
 import OrderStageBar from "./order-stage-bar";
 import OrderHistoryPanel from "./order-history-panel";
 import RefundDialog from "./refund-dialog";
+import { InlineEditProvider } from "./inline-edit";
 
 function resolveBackLink(from) {
   if (from === "/home/realtime-orders" || from?.startsWith("/home/realtime-orders")) {
@@ -136,11 +137,13 @@ function OrderDetailsBody() {
 
       <div className="grid grid-cols-1 items-start gap-5 min-[1500px]:grid-cols-[minmax(0,1fr)_380px]">
         <div className="min-w-0">
-          {isLeaseRenewal ? (
-            <LeaseRenewalOrderView orderData={orderData} />
-          ) : (
-            <OrderGroupsLayout order={view} onEdit={dialogs.setEditorSection} />
-          )}
+          <InlineEditProvider orderData={orderData} canEdit={canEditOrder}>
+            {isLeaseRenewal ? (
+              <LeaseRenewalOrderView orderData={orderData} />
+            ) : (
+              <OrderGroupsLayout order={view} onEdit={dialogs.setEditorSection} />
+            )}
+          </InlineEditProvider>
         </div>
         <OrderHistoryPanel
           orderData={orderData}

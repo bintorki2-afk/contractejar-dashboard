@@ -5,6 +5,7 @@ import Image from "next/image";
 import greenRial from "@/public/images/greenRial.svg";
 import { cn } from "@/lib/utils";
 import { RT } from "../../theme";
+import { InlineEditableValue } from "../inline-edit";
 
 export function GroupTitle({ children, end }) {
   return (
@@ -103,21 +104,23 @@ export function AccentCard({
   );
 }
 
-export function Field({ label, value, empty }) {
+export function Field({ label, value, empty, editKey }) {
   const isEmpty = empty || value === "" || value == null;
+  const valueClass = cn(
+    "font-bold text-left truncate min-w-0",
+    isEmpty ? "text-[#D1D5DB] dark:text-white/25" : "text-gray-900 dark:text-white/90"
+  );
   return (
     <div className="flex items-center justify-between gap-3 text-xs">
       <span className="text-gray-400 font-medium shrink-0">{label}</span>
-      <span
-        className={cn(
-          "font-bold text-left truncate min-w-0",
-          isEmpty
-            ? "text-[#D1D5DB] dark:text-white/25"
-            : "text-gray-900 dark:text-white/90"
-        )}
-      >
-        {isEmpty ? "—" : value}
-      </span>
+      {editKey ? (
+        // د21: تعديل سريع للحقول المسموحة (PATCH + سجل النشاط)
+        <InlineEditableValue editKey={editKey} className={valueClass}>
+          {isEmpty ? "—" : value}
+        </InlineEditableValue>
+      ) : (
+        <span className={valueClass}>{isEmpty ? "—" : value}</span>
+      )}
     </div>
   );
 }
