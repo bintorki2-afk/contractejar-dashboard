@@ -6,6 +6,8 @@ import {
   canAccessRoute,
   getFirstAllowedHref,
   isFeatureDisabled,
+  isSuperAdmin,
+  roleGrantsFullAccess,
 } from "./permissions";
 
 const employee = (permissions) => ({ id: 99, role_id: 6, is_system_admin: false, permissions });
@@ -63,9 +65,20 @@ describe("permissions — pages match what the server allows", () => {
     expect(canAccessRoute("/home/settings/blogs/create", blogViewer.permissions, blogViewer)).toBe(false);
   });
 
-  it("only is_system_admin grants blanket access — never a role title", () => {
-    const fakeAdmin = { id: 5, role_id: 2, role_title: "مدير النظام", permissions: [] };
+  it("system admin = exact role name/title match, like the backend (no partial match)", () => {
+    expect(isSuperAdmin({ role: "admin" })).toBe(true);
+    expect(isSuperAdmin({ role: "Super-Admin" })).toBe(true);
+    expect(isSuperAdmin({ role: "x", role_title: "مدير النظام" })).toBe(true);
+    expect(isSuperAdmin({ role: "content_admin" })).toBe(false);
+    expect(isSuperAdmin({ role: "x", role_title: "مساعد الأدمن" })).toBe(false);
+    expect(isSuperAdmin({ role: "x", role_title: "Marketing Admin" })).toBe(false);
+    expect(roleGrantsFullAccess("admin_assistant")).toBe(false);
+  });
+
+  it("is_system_admin from the API always wins when sent", () => {
+    const fakeAdmin = { id: 5, role: "admin", role_title: "مدير النظام", is_system_admin: false, permissions: [] };
     expect(canAccessRoute("/home/settings", fakeAdmin.permissions, fakeAdmin)).toBe(false);
+    expect(isSuperAdmin({ role: "manager", is_system_admin: true })).toBe(true);
   });
 
   it("hidden features stay closed even for the system admin", () => {

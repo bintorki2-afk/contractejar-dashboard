@@ -131,9 +131,45 @@ export function normalizeUserPermissions(user) {
   return matrixToPermissionNames(source.permission_matrix);
 }
 
-/** `is_system_admin` from the API is the only thing allowed to grant blanket access — never role name/title. */
+/**
+ * Same rule as the backend (`Role::grantsFullAccess`, config/permissions.php): an EXACT
+ * role name/title match only — never a partial match («content_admin», «مساعد الأدمن» are not admins).
+ * `is_system_admin` from the API wins whenever it is sent (true or false).
+ */
+const FULL_ACCESS_ROLE_NAMES = ['admin', 'super_admin', 'superadmin', 'administrator', 'system_admin'];
+const FULL_ACCESS_ROLE_TITLES = [
+  'admin', 'administrator', 'system admin', 'super admin', 'superadmin',
+  'أدمن', 'ادمن', 'الادمن', 'الأدمن', 'مدير النظام', 'مدير عام',
+];
+
+function normalizeRoleKey(value) {
+  return String(value ?? '').trim().toLowerCase().replace(/[-\s]+/g, '_').replace(/_+/g, '_');
+}
+
+function normalizeRoleTitle(value) {
+  const v = String(value ?? '').trim();
+  return /[A-Za-z]/.test(v) ? v.toLowerCase() : v;
+}
+
+export function roleGrantsFullAccess(name, ...titles) {
+  const key = normalizeRoleKey(name);
+  if (key && FULL_ACCESS_ROLE_NAMES.includes(key)) return true;
+  return [name, ...titles]
+    .map(normalizeRoleTitle)
+    .some((t) => t !== '' && FULL_ACCESS_ROLE_TITLES.includes(t));
+}
+
 export function isSuperAdmin(user) {
-  return resolveAuthUser(user)?.is_system_admin === true;
+  const source = resolveAuthUser(user);
+  if (!source) return false;
+  if (typeof source.is_system_admin === 'boolean') return source.is_system_admin;
+  const roleName = typeof source.role === 'string' ? source.role : source.role?.name;
+  return roleGrantsFullAccess(
+    roleName ?? source.role_relation?.name,
+    source.role_title,
+    source.role_relation?.title_ar,
+    source.role_relation?.title_en
+  );
 }
 
 export function hasPermission(permissions, section, action = 'view') {
