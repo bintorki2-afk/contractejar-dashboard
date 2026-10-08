@@ -16,7 +16,7 @@ export default function GroupedBarChart({ items, height = 220 }) {
                 title={`الصرف: ${item.spend.toLocaleString("en-US")}`}
               />
               <div
-                className="w-[14px] sm:w-[18px] rounded-t-[4px] bg-[#0E5F4E] transition-all duration-500"
+                className="w-[14px] sm:w-[18px] rounded-t-[4px] bg-[#0B5A3C] transition-all duration-500"
                 style={{ height: Math.max((item.revenue / peak) * barMax, 4) }}
                 title={`الإيراد: ${item.revenue.toLocaleString("en-US")}`}
               />
@@ -29,7 +29,7 @@ export default function GroupedBarChart({ items, height = 220 }) {
       </div>
       <div className="flex items-center justify-center gap-5 mt-3 pt-3 border-t border-[#eef4f1]">
         <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[#4a5b54]">
-          <span className="size-2.5 rounded-[3px] bg-[#0E5F4E]" />
+          <span className="size-2.5 rounded-[3px] bg-[#0B5A3C]" />
           الإيراد
         </span>
         <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[#4a5b54]">

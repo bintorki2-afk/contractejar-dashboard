@@ -248,6 +248,11 @@ export function mapOrderDetailView(orderData = {}) {
     contract_type: contractType,
     contract_type_key: pick(summary.contract_type_key, orderData.contract_type_key),
     instrument_type: getInstrumentTypeLabel(instrumentRaw),
+    // د22: مفتاح الحالة الثابت لشارة الحالة الموحّدة (tag «تم الدفع» للجديد المدفوع).
+    status_key:
+      orderData.status_key === "new" && (orderData.is_paid || orderData.is_completed)
+        ? "paid"
+        : orderData.status_key ?? null,
     status_id: pick(
       summary.contract_status_id,
       orderData.contract_status_id,

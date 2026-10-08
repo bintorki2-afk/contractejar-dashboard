@@ -65,9 +65,10 @@ module.exports = {
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
 				brand: {
-					main: '#0c6055',
-					dark: '#0B5345',
-					hover: '#0004E2',
+					// د22: موحّدة مع الموقع
+					main: '#0B5A3C',
+					dark: '#0A4D33',
+					hover: '#169963',
 					sec: '#453B2F',
 					text: '#363636',
 					accent: '#10B981',
@@ -90,8 +91,8 @@ module.exports = {
 					dark: '#0F1C16',
 				},
 				sidebar: {
-					DEFAULT: '#0D3B31',
-					dark: '#08251F',
+					DEFAULT: '#0B3D2A',
+					dark: '#072519',
 					hover: '#124436',
 					foreground: '#E8F1EE',
 				},

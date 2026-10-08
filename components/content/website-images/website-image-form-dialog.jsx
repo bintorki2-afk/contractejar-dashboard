@@ -133,7 +133,7 @@ export default function WebsiteImageFormDialog({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <label className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-[#cfe3da] bg-white px-3 text-[12px] font-bold text-[#0b5f4c] hover:bg-[#eef8f3] dark:border-white/15 dark:bg-white/[0.04] dark:text-white/80 dark:hover:bg-white/[0.08]">
+            <label className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-[#cfe3da] bg-white px-3 text-[12px] font-bold text-[#0B5A3C] hover:bg-[#eef8f3] dark:border-white/15 dark:bg-white/[0.04] dark:text-white/80 dark:hover:bg-white/[0.08]">
               <ImageUp className="size-3.5" />
               {imageFile ? "تغيير الاختيار" : "استبدال الصورة"}
               <input

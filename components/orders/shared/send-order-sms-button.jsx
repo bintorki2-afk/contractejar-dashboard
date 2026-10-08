@@ -249,7 +249,7 @@ export default function SendOrderSmsButton({
           className="sm:max-w-[520px] rounded-[28px] border border-[#E8EEEC] dark:border-white/10 bg-white dark:bg-[#0F1C16] p-0 overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.18)]"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="relative px-6 pt-6 pb-5 bg-gradient-to-l from-[#E8F5F1] via-white to-white dark:from-[#0B5345]/30 dark:via-[#0F1C16] dark:to-[#0F1C16] border-b border-[#EEF2F0] dark:border-white/5">
+          <div className="relative px-6 pt-6 pb-5 bg-gradient-to-l from-[#E8F5F1] via-white to-white dark:from-[#0A4D33]/30 dark:via-[#0F1C16] dark:to-[#0F1C16] border-b border-[#EEF2F0] dark:border-white/5">
             <button
               type="button"
               onClick={() => setOpen(false)}

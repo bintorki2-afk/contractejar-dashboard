@@ -375,7 +375,7 @@ export default function SendNotificationPage() {
             <Button
               type="submit"
               disabled={mutation.isPending}
-              className="mt-1 h-11 w-fit min-w-[160px] rounded-[10px] bg-[#0E5F4E] text-[13px] font-extrabold text-white hover:bg-[#0B7A4C]"
+              className="mt-1 h-11 w-fit min-w-[160px] rounded-[10px] bg-[#0B5A3C] text-[13px] font-extrabold text-white hover:bg-[#0B7A4C]"
             >
               {mutation.isPending ? (
                 <Loader2 className="size-4 animate-spin" />

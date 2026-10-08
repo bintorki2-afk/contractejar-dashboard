@@ -179,7 +179,7 @@ function ViewerToolButton({ icon: Icon, label, onClick, disabled }) {
       disabled={disabled}
       title={label}
       aria-label={label}
-      className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-[#0E5F4E] text-white shadow-lg transition-colors hover:bg-[#0B7A4C] disabled:pointer-events-none disabled:opacity-40 dark:bg-[#2f9c73] dark:hover:bg-[#3db889]"
+      className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-[#0B5A3C] text-white shadow-lg transition-colors hover:bg-[#0B7A4C] disabled:pointer-events-none disabled:opacity-40 dark:bg-[#2f9c73] dark:hover:bg-[#3db889]"
     >
       <Icon className="size-4" strokeWidth={2} />
     </button>

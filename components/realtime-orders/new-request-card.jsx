@@ -62,7 +62,7 @@ export default function NewRequestCard({
           left: 0;
           height: 3px;
           border-radius: 12px 12px 0 0;
-          background: linear-gradient(90deg, #1F9E86, #0E5F4E);
+          background: linear-gradient(90deg, #1F9E86, #0B5A3C);
         }
       `}</style>
       <div
@@ -98,7 +98,7 @@ export default function NewRequestCard({
         <span
           className={cn(
             "text-13 font-black tabular-nums",
-            dark ? "text-white" : "text-[#0E5F4E]"
+            dark ? "text-white" : "text-[#0B5A3C]"
           )}
         >
           #{order?.uuid}

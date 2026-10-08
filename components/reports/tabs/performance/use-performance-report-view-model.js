@@ -134,7 +134,7 @@ export function usePerformanceReportViewModel(data, period) {
         ...row,
         detail: row.detail ?? (row.revenue != null ? `إيراد ${Number(row.revenue).toLocaleString("en-US")} ريال` : undefined),
       })),
-      ["#0B5F4C", "#3A5F8A"]
+      ["#0B5A3C", "#3A5F8A"]
     );
 
     const byDocType = colorize(

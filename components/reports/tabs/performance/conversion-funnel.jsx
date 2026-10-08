@@ -2,7 +2,7 @@
 
 import EmptyNote from "../../shared/empty-note";
 
-const FUNNEL_COLORS = ["#8A6D57", "#6C8A57", "#1F9D8F", "#A3781E", "#0B5F4C"];
+const FUNNEL_COLORS = ["#8A6D57", "#6C8A57", "#1F9D8F", "#A3781E", "#0B5A3C"];
 
 export default function ConversionFunnel({ stages, leakage }) {
   if (!stages.length) return <EmptyNote />;

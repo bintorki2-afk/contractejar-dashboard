@@ -17,8 +17,8 @@ export const STAT_DEFS = [
   { key: "completed", label: "مدفوعة", bar: "#10B981", barDark: "#34D399" },
   { key: "incomplete", label: "غير مدفوعة", bar: "#F97316", barDark: "#FB923C" },
   { key: "incompleteDrafts", label: "مسودات غير مكتملة", bar: "#94A3B8", barDark: "#94A3B8" },
-  { key: "properties", label: "عقارات", bar: "#0B5345", barDark: "#34D399" },
-  { key: "units", label: "وحدات", bar: "#0B5345", barDark: "#6EE7B7" },
+  { key: "properties", label: "عقارات", bar: "#0A4D33", barDark: "#34D399" },
+  { key: "units", label: "وحدات", bar: "#0A4D33", barDark: "#6EE7B7" },
   {
     key: "refundedAmount",
     label: "مسترجع (ر.س)",

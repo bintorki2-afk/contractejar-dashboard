@@ -38,7 +38,7 @@ export default function DisplayMessageForEmployeeDialog({ messageAlert }) {
         <DialogHeader className="space-y-0 border-b border-[#EEF1F0] px-5 py-4 text-right">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 items-start gap-3 text-right">
-              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#E8F5F1] text-[#054D44]">
+              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#E8F5F1] text-[#0B5A3C]">
                 <MessageSquareText className="size-4" />
               </span>
               <div className="min-w-0">
@@ -69,7 +69,7 @@ export default function DisplayMessageForEmployeeDialog({ messageAlert }) {
             </div>
             <div className="rounded-xl border border-[#E6EBE9] bg-[#F8FAF9] px-3.5 py-3">
               <p className="text-[11px] font-bold text-[#9CA3AF]">بند القسم</p>
-              <p className="mt-1 text-[13px] font-bold text-[#054D44]">{item}</p>
+              <p className="mt-1 text-[13px] font-bold text-[#0B5A3C]">{item}</p>
             </div>
           </div>
 
@@ -85,7 +85,7 @@ export default function DisplayMessageForEmployeeDialog({ messageAlert }) {
           <Button
             type="button"
             onClick={() => setOpen(false)}
-            className="h-10 rounded-xl bg-[#054D44] px-5 text-[13px] font-bold text-white hover:bg-[#043F38]"
+            className="h-10 rounded-xl bg-[#0B5A3C] px-5 text-[13px] font-bold text-white hover:bg-[#043F38]"
           >
             إغلاق
           </Button>

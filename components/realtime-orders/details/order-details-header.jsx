@@ -49,6 +49,7 @@ import { getOrderContractUuid } from "@/components/orders/messages/order-section
 import { fetchContractPaymentLink } from "@/components/orders/shared/payment-gateway";
 import { getSendErrorTitle } from "@/components/orders/messages/order-send-error-utils";
 import { DRAFT_RULE_HINT, statusRequiresDraftFirst } from "@/src/lib/draft-rule";
+import { DelayBadge, StatusPill } from "@/components/orders/status-pill";
 
 // د16: أزرار «إرسال المسودة عبر واتساب / تم التوثيق» السريعة استُبدلت بشريط «الخطوة التالية»
 // (OrderStageBar) الذي يستدعي مراحل الخادم ويفتح واتساب برسالة القالب.
@@ -58,50 +59,43 @@ const ACTION_PILLS = [
     id: "view_file",
     label: "عرض مكبّر",
     Icon: ZoomIn,
-    className:
-      "border-[#D1D5DB] text-[#6B7280] hover:bg-[#F9FAFB] dark:border-white/15 dark:text-white/70",
+    iconClass: "text-[#6B7570]",
   },
   {
     id: "property_update",
     label: "رفع تحديث العقار",
     Icon: Upload,
-    className:
-      "border-[#3B82F6] text-[#2563EB] hover:bg-[#EFF6FF] dark:border-blue-400/50 dark:text-blue-300",
+    iconClass: "text-[#2563EB]",
   },
   {
     id: "send_draft",
     label: "إرسال المسودة",
     Icon: Send,
-    className:
-      "border-[#D97706] text-[#B45309] hover:bg-[#FFFBEB] dark:border-amber-400/50 dark:text-amber-300",
+    iconClass: "text-[#B45309]",
   },
   {
     id: "missing_attachment",
     label: "طلب مرفق ناقص",
     Icon: Paperclip,
-    className:
-      "border-[#EF4444] text-[#DC2626] hover:bg-[#FEF2F2] dark:border-red-400/50 dark:text-red-300",
+    iconClass: "text-[#DC2626]",
   },
   {
     id: "refund",
     label: "رفع طلب استرجاع",
     Icon: Undo2,
-    className:
-      "border-[#6B7280] text-[#4B5563] hover:bg-[#F9FAFB] dark:border-white/20 dark:text-white/70",
+    iconClass: "text-[#B42318]",
   },
   {
     id: "ejar_documentation",
     label: "موثق في إيجار",
     Icon: BadgeCheck,
-    className:
-      "border-[#16A34A] text-[#15803D] hover:bg-[#F0FDF4] dark:border-green-400/50 dark:text-green-300",
+    iconClass: "text-[#0B7A4C]",
   },
   {
     id: "pay_link",
     label: "توليد رابط دفع",
     Icon: Link2,
-    className:
-      "border-[var(--main-color)] text-brand-dark hover:bg-[#F3F9F6] dark:border-[#6EE7B7]/50 dark:text-[#6EE7B7]",
+    iconClass: "text-brand-deep",
   },
 ];
 
@@ -114,8 +108,9 @@ const SECTION_ERROR_CONTEXTS = [
   "unitDetails",
 ];
 
+// د22: أزرار الإجراءات الثانوية بنمط موحّد (حدّ محايد + أيقونة ملوّنة) بدل حدود متعددة الألوان.
 const pillBase =
-  "h-7 px-3.5 rounded-lg border bg-white dark:bg-transparent text-[10px] font-semibold inline-flex items-center gap-1.5 transition-colors whitespace-nowrap";
+  "h-8 px-3 rounded-xl border border-brand-line bg-white text-[12px] font-bold text-[#33403B] hover:bg-brand-mint hover:border-brand-green/40 dark:bg-transparent dark:border-white/10 dark:text-white/75 dark:hover:bg-white/[0.06] inline-flex items-center gap-1.5 transition-colors whitespace-nowrap";
 
 export default function OrderDetailsHeader({
   order,
@@ -277,7 +272,7 @@ export default function OrderDetailsHeader({
 
   return (
     <div
-      className="space-y-3 my-2.5 py-2.5 px-5 rounded-[20px] bg-white dark:bg-[#0F1C16] shadow-[0px_4px_12px_0px_rgba(0,0,0,0.15)]"
+      className="space-y-3 py-3.5 px-4 sm:px-5 rounded-2xl border border-brand-line bg-white dark:bg-[#0F1C16] dark:border-white/10"
       dir="rtl"
     >
       <div className="flex flex-wrap items-center gap-2">
@@ -295,7 +290,7 @@ export default function OrderDetailsHeader({
           className="inline-flex items-center gap-1.5 group"
           title="نسخ رقم الطلب"
         >
-          <span className="text-15 font-black text-brand-dark dark:text-[#6EE7B7] tabular-nums">
+          <span className="text-[20px] font-extrabold text-brand-deep dark:text-[#6EE7B7] tabular-nums">
             #{order.uuid}
           </span>
           <Copy
@@ -303,7 +298,7 @@ export default function OrderDetailsHeader({
           />
         </button>
 
-        <span className="conic-border-badge inline-flex items-center gap-1.5 h-7 px-3 rounded-full text-green-700 dark:text-[#6EE7B7] text-[12.5px] font-bold">
+        <span className="inline-flex items-center gap-1.5 h-7 px-3 rounded-full bg-brand-mint text-brand-deep dark:bg-emerald-500/15 dark:text-[#6EE7B7] text-[12.5px] font-bold">
           <FileText className="size-3.5" />
           عقد {order.contract_type} - {order.instrument_type} - وزارة العدل
         </span>
@@ -315,9 +310,11 @@ export default function OrderDetailsHeader({
           disabled={!canChangeStatus || isStatusPending}
         />
 
-        <span className="h-7 px-3 rounded-full bg-[#EDE9FE] text-[#6D28D9] text-[12.5px] font-bold inline-flex items-center">
+        <span className="h-7 px-3 rounded-full bg-[#EFEAFD] text-[#5B35C9] dark:bg-violet-500/15 dark:text-violet-300 text-[12.5px] font-bold inline-flex items-center">
           المستلم: {order.employee_name || "—"}
         </span>
+
+        <DelayBadge order={orderData} />
 
         {mobileDisplay ? (
           <a
@@ -351,17 +348,16 @@ export default function OrderDetailsHeader({
           </a>
         ) : null}
 
-        <span className="h-7 px-3 rounded-full border-2 border-[#1D4ED8] text-[#1D4ED8] text-[12.5px] font-bold inline-flex items-center gap-1.5">
-          <CalendarDays className="size-3.5" />
+        <span className="h-7 px-3 rounded-full bg-[#E8F0FE] text-[#1D4ED8] dark:bg-blue-500/15 dark:text-blue-300 text-[12.5px] font-bold inline-flex items-center gap-1.5">
           {order.contract_type}
         </span>
 
         <span
           className={cn(
-            "h-7 px-3 rounded-full border-2 text-[12.5px] font-black flex items-center",
+            "h-7 px-3 rounded-full text-[12.5px] font-extrabold flex items-center",
             order.is_paid
-              ? "border-green-700 text-green-700"
-              : "border-[#EA580C] text-[#EA580C]"
+              ? "bg-[#E3F4EA] text-[#0B7A4C] dark:bg-emerald-500/15 dark:text-emerald-300"
+              : "bg-[#FDECEC] text-[#B42318] dark:bg-red-500/15 dark:text-red-300"
           )}
         >
           {order.is_paid ? "مدفوع" : "غير مدفوع"}
@@ -496,9 +492,9 @@ export default function OrderDetailsHeader({
               key={pill.id}
               type="button"
               onClick={() => handlePill(pill.id)}
-              className={cn(pillBase, pill.className)}
+              className={pillBase}
             >
-              <Icon className="size-3.5 shrink-0" />
+              <Icon className={cn("size-3.5 shrink-0", pill.iconClass)} />
               {pill.id === "refund" && refundLabel ? refundLabel : pill.label}
             </button>
           );
@@ -560,10 +556,11 @@ function StatusSelect({ order, statuses = [], onStatusChange, disabled }) {
           <button
             type="button"
             disabled={disabled}
-            className="h-7 px-3 rounded-full border border-surface-border-soft dark:border-white/10 bg-[#F3F4F6] dark:bg-white/[0.06] text-[12.5px] font-bold text-gray-700 dark:text-white/80 inline-flex items-center gap-1.5 disabled:opacity-60"
+            title="تغيير الحالة"
+            className="inline-flex items-center gap-0.5 rounded-full disabled:opacity-60"
           >
-            {order.status_name}
-            <ChevronDown className="size-3.5 opacity-60" />
+            <StatusPill statusKey={order.status_key} label={order.status_name} size="lg" className="pe-7" />
+            <ChevronDown className="size-3.5 opacity-60 -ms-6" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent

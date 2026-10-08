@@ -64,7 +64,7 @@ export default function EditRole() {
         name: '',
         title_ar: '',
         description: '',
-        color: '#0E5F4E',
+        color: '#0B5A3C',
         is_active: true,
         employee_id: '',
     });
@@ -115,7 +115,7 @@ export default function EditRole() {
             name: role.name || '',
             title_ar: role.title_ar || role.title_trans || '',
             description: role.description || '',
-            color: role.color || '#0E5F4E',
+            color: role.color || '#0B5A3C',
             is_active: role.is_active ?? true,
             employee_id: role.employee_id ? String(role.employee_id) : '',
         });

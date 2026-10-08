@@ -15,7 +15,7 @@ function ButtonPreview({ label, text, link }) {
         rel={link ? "noreferrer" : undefined}
         className={`mt-1 inline-flex max-w-full items-center gap-1 break-all text-[11px] ${
           link
-            ? "text-[#054D44] hover:underline dark:text-emerald-300"
+            ? "text-[#0B5A3C] hover:underline dark:text-emerald-300"
             : "pointer-events-none text-[#9CA3AF] dark:text-white/45"
         }`}
         dir="ltr"

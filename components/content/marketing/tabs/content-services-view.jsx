@@ -188,7 +188,7 @@ export default function ServicePagesView() {
                 style={{
                   fontSize: 12,
                   fontWeight: 800,
-                  color: "#0b5f4c",
+                  color: "#0B5A3C",
                   margin: 0,
                 }}
               >

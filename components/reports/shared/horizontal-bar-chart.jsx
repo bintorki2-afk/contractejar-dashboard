@@ -42,7 +42,7 @@ export default function HorizontalBarChart({ items, className, showValue = true,
             <div className="h-3 bg-status-neutral-bg rounded-full overflow-hidden dark:bg-white/10">
               <div
                 className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${width}%`, backgroundColor: item.color ?? (val < 0 ? "#B91C1C" : "#0B5345") }}
+                style={{ width: `${width}%`, backgroundColor: item.color ?? (val < 0 ? "#B91C1C" : "#0A4D33") }}
               />
             </div>
           </div>

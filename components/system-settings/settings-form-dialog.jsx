@@ -67,7 +67,7 @@ export default function SettingsFormDialog({
             type="button"
             disabled={isPending || submitDisabled}
             onClick={onSubmit}
-            className="h-10 flex-1 rounded-[10px] bg-[#0E5F4E] text-[13px] font-extrabold text-white hover:bg-[#0B7A4C]"
+            className="h-10 flex-1 rounded-[10px] bg-[#0B5A3C] text-[13px] font-extrabold text-white hover:bg-[#0B7A4C]"
           >
             {isPending ? <Loader2 className="size-4 animate-spin" /> : submitLabel}
           </Button>
@@ -86,7 +86,7 @@ export default function SettingsFormDialog({
 }
 
 export const settingsFieldClass =
-  "h-11 rounded-xl border-[#E6EBE9] bg-white text-[13px] font-semibold focus-visible:border-[#054D44] focus-visible:ring-0 dark:border-white/10 dark:bg-white/[0.04] dark:text-white";
+  "h-11 rounded-xl border-[#E6EBE9] bg-white text-[13px] font-semibold focus-visible:border-[#0B5A3C] focus-visible:ring-0 dark:border-white/10 dark:bg-white/[0.04] dark:text-white";
 
 export function SettingsFieldLabel({ children, required }) {
   return (

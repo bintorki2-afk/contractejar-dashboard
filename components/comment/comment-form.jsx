@@ -58,7 +58,7 @@ export default function CommentForm() {
         disabled={isPending}
         className={cn(
           "w-full h-12 transition-colors duration-300 font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-60",
-          "bg-[#0E5F4E] hover:bg-[#0B5345] text-white",
+          "bg-[#0B5A3C] hover:bg-[#0A4D33] text-white",
           "dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:text-[#0B1411]"
         )}
       >

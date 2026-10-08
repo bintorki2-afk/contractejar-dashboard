@@ -85,8 +85,8 @@ function SortableHeaderButton({ label, active, direction, onClick }) {
       title="ترتيب"
       className={cn(
         "inline-flex items-center gap-1 transition-colors",
-        "hover:text-[#0E5F4E] dark:hover:text-[#5FD0A8]",
-        active && "text-[#0B5F4C] dark:text-[#5FD0A8]"
+        "hover:text-[#0B5A3C] dark:hover:text-[#5FD0A8]",
+        active && "text-[#0B5A3C] dark:text-[#5FD0A8]"
       )}
     >
       <span>{label}</span>

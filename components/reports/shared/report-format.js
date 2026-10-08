@@ -24,7 +24,7 @@ export function pick(obj, ...keys) {
   return undefined;
 }
 
-export function colorize(items = [], palette = ["#0B5345", "#1E40AF", "#CA8A04", "#DC2626", "#9CA3AF"]) {
+export function colorize(items = [], palette = ["#0A4D33", "#1E40AF", "#CA8A04", "#DC2626", "#9CA3AF"]) {
   return items.map((item, index) => ({
     ...item,
     label: item.label ?? item.name ?? item.stage,

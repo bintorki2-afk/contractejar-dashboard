@@ -58,8 +58,8 @@ function FilterGroup({ label, options, value, onChange }) {
             className={cn(
               "px-4 py-2 rounded-xl text-13 font-bold transition-colors border",
               value === option.value
-                ? "bg-[#054D44] text-white border-[#054D44]"
-                : "bg-white text-status-neutral border-surface-border-soft hover:border-[#054D44]/40 hover:text-[#054D44]"
+                ? "bg-[#0B5A3C] text-white border-[#0B5A3C]"
+                : "bg-white text-status-neutral border-surface-border-soft hover:border-[#0B5A3C]/40 hover:text-[#0B5A3C]"
             )}
           >
             {option.label}

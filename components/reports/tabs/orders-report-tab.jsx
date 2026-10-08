@@ -18,7 +18,7 @@ export default function OrdersReportTab({ period, dateFrom, dateTo, contractType
   const kpis = KPI_FIELDS.map(([key, label, icon, tone]) => ({ key, label, value: data?.kpis?.[key] ?? 0, icon, tone }));
   const minutes = data?.kpis?.avg_completion_minutes ?? 0;
   kpis.push({ key: "avgTime", label: "متوسط مدة الإنجاز", value: formatDurationMinutes(minutes), icon: "clock", isText: true });
-  const colorize = (items = []) => items.map((item, index) => ({ ...item, label: item.label ?? item.stage, color: ["#0B5345", "#1E40AF", "#CA8A04", "#DC2626"][index % 4] }));
+  const colorize = (items = []) => items.map((item, index) => ({ ...item, label: item.label ?? item.stage, color: ["#0A4D33", "#1E40AF", "#CA8A04", "#DC2626"][index % 4] }));
   return (
     <div className="flex flex-col gap-5" dir="rtl">
       <ReportKpiGrid items={kpis} columns="grid-cols-2 sm:grid-cols-4 2xl:grid-cols-7" />

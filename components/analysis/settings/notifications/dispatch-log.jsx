@@ -140,7 +140,7 @@ export default function NotificationDispatchLog() {
                     target="_blank"
                     rel="noreferrer"
                     dir="ltr"
-                    className="text-[#0E5F4E] underline truncate inline-block max-w-[180px]"
+                    className="text-[#0B5A3C] underline truncate inline-block max-w-[180px]"
                   >
                     {row.url}
                   </a>

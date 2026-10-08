@@ -38,10 +38,10 @@ export default function NotificationList() {
           </p>
         </div>
         <div className="flex items-center gap-2.5 shrink-0">
-          <span className="font-black text-[#0E5F4E] dark:text-emerald-300 text-[22px] tabular-nums leading-none">
+          <span className="font-black text-[#0B5A3C] dark:text-emerald-300 text-[22px] tabular-nums leading-none">
             {totalCount}
           </span>
-          <div className="relative flex items-center justify-center h-10 w-10 rounded-full bg-[#F0F8F4] text-[#0E5F4E] dark:bg-[#1B3A2E] dark:text-emerald-300">
+          <div className="relative flex items-center justify-center h-10 w-10 rounded-full bg-[#F0F8F4] text-[#0B5A3C] dark:bg-[#1B3A2E] dark:text-emerald-300">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-accent/20" />
             <Bell size={18} strokeWidth={2.25} className="relative" />
           </div>
@@ -56,7 +56,7 @@ export default function NotificationList() {
             "dark:bg-[#13251E] dark:border-[#26473A]"
           )}
         >
-          <div className="flex items-center justify-center h-10 w-10 rounded-full bg-[#F0F8F4] text-[#0E5F4E] dark:bg-[#1B3A2E] dark:text-emerald-300">
+          <div className="flex items-center justify-center h-10 w-10 rounded-full bg-[#F0F8F4] text-[#0B5A3C] dark:bg-[#1B3A2E] dark:text-emerald-300">
             <Bell size={18} strokeWidth={2} />
           </div>
           <p className="text-13 font-bold text-gray-700 dark:text-[#D6E5DE]">

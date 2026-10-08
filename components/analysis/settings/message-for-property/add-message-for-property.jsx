@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const fieldClass =
-  "h-11 rounded-xl border-[#E6EBE9] bg-white text-[13px] font-semibold focus:ring-0 focus:border-[#054D44] data-[placeholder]:text-[#9CA3AF]";
+  "h-11 rounded-xl border-[#E6EBE9] bg-white text-[13px] font-semibold focus:ring-0 focus:border-[#0B5A3C] data-[placeholder]:text-[#9CA3AF]";
 
 export default function AddNewMessageForPropertyDialog({ isEdit, messageAlert }) {
   const [open, setOpen] = useState(false);
@@ -121,7 +121,7 @@ export default function AddNewMessageForPropertyDialog({ isEdit, messageAlert })
         <DialogHeader className="space-y-0 border-b border-[#EEF1F0] px-5 py-4 text-right">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 items-start gap-3 text-right">
-              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#E8F5F1] text-[#054D44]">
+              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#E8F5F1] text-[#0B5A3C]">
                 <MessageSquareText className="size-4" />
               </span>
               <div className="min-w-0">
@@ -146,7 +146,7 @@ export default function AddNewMessageForPropertyDialog({ isEdit, messageAlert })
 
         <div dir="rtl" className="flex min-w-0 max-w-full flex-col gap-4 overflow-hidden px-5 py-4 text-right">
           {(sectionLabel || itemLabel) && (
-            <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[#DCEEE8] bg-[#F4FBF8] px-3 py-2.5 text-[12px] font-bold text-[#054D44]">
+            <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[#DCEEE8] bg-[#F4FBF8] px-3 py-2.5 text-[12px] font-bold text-[#0B5A3C]">
               <span className={cn(!sectionLabel && "text-[#9CA3AF]")}>
                 {sectionLabel || "القسم"}
               </span>
@@ -226,7 +226,7 @@ export default function AddNewMessageForPropertyDialog({ isEdit, messageAlert })
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={5}
-              className="min-h-[120px] resize-none rounded-xl border-[#E6EBE9] bg-white text-[13px] font-medium leading-relaxed focus-visible:border-[#054D44] focus-visible:ring-0"
+              className="min-h-[120px] resize-none rounded-xl border-[#E6EBE9] bg-white text-[13px] font-medium leading-relaxed focus-visible:border-[#0B5A3C] focus-visible:ring-0"
             />
             <span className="text-[11px] font-semibold text-[#9CA3AF]">
               {message.trim().length} حرف
@@ -239,7 +239,7 @@ export default function AddNewMessageForPropertyDialog({ isEdit, messageAlert })
             type="button"
             variant="outline"
             onClick={() => setOpen(false)}
-            className="h-10 rounded-xl border-[#054D44]/30 px-4 text-[13px] font-bold text-[#054D44] hover:bg-[#E8F5F1]"
+            className="h-10 rounded-xl border-[#0B5A3C]/30 px-4 text-[13px] font-bold text-[#0B5A3C] hover:bg-[#E8F5F1]"
           >
             إلغاء
           </Button>
@@ -247,7 +247,7 @@ export default function AddNewMessageForPropertyDialog({ isEdit, messageAlert })
             type="button"
             disabled={mutation.isPending}
             onClick={handleSubmit}
-            className="h-10 min-w-[104px] rounded-xl bg-[#054D44] px-5 text-[13px] font-bold text-white hover:bg-[#043F38]"
+            className="h-10 min-w-[104px] rounded-xl bg-[#0B5A3C] px-5 text-[13px] font-bold text-white hover:bg-[#043F38]"
           >
             {mutation.isPending ? (
               <Loader2 className="size-4 animate-spin" />

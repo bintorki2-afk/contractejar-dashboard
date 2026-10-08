@@ -171,7 +171,7 @@ export default function EditPopupContractDialog({
             type="button"
             variant="outline"
             onClick={() => setOpen(false)}
-            className="h-10 rounded-xl border-[#054D44]/30 px-4 text-[13px] font-bold text-[#054D44] hover:bg-[#E8F5F1]"
+            className="h-10 rounded-xl border-[#0B5A3C]/30 px-4 text-[13px] font-bold text-[#0B5A3C] hover:bg-[#E8F5F1]"
           >
             إلغاء
           </Button>
@@ -179,7 +179,7 @@ export default function EditPopupContractDialog({
             type="button"
             disabled={isPending}
             onClick={handleSubmit}
-            className="h-10 min-w-[96px] rounded-xl bg-[#054D44] px-5 text-[13px] font-bold text-white hover:bg-[#043F38]"
+            className="h-10 min-w-[96px] rounded-xl bg-[#0B5A3C] px-5 text-[13px] font-bold text-white hover:bg-[#043F38]"
           >
             {isPending ? <Loader2 className="size-4 animate-spin" /> : "حفظ"}
           </Button>

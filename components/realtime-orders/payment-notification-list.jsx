@@ -64,7 +64,7 @@ export default function PaymentNotificationList() {
           <p className="font-bold text-15 text-gray-900 dark:text-[#D6E5DE]">
             مدفوعات اليوم
           </p>
-          <CreditCard className="size-5 text-[#0E5F4E] dark:text-emerald-300" />
+          <CreditCard className="size-5 text-[#0B5A3C] dark:text-emerald-300" />
         </div>
         <p className="font-black text-gray-900 dark:text-white text-3xl tabular-nums">
           {total}
@@ -72,7 +72,7 @@ export default function PaymentNotificationList() {
         <Link
           href="/home/invoices"
           onClick={() => setDisplayedPart("default")}
-          className="text-xs font-bold text-[#0E5F4E] dark:text-emerald-300 hover:underline w-fit"
+          className="text-xs font-bold text-[#0B5A3C] dark:text-emerald-300 hover:underline w-fit"
         >
           عرض كل الفواتير
         </Link>
@@ -126,7 +126,7 @@ export default function PaymentNotificationList() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-[12.5px] font-bold">
-                  <span className="tabular-nums text-[#0E5F4E] dark:text-emerald-300">
+                  <span className="tabular-nums text-[#0B5A3C] dark:text-emerald-300">
                     {payment.amount} {payment.tran_currency || "ريال"}
                   </span>
                   <span className="text-[#98A39E] dark:text-[#9FC0B4] font-medium">
