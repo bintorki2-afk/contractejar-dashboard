@@ -4,6 +4,7 @@ import { getOrderClientPhone } from "@/components/orders/messages/order-section-
 import { formatSaudiMobileDisplay, toSaudiMobileDialDigits } from "@/src/lib/format-phone";
 import { fileNameFromUrl, resolveImageUrl, resolveNationalAddress } from "./national-address-utils";
 import { normalizeApiInvoice } from "@/src/lib/invoice-lines";
+import { isPaymentNeedsReview } from "@/src/lib/payment-status";
 
 function pick(...values) {
   for (const value of values) {
@@ -32,12 +33,26 @@ export function successfulPaymentsTotal(orderData = {}) {
     .reduce((sum, payment) => sum + toAmount(payment?.amount), 0);
 }
 
+/** دفعات «مراجعة:» المعلّقة (مبلغ لا يطابق المستحق) — تُعرض للمراجعة ولا تُحسب دفعاً. */
+export function reviewPayments(orderData = {}) {
+  const list = orderData?.payment_and_admin?.contract_payments;
+  return Array.isArray(list) ? list.filter(isPaymentNeedsReview) : [];
+}
+
 function paidAmountFields(summary, orderData, paid) {
   const apiAmount = pick(summary.amount_payment, orderData.amount_payment);
+  const review = reviewPayments(orderData);
+  const reviewFields = {
+    payment_review_count: review.length,
+    payment_review_amount: review.reduce((sum, p) => sum + toAmount(p?.amount), 0),
+  };
   const successfulTotal = successfulPaymentsTotal(orderData);
-  if (successfulTotal == null) return { fees: apiAmount, fees_paid: paid };
-  if (successfulTotal > 0) return { fees: Math.round(successfulTotal * 100) / 100, fees_paid: true };
-  return { fees: paid ? "لا توجد دفعة ناجحة مسجّلة" : "لم يتم الدفع", fees_paid: false };
+  if (successfulTotal == null) return { fees: apiAmount, fees_paid: paid, ...reviewFields };
+  if (successfulTotal > 0) {
+    return { fees: Math.round(successfulTotal * 100) / 100, fees_paid: true, ...reviewFields };
+  }
+  if (review.length) return { fees: "بحاجة لمراجعة", fees_paid: false, ...reviewFields };
+  return { fees: paid ? "لا توجد دفعة ناجحة مسجّلة" : "لم يتم الدفع", fees_paid: false, ...reviewFields };
 }
 
 function isCompanyEntity(value) {

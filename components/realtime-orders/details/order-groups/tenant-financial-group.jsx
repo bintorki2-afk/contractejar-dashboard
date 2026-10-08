@@ -153,6 +153,16 @@ export default function TenantFinancialGroup({ order, onEdit }) {
         </div>
       </AccentCard>
 
+      {financial.payment_review_count > 0 ? (
+        <div
+          role="status"
+          className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800 dark:border-amber-400/40 dark:bg-amber-500/10 dark:text-amber-200"
+        >
+          دفعة بحاجة لمراجعة: مبلغها ({financial.payment_review_amount} ريال) لا يطابق المستحق — لا تُعتبر
+          دفعاً حتى تُراجع يدوياً.
+        </div>
+      ) : null}
+
       <InvoiceCard invoice={order.invoice} />
 
       <AccentCard

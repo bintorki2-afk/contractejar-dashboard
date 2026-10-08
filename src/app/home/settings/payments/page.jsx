@@ -17,6 +17,7 @@ import {
 import { axiosInstance } from "@/src/utils/axios";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { paymentStatusKey, paymentStatusLabel } from "@/src/lib/payment-status";
 
 const HEADERS = [
   "الاسم",
@@ -40,12 +41,9 @@ const statusFilters = [
   { value: "", label: "الكل" },
   { value: "success", label: "ناجحة" },
   { value: "failed", label: "فشلت" },
+  { value: "review", label: "بحاجة لمراجعة" },
 ];
 
-const statusLabels = {
-  success: "ناجحة",
-  failed: "فشلت",
-};
 
 function FilterGroup({ label, options, value, onChange }) {
   return (
@@ -99,7 +97,7 @@ export default function PaymentsPage(props) {
 
   const allPayments = responseData?.data?.items ?? [];
   const payments = statusFilter
-    ? allPayments.filter((payment) => payment.status === statusFilter)
+    ? allPayments.filter((payment) => paymentStatusKey(payment) === statusFilter)
     : allPayments;
   const pagination = responseData?.data?.pagination;
 
@@ -153,14 +151,21 @@ export default function PaymentsPage(props) {
                 <span
                   className={cn(
                     "inline-flex rounded-full px-3 py-1 text-11 font-bold",
-                    payment.status === "success"
+                    paymentStatusKey(payment) === "success"
                       ? "bg-[#E6F7EF] text-green-700"
-                      : payment.status === "failed"
+                      : paymentStatusKey(payment) === "failed"
                         ? "bg-[#FEF2F2] text-red-600"
-                        : "bg-status-neutral-bg text-status-neutral"
+                        : paymentStatusKey(payment) === "review"
+                          ? "bg-amber-50 text-amber-700"
+                          : "bg-status-neutral-bg text-status-neutral"
                   )}
+                  title={
+                    paymentStatusKey(payment) === "review"
+                      ? "مبلغ الدفعة لا يطابق المستحق — ليست دفعاً حتى تُراجع"
+                      : undefined
+                  }
                 >
-                  {statusLabels[payment.status] || payment.status || "—"}
+                  {paymentStatusLabel(payment)}
                 </span>
               </SettingsTd>
             </SettingsTableRow>
