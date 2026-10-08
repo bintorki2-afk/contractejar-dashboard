@@ -117,6 +117,7 @@ function OrderDetailsBody() {
         onPayLink={dialogs.handlePayLink}
         onRefund={() => (canRefundPayments ? setRefundOpen(true) : dialogs.openReturn(orderData))}
         refundLabel={canRefundPayments ? "استرجاع المبلغ" : undefined}
+        appliedDiscount={orderData?.applied_discount ?? null}
         onPropertyUpdate={() => dialogs.setPropertyUpdateOpen(true)}
         onSendDraft={() => dialogs.setSendDraftOpen(true)}
         onMissingAttachment={() => dialogs.setCorrectionRequestOpen(true)}
@@ -149,6 +150,7 @@ function OrderDetailsBody() {
           orderData={orderData}
           canRefund={canRefundPayments}
           onRefund={() => setRefundOpen(true)}
+          canNotify={canEditOrder}
           className="min-[1500px]:sticky min-[1500px]:top-0"
         />
       </div>

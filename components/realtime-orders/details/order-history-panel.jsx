@@ -4,18 +4,25 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import OrderPaymentsTab from "./order-payments-tab";
 import OrderActivityTab from "./order-activity-tab";
+import OrderNotificationsTab from "./order-notifications-tab";
 
 /**
  * لوحة «سجل الطلب» الجانبية في تفاصيل الطلب: المدفوعات والاسترجاع (د9)،
  * سجل النشاط (د13)، الإشعارات المرسلة (د24).
  */
-export default function OrderHistoryPanel({ orderData, tabs: extraTabs = [], canRefund, onRefund, className }) {
+export default function OrderHistoryPanel({ orderData, tabs: extraTabs = [], canRefund, onRefund, canNotify, className }) {
   const tabs = [
     {
       key: "activity",
       label: "سجل النشاط",
       count: (orderData?.activities ?? []).length || null,
       render: () => <OrderActivityTab orderData={orderData} />,
+    },
+    {
+      key: "notifications",
+      label: "الإشعارات المرسلة",
+      count: (orderData?.notifications_sent ?? []).length || null,
+      render: () => <OrderNotificationsTab orderData={orderData} canNotify={canNotify} />,
     },
     ...extraTabs,
     {
