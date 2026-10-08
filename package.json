@@ -36,7 +36,7 @@
     "@tiptap/extension-placeholder": "3.30.6",
     "@tiptap/extension-text-align": "3.30.6",
     "@tiptap/extension-text-style": "3.30.6",
-    "@tiptap/extension-underline": "3.30.6",
+    "@tiptap/extension-underline": "3.31.4",
     "@tiptap/pm": "3.30.6",
     "@tiptap/react": "3.30.6",
     "@tiptap/starter-kit": "3.30.6",
@@ -126,6 +126,6 @@
     "@tiptap/extension-text": "3.30.6",
     "@tiptap/extension-text-align": "3.30.6",
     "@tiptap/extension-text-style": "3.30.6",
-    "@tiptap/extension-underline": "3.30.6"
+    "@tiptap/extension-underline": "3.31.4"
   }
 }
