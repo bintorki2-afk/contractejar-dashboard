@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import { toast } from "sonner";
-import { Check, Copy, FileText, X } from "lucide-react";
+import { BadgeCheck, Check, Copy, FileText, Hand, Send, X } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa6";
+import { nextStageForRow } from "@/src/lib/order-status-keys";
+import { toSaudiMobileDialDigits } from "@/src/lib/format-phone";
 import greenRial from "@/public/images/greenRial.svg";
 import { cn } from "@/lib/utils";
 import { RT } from "@/components/realtime-orders/theme";
@@ -23,6 +26,9 @@ function formatRelativeShort(dateString) {
   return `${days} يوم`;
 }
 
+const STAGE_ROW_LABELS = { received: "استلمت", draft_sent: "أرسلت المسودة", notarized: "وثّقت" };
+const STAGE_ROW_ICONS = { received: Hand, draft_sent: Send, notarized: BadgeCheck };
+
 export function buildAllOrderColumns({
   onView,
   onStatusChange,
@@ -33,6 +39,8 @@ export function buildAllOrderColumns({
   canChangeStatus = true,
   canAddStatus = false,
   canDelete = false,
+  canStage = false,
+  onStage,
   dark = false,
 } = {}) {
   return [
@@ -202,8 +210,34 @@ export function buildAllOrderColumns({
       cell: (row) => {
         // الطباعة متاحة دائمًا (لا تشترط الدفع) — لعقد إيجار بلا بوابة دفع.
         const canPrint = true;
+        const stage = canStage ? nextStageForRow(row) : null;
+        const StageIcon = STAGE_ROW_ICONS[stage];
+        const waDigits = toSaudiMobileDialDigits(row?.user_mobile ?? "");
         return (
           <div className="flex items-center gap-1.5">
+            {stage ? (
+              <button
+                type="button"
+                onClick={() => onStage?.(row)}
+                title={`${STAGE_ROW_LABELS[stage]} — دون فتح الطلب`}
+                className="h-8 px-2.5 rounded-lg text-xs font-bold inline-flex items-center gap-1 bg-brand-deep text-white hover:bg-brand-deep/90 dark:bg-emerald-500 dark:text-[#0B1411] whitespace-nowrap"
+              >
+                <StageIcon className="size-3.5" />
+                {STAGE_ROW_LABELS[stage]}
+              </button>
+            ) : null}
+            {waDigits ? (
+              <a
+                href={`https://wa.me/${waDigits}`}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="واتساب العميل"
+                title="واتساب العميل"
+                className="size-8 rounded-lg border flex items-center justify-center transition-colors border-[#25D366]/40 text-[#128C4B] hover:bg-[#25D366]/10 dark:text-[#6EE7B7]"
+              >
+                <FaWhatsapp className="size-4" />
+              </a>
+            ) : null}
             <button
               type="button"
               onClick={() => onView?.(row)}

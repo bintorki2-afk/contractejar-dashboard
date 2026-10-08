@@ -86,6 +86,8 @@ export function useAllOrdersWrapper({
     can(PERMISSION_SECTIONS.incomplete_request, "view") ||
     can(PERMISSION_SECTIONS.request_classification, "view") ||
     can(PERMISSION_SECTIONS.returned_request, "view");
+  // د18: أزرار المراحل في الصف = صلاحية «استلمت» في الخادم (all_requests.edit).
+  const canStage = isAdmin || can(PERMISSION_SECTIONS.all_requests, "edit");
   const canReturn =
     isAdmin ||
     can(PERMISSION_SECTIONS.returned_request, "create") ||
@@ -139,25 +141,34 @@ export function useAllOrdersWrapper({
     setCurrentPage(1);
   }
 
-  const listParams = useMemo(() => {
-    const tabParams = tabToOrderListParams(tab);
-    return buildAdminOrdersParams({
-      page: currentPage,
-      perPage,
-      search: debouncedSearch,
-      isCompleted:
-        paymentFilter === "paid" ? 1 : paymentFilter === "unpaid" ? 0 : undefined,
-      statusKey: tabParams.status_key,
-      tab: tabParams.tab,
-      contractType: contractType || undefined,
-    });
-  }, [contractType, currentPage, debouncedSearch, paymentFilter, perPage, tab]);
-
   const statusCounts = useOrderStatusCounts({
     search: debouncedSearch,
     contractType: contractType || undefined,
     enabled: !lockedFilter,
   });
+  const statusTabs = statusCounts.tabs;
+
+  const listParams = useMemo(() => {
+    const tabParams = tabToOrderListParams(tab);
+    const isCompleted =
+      paymentFilter === "paid" ? 1 : paymentFilter === "unpaid" ? 0 : undefined;
+    // الخادم يتجاهل status_key عند إرسال فلتر الدفع (complete/incomplete) — نستخدم رقم الحالة
+    // القادم من status-counts لنفس التبويب في هذه الحالة فقط (مسجّل في issues-for-backend).
+    const tabStatusId =
+      isCompleted !== undefined && tabParams.status_key
+        ? statusTabs.find((t) => t.key === tab)?.status_id ?? null
+        : null;
+    return buildAdminOrdersParams({
+      page: currentPage,
+      perPage,
+      search: debouncedSearch,
+      isCompleted: tabParams.tab === "incomplete" ? undefined : isCompleted,
+      statusId: tabStatusId ?? undefined,
+      statusKey: tabStatusId ? undefined : tabParams.status_key,
+      tab: tabParams.tab,
+      contractType: contractType || undefined,
+    });
+  }, [contractType, currentPage, debouncedSearch, paymentFilter, perPage, tab, statusTabs]);
 
   const {
     items: tableItems,
@@ -272,13 +283,14 @@ export function useAllOrdersWrapper({
     canManageStatuses,
     canExport,
     canReturn,
+    canStage,
     searchQuery,
     setSearchQuery,
     tab,
     setTab,
     paymentFilter,
     setPaymentFilter,
-    statusTabs: statusCounts.tabs,
+    statusTabs,
     statusTabsLoading: statusCounts.isLoading,
     refetchStatusCounts: statusCounts.refetch,
     contractType,

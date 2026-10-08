@@ -109,6 +109,8 @@ export function isClosedStatusKey(key) {
 export function tabToOrderListParams(tab) {
   if (!tab || tab === "all") return {};
   if (tab === "incomplete") return { tab: "incomplete" };
+  // عدّاد تبويب «جديد» = صف «جديد» كاملاً (مدفوع + غير مدفوع)، بينما status_key=new = غير المدفوع فقط.
+  if (tab === "new") return { status_key: "new,paid" };
   return { status_key: tab };
 }
 
@@ -136,4 +138,19 @@ export function sortStatusTabs(tabs = []) {
     return i === -1 ? TAB_ORDER.length - 1 : i;
   };
   return list.sort((a, b) => rank(a?.key) - rank(b?.key));
+}
+
+/**
+ * المرحلة التالية لصف في القائمة (د18) — تقدير من الواجهة لعرض الزر فقط؛
+ * الخادم يتحقق من الشروط عند التنفيذ (POST /admin/orders/{id}/stage/{stage}).
+ */
+export function nextStageForRow(row = {}) {
+  const key = row?.status_key ?? null;
+  const paid = row?.is_paid === true || row?.is_paid === 1 || row?.is_completed === true || row?.is_completed === 1;
+  const received = Boolean(row?.is_received || row?.received_contract_exists);
+  if (!paid) return null;
+  if (["new", "paid", "under_review"].includes(key) && !received) return "received";
+  if (["new", "paid", "under_review", "received", "received_by_employee"].includes(key)) return "draft_sent";
+  if (key === "whatsapp_draft") return "notarized";
+  return null;
 }

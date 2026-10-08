@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ControllableDataTable,
   useTablePreferences,
@@ -19,6 +19,7 @@ import { useAllOrdersWrapper } from "@/src/hooks/use-all-orders-wrapper";
 import { isDraftOrderRow } from "@/src/lib/draft-contract-statuses";
 import { cn } from "@/lib/utils";
 import OrderStatusTabs from "./order-status-tabs";
+import StageActionDialog from "./stage-action-dialog";
 import { PAYMENT_FILTERS } from "@/src/hooks/use-all-orders-wrapper";
 
 function PaymentFilterChips({ value = "all", onChange }) {
@@ -52,6 +53,7 @@ const TABLE_STORAGE_KEY = "all-orders-table-prefs";
 export default function AllOrdersWrapper() {
   const vm = useAllOrdersWrapper();
   const selection = useRowSelection();
+  const [stageOrder, setStageOrder] = useState(null);
 
   // Drop stale selections whenever the underlying query (page/filters/search) changes.
   const clearSelection = selection.clear;
@@ -72,6 +74,8 @@ export default function AllOrdersWrapper() {
         canChangeStatus: vm.canChangeStatus,
         canAddStatus: vm.canAddStatus,
         canDelete: vm.canDelete,
+        canStage: vm.canStage,
+        onStage: (row) => setStageOrder(row),
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -82,6 +86,7 @@ export default function AllOrdersWrapper() {
       vm.canChangeStatus,
       vm.canAddStatus,
       vm.canDelete,
+      vm.canStage,
     ]
   );
 
@@ -215,6 +220,14 @@ export default function AllOrdersWrapper() {
         onManageStatusesOpenChange={vm.setManageStatusesOpen}
         canAddStatus={vm.canAddStatus}
         canEditStatus={vm.canEditStatus}
+      />
+
+      <StageActionDialog
+        order={stageOrder}
+        open={Boolean(stageOrder)}
+        onOpenChange={(open) => {
+          if (!open) setStageOrder(null);
+        }}
       />
 
       <ConfirmDialog
