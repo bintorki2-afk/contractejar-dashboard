@@ -62,6 +62,7 @@ export function invalidateOrdersCaches(queryClient, { queryKey, orderId } = {}) 
   invalidate(queryClient, ["unReceivedOrdersTotal"]);
   invalidate(queryClient, ["orders-attention"]);
   invalidate(queryClient, ["orders-status-counts"]);
+  invalidate(queryClient, ["order-stages"]);
   invalidate(queryClient, ["dashboard-analytics-quick"]);
 
   invalidateSingleOrder(queryClient, orderId);

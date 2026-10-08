@@ -113,7 +113,7 @@ export function formatHomeCurrency(value, currency = 'SAR') {
   if (value === null || value === undefined) return '—'
   const num = Number(value)
   if (Number.isNaN(num)) return '—'
-  const formatted = num.toLocaleString('ar-EG', { maximumFractionDigits: 0 })
+  const formatted = num.toLocaleString('en-US', { maximumFractionDigits: 0 })
   return currency === 'SAR' ? `${formatted} ر.س` : `${formatted} ${currency}`
 }
 
