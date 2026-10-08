@@ -4,11 +4,18 @@ import { useMutation } from "@tanstack/react-query";
 import { axiosInstance } from "@/src/utils/axios";
 import { toast } from "sonner";
 
+/** نوع إشعار العميل اليدوي (ف8) — يُخزَّن في صندوق إشعارات العميل. */
+export const CUSTOMER_NOTIFICATION_KINDS = [
+  { value: "offer", label: "عرض" },
+  { value: "announcement", label: "إعلان" },
+];
+
 export const NOTIFICATION_TARGETS = {
   user: {
     value: "user",
     label: "مستخدم محدد",
     endpoint: "/admin/notifications/user",
+    isCustomer: true,
     needsUser: true,
     needsEmployee: false,
   },
@@ -16,6 +23,7 @@ export const NOTIFICATION_TARGETS = {
     value: "custom-user",
     label: "رسالة مخصصة لمستخدم",
     endpoint: "/admin/notifications/custom-user",
+    isCustomer: true,
     needsUser: true,
     needsEmployee: false,
   },
@@ -30,6 +38,7 @@ export const NOTIFICATION_TARGETS = {
     value: "all-users",
     label: "جميع المستخدمين",
     endpoint: "/admin/notifications/all-users",
+    isCustomer: true,
     needsUser: false,
     needsEmployee: false,
   },
@@ -53,6 +62,12 @@ function buildPayload(target, form) {
 
   if (config.needsUser) {
     payload.user_id = Number(form.userId) || form.userId;
+  }
+
+  if (config.isCustomer) {
+    payload.kind = form.kind || "offer";
+    const url = String(form.url ?? "").trim();
+    if (url) payload.url = url;
   }
 
   if (config.needsEmployee) {
