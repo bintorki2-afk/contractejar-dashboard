@@ -40,6 +40,7 @@ export const SYSTEM_CATEGORIES = [
   { id: "faqs", label: "الأسئلة الشائعة", subtitle: "أسئلة وأجوبة · 2 عنصر", href: "/home/marketing-and-content?tab=content&view=faqs", section: "faqs" },
   { id: "terms", label: "الشروط والأحكام", subtitle: "محتوى نصّي", href: "/home/settings/terms", section: "app_content" },
   { id: "privacy", label: "سياسة الخصوصية", subtitle: "محتوى نصّي", href: "/home/settings/privacy", section: "app_content" },
+  { id: "message-templates", label: "قوالب الرسائل", subtitle: "واتساب · SMS · إشعارات المراحل", href: "/home/settings/message-templates", section: "settings" },
   { id: "notifications", label: "الإشعارات", subtitle: "إرسال إشعار", href: "/home/settings/notifications", section: "notifications" },
   { id: "payments", label: "المدفوعات", subtitle: "سجل المدفوعات", href: "/home/settings/payments", section: "payments" },
   { id: "payment-types", label: "طرق الدفع", subtitle: "سجلات · 5 عنصر", href: "/home/settings/payment-types", section: "app_content" },
