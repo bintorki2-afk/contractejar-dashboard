@@ -15,7 +15,7 @@ const admin = { id: 1, role_id: 1, is_system_admin: true, permissions: [] };
 
 function visibleSidebar(user) {
   return SIDEBAR_NAV.flatMap((group) => group.items)
-    .filter((item) => !isFeatureDisabled(item.href))
+    .filter((item) => !isFeatureDisabled(item.href) && !item.alwaysVisible)
     .filter((item) => canAccess(user.permissions, user, item.section, item.action ?? "view"))
     .map((item) => item.href);
 }
@@ -110,5 +110,15 @@ describe("«السلة» (د12)", () => {
     expect(visibleSidebar(deleter)).toContain("/home/trash");
     expect(visibleSidebar(employee(["all_requests.view"]))).not.toContain("/home/trash");
     expect(canAccessRoute("/home/trash", deleter.permissions, deleter)).toBe(true);
+  });
+});
+
+describe("«دليل الموظف» (د23)", () => {
+  it("is visible to every signed-in user but never the landing page", () => {
+    const nobody = employee([]);
+    const guide = SIDEBAR_NAV.flatMap((g) => g.items).find((i) => i.href === "/home/guide");
+    expect(guide).toBeTruthy();
+    expect(canAccessRoute("/home/guide", nobody.permissions, nobody)).toBe(true);
+    expect(getFirstAllowedHref(nobody.permissions, nobody)).toBe("/home");
   });
 });

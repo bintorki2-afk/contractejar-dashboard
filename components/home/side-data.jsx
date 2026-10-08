@@ -10,6 +10,7 @@ import { usePermissions } from "@/src/hooks/use-permissions";
 import { SIDEBAR_NAV, isFeatureDisabled } from "@/src/lib/permissions";
 import {
   BarChart3,
+  BookOpen,
   ClipboardList,
   FileSignature,
   Loader2,
@@ -48,6 +49,7 @@ const NAV_ICONS = {
   '/home/lessor-change': FileSignature,
   '/home/invoices': ReceiptText,
   '/home/trash': Trash2,
+  '/home/guide': BookOpen,
 };
 
 const DESKTOP_MEDIA = '(min-width: 1201px)';

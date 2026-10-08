@@ -280,6 +280,8 @@ export const ROUTE_SECTION_RULES = [
   { prefix: '/home/leads', section: PERMISSION_SECTIONS.users },
   { prefix: '/home/realtime-orders', section: REALTIME_ORDERS_SECTIONS },
   { prefix: '/home/invoices', section: null },
+  // د23: «دليل الموظف» لكل مستخدم مسجّل.
+  { prefix: '/home/guide', section: null },
   // Legacy URL — page redirects into marketing content tab; keep gate for deep links.
   { prefix: '/home/content', section: CONTENT_SECTIONS },
   { prefix: '/home', section: null },
@@ -350,6 +352,7 @@ export const SIDEBAR_NAV = [
     items: [
       { label: 'جميع الطلبات', href: '/home/orders', section: ORDERS_SECTIONS },
       { label: 'طلبات تغيير المؤجر', href: '/home/lessor-change', section: PERMISSION_SECTIONS.lessor_change },
+      { label: 'دليل الموظف', href: '/home/guide', section: null, alwaysVisible: true, skipLanding: true },
       { label: 'السلة', href: '/home/trash', section: [PERMISSION_SECTIONS.all_requests, PERMISSION_SECTIONS.lessor_change], action: 'delete' },
       { label: 'الفواتير', href: '/home/invoices', section: null },
     ],
@@ -359,7 +362,7 @@ export const SIDEBAR_NAV = [
 export function getFirstAllowedHref(permissions, user) {
   for (const group of SIDEBAR_NAV) {
     for (const item of group.items) {
-      if (isFeatureDisabled(item.href)) continue;
+      if (isFeatureDisabled(item.href) || item.skipLanding) continue;
       if (canAccess(permissions, user, item.section, item.action ?? 'view')) {
         return item.href;
       }
