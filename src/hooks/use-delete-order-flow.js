@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { openDialogAfterMenuClose } from "@/src/lib/open-dialog-after-menu-close";
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { invalidateOrdersCaches } from "@/src/lib/invalidate-orders-caches";
-import { postOrderDelete } from "@/src/lib/order-delete-api";
+import { postOrderDelete, restoreOrder } from "@/src/lib/order-delete-api";
 import { PERMISSION_SECTIONS } from "@/src/lib/permissions";
 
 /**
@@ -14,11 +14,11 @@ import { PERMISSION_SECTIONS } from "@/src/lib/permissions";
  * (الطلبات المباشرة / جميع الطلبات).
  *
  * Supports a single-order delete (from the row menu) and a bulk delete
- * (from the selection bar). Deletion is destructive and irreversible, so:
+ * (from the selection bar). دفعة د (د12): الحذف ينقل الطلب إلى السلة (30 يوماً) مع «تراجع»:
  *  - it needs `all_requests.delete` (same as the server) or a system admin (canDelete),
- *  - paid orders are refused by the server (422) — its message is shown as is,
+ *  - paid orders are refused by the server (422) unless a system admin confirms force=1,
  *  - it always goes through a confirmation dialog,
- *  - the backend removes each order together with its related rows.
+ *  - success toast offers «تراجع» (POST /admin/orders/{id}/restore).
  */
 export function useDeleteOrderFlow({ queryKey } = {}) {
   const { isAdmin, can } = usePermissions();
@@ -68,13 +68,13 @@ export function useDeleteOrderFlow({ queryKey } = {}) {
     if (!ids.length) return;
 
     setIsDeletingOrder(true);
-    let deleted = 0;
+    const trashed = [];
     let failed = 0;
     let firstError = null;
     for (const id of ids) {
       try {
-        await postOrderDelete(id);
-        deleted += 1;
+        await postOrderDelete(id, { force: Boolean(isAdmin && target?.force) });
+        trashed.push(id);
       } catch (error) {
         failed += 1;
         // مثال: 422 «لا يمكن حذف طلب مدفوع» — نعرض سبب الخادم بدل رسالة عامة.
@@ -82,21 +82,46 @@ export function useDeleteOrderFlow({ queryKey } = {}) {
       }
     }
     invalidateOrdersCaches(queryClient, { queryKey });
+    queryClient.invalidateQueries({ queryKey: ["orders-trash"] });
 
     setIsDeletingOrder(false);
     setDeleteDialogOpen(false);
     setTarget(null);
 
+    const undo = async () => {
+      let restored = 0;
+      for (const id of trashed) {
+        try {
+          await restoreOrder(id);
+          restored += 1;
+        } catch {
+          // يبقى في السلة
+        }
+      }
+      invalidateOrdersCaches(queryClient, { queryKey });
+      queryClient.invalidateQueries({ queryKey: ["orders-trash"] });
+      if (restored) toast.success(restored > 1 ? `تمت استعادة ${restored} طلب` : "تمت استعادة الطلب");
+      else toast.error("تعذرت الاستعادة — جرّب من «السلة»");
+    };
+    const undoAction = trashed.length ? { label: "تراجع", onClick: undo } : undefined;
+
     if (failed === 0) {
-      toast.success(ids.length > 1 ? `تم حذف ${deleted} طلب` : "تم حذف الطلب");
-    } else if (deleted === 0) {
-      toast.error(firstError || "تعذر حذف الطلبات، حاول مرة أخرى");
+      toast.success(trashed.length > 1 ? `نُقل ${trashed.length} طلب إلى السلة` : "نُقل الطلب إلى السلة", {
+        description: "يمكن استعادته خلال 30 يوماً من «السلة».",
+        action: undoAction,
+        duration: 10000,
+      });
+    } else if (trashed.length === 0) {
+      toast.error(firstError || "تعذر نقل الطلبات إلى السلة، حاول مرة أخرى");
     } else {
       toast.error(
-        `تم حذف ${deleted} طلب، وتعذر حذف ${failed}${firstError ? ` — ${firstError}` : ""}`
+        `نُقل ${trashed.length} طلب إلى السلة، وتعذر نقل ${failed}${firstError ? ` — ${firstError}` : ""}`,
+        { action: undoAction, duration: 10000 }
       );
     }
   };
+
+  const setForce = (force) => setTarget((prev) => (prev ? { ...prev, force } : prev));
 
   return {
     canDelete,
@@ -108,5 +133,8 @@ export function useDeleteOrderFlow({ queryKey } = {}) {
     requestDeleteOrder,
     requestBulkDelete,
     confirmDeleteOrder,
+    deleteForce: Boolean(target?.force),
+    setDeleteForce: setForce,
+    canForceDelete: Boolean(isAdmin),
   };
 }

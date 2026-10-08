@@ -18,13 +18,14 @@ import {
   ReceiptText,
   Settings,
   Sun,
+  Trash2,
   TrendingUp,
+  Undo2,
   UserRound,
   Users2,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HiMiniArrowPathRoundedSquare } from "react-icons/hi2";
 import { LuLogOut } from "react-icons/lu";
 import { useSidebarStore } from "@/src/stores/sidebar-store";
 import { useUserStore } from "@/src/stores/user-store";
@@ -38,7 +39,7 @@ import { toast } from "sonner";
 const NAV_ICONS = {
   '/home/realtime-orders': Menu,
   '/home/clients': Users2,
-  '/home/return-orders': HiMiniArrowPathRoundedSquare,
+  '/home/return-orders': Undo2,
   '/home/roles-and-employees': UserRound,
   '/home/marketing-and-content': TrendingUp,
   '/home/reports': BarChart3,
@@ -46,6 +47,7 @@ const NAV_ICONS = {
   '/home/orders': ClipboardList,
   '/home/lessor-change': FileSignature,
   '/home/invoices': ReceiptText,
+  '/home/trash': Trash2,
 };
 
 const DESKTOP_MEDIA = '(min-width: 1201px)';
@@ -115,7 +117,7 @@ export default function SideData() {
   const visibleNav = SIDEBAR_NAV.map((group) => ({
     ...group,
     items: group.items.filter(
-      (item) => !isFeatureDisabled(item.href) && isReady && can(item.section, 'view')
+      (item) => !isFeatureDisabled(item.href) && isReady && can(item.section, item.action ?? 'view')
     ),
   })).filter((group) => group.items.length > 0);
 

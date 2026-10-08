@@ -15,7 +15,7 @@ export function useDeleteOrder({ queryKey, onSuccess, onError } = {}) {
         queryKey,
         orderId: vars.orderId,
       });
-      toast.success(res?.data?.message || "تم حذف الطلب");
+      toast.success(res?.data?.data?.message || res?.data?.message || "نُقل الطلب إلى السلة");
       onSuccess?.(res, vars);
     },
     onError: (err) => {

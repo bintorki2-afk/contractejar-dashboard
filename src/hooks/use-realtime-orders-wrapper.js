@@ -390,6 +390,9 @@ export function useRealtimeOrdersWrapper() {
     getStatusCaseFields,
     // delete-order flow
     canDelete: deleteFlow.canDelete,
+    deleteForce: deleteFlow.deleteForce,
+    setDeleteForce: deleteFlow.setDeleteForce,
+    canForceDelete: deleteFlow.canForceDelete,
     deleteLabel: deleteFlow.deleteLabel,
     deleteCount: deleteFlow.deleteCount,
     deleteDialogOpen: deleteFlow.deleteDialogOpen,

@@ -262,6 +262,8 @@ export const ROUTE_SECTION_RULES = [
   // د9: «المرتجعات» = عمليات استرجاع Moyasar (payments) + طلبات الاسترجاع القديمة (returned_request).
   { prefix: '/home/return-orders', section: [PERMISSION_SECTIONS.payments, PERMISSION_SECTIONS.returned_request] },
   { prefix: '/home/lessor-change', section: PERMISSION_SECTIONS.lessor_change },
+  // د12: «السلة» — الطلبات وطلبات تغيير المؤجر المحذوفة (الاستعادة تتطلب صلاحية الحذف في الخادم).
+  { prefix: '/home/trash', section: [PERMISSION_SECTIONS.all_requests, PERMISSION_SECTIONS.lessor_change] },
   { prefix: '/home/orders', section: ORDERS_SECTIONS },
   { prefix: '/home/reports', section: PERMISSION_SECTIONS.analytics },
   { prefix: '/home/users', section: PERMISSION_SECTIONS.users },
@@ -342,6 +344,7 @@ export const SIDEBAR_NAV = [
     items: [
       { label: 'جميع الطلبات', href: '/home/orders', section: ORDERS_SECTIONS },
       { label: 'طلبات تغيير المؤجر', href: '/home/lessor-change', section: PERMISSION_SECTIONS.lessor_change },
+      { label: 'السلة', href: '/home/trash', section: [PERMISSION_SECTIONS.all_requests, PERMISSION_SECTIONS.lessor_change], action: 'delete' },
       { label: 'الفواتير', href: '/home/invoices', section: null },
     ],
   },
@@ -351,7 +354,7 @@ export function getFirstAllowedHref(permissions, user) {
   for (const group of SIDEBAR_NAV) {
     for (const item of group.items) {
       if (isFeatureDisabled(item.href)) continue;
-      if (canAccess(permissions, user, item.section, 'view')) {
+      if (canAccess(permissions, user, item.section, item.action ?? 'view')) {
         return item.href;
       }
     }

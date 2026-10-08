@@ -16,7 +16,7 @@ const admin = { id: 1, role_id: 1, is_system_admin: true, permissions: [] };
 function visibleSidebar(user) {
   return SIDEBAR_NAV.flatMap((group) => group.items)
     .filter((item) => !isFeatureDisabled(item.href))
-    .filter((item) => canAccess(user.permissions, user, item.section, "view"))
+    .filter((item) => canAccess(user.permissions, user, item.section, item.action ?? "view"))
     .map((item) => item.href);
 }
 
@@ -101,5 +101,14 @@ describe("payments.refund (د9)", () => {
     expect(canAccess(["payments.view"], employee, "payments", "refund")).toBe(false);
     expect(canAccess(["payments.view", "payments.refund"], employee, "payments", "refund")).toBe(true);
     expect(canAccess([], { is_system_admin: true }, "payments", "refund")).toBe(true);
+  });
+});
+
+describe("«السلة» (د12)", () => {
+  it("trash link shows only with a delete permission; route opens for order/lessor viewers", () => {
+    const deleter = employee(["all_requests.view", "all_requests.delete"]);
+    expect(visibleSidebar(deleter)).toContain("/home/trash");
+    expect(visibleSidebar(employee(["all_requests.view"]))).not.toContain("/home/trash");
+    expect(canAccessRoute("/home/trash", deleter.permissions, deleter)).toBe(true);
   });
 });

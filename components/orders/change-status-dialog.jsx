@@ -111,7 +111,7 @@ export default function ChangeStatusDialog({ orderId, order, queryKey }) {
   const { mutate: deleteOrder, isPending: isDeleting } = useMutation({
     mutationFn: () => axiosInstance.post(`/admin/orders/${orderId}/delete`),
     onSuccess: (res) => {
-      toast.success(res?.data?.message || "تم حذف الطلب بنجاح")
+      toast.success(res?.data?.data?.message || "نُقل الطلب إلى السلة — يمكن استعادته خلال 30 يوماً")
       invalidateOrdersCaches(queryClient, { queryKey, orderId })
     },
     onError: (error) => {
