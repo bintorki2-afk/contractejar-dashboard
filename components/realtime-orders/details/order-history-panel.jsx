@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import OrderPaymentsTab from "./order-payments-tab";
+import OrderActivityTab from "./order-activity-tab";
 
 /**
  * لوحة «سجل الطلب» الجانبية في تفاصيل الطلب: المدفوعات والاسترجاع (د9)،
@@ -10,6 +11,12 @@ import OrderPaymentsTab from "./order-payments-tab";
  */
 export default function OrderHistoryPanel({ orderData, tabs: extraTabs = [], canRefund, onRefund, className }) {
   const tabs = [
+    {
+      key: "activity",
+      label: "سجل النشاط",
+      count: (orderData?.activities ?? []).length || null,
+      render: () => <OrderActivityTab orderData={orderData} />,
+    },
     ...extraTabs,
     {
       key: "payments",
