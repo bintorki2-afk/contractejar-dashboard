@@ -42,6 +42,12 @@ export const HOME_MOCK = {
       badge_count: null,
     },
     {
+      id: 'lessor-change',
+      label: 'طلبات تغيير المؤجر',
+      href: '/home/lessor-change',
+      badge_count: null,
+    },
+    {
       id: 'return-orders',
       label: 'طلبات الاسترجاع',
       href: '/home/return-orders',

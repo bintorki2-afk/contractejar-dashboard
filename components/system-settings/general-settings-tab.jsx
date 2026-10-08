@@ -17,6 +17,7 @@ import {
 import { usePermissions } from "@/src/hooks/use-permissions";
 import { PERMISSION_SECTIONS } from "@/src/lib/permissions";
 import { SYSTEM_CATEGORIES } from "./mock-data";
+import SiteSettingsCards from "./site-settings-cards";
 
 // أيقونات غير مفعّلة لعقد إيجار (خاصة بالتطبيق/الدفع أو غير موصولة بالموقع بعد) → تعرض «قريبًا» ومعطّلة.
 const COMING_SOON_CARDS = new Set([
@@ -140,6 +141,10 @@ export default function GeneralSettingsTab() {
             );
           })}
         </div>
+      </section>
+
+      <section>
+        <SiteSettingsCards />
       </section>
 
       <section>

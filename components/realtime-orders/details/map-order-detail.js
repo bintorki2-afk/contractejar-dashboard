@@ -55,6 +55,44 @@ function durationLabel(step4 = {}, orderData = {}) {
   return pick(step4.duration_preset, orderData.duration_preset);
 }
 
+function toAmount(value) {
+  const amount = Number(typeof value === "string" ? value.replace(/,/g, "").trim() : value);
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+/**
+ * العداد المشترك: مبلغ شهري يدفعه المستأجر × مدة العقد — بند من بنود العقد
+ * (يُعرض فقط ولا يدخل في إجمالي رسومنا). يُحسب من الوحدات عندما تكون ملكية
+ * العداد `shared` ومعها رسم شهري، باستخدام `total_months` من الخطوة 4.
+ */
+function buildSharedMeters(units = [], step4 = {}, orderData = {}) {
+  const months = Number(pick(step4.total_months, orderData.total_months)) || 0;
+  const sums = { electricity: 0, water: 0 };
+
+  for (const unit of units) {
+    if (!unit || typeof unit !== "object") continue;
+    if (unit.electricity_meter_ownership === "shared") {
+      sums.electricity += toAmount(unit.electricity_shared_monthly_fee);
+    }
+    if (unit.water_meter_ownership === "shared") {
+      sums.water += toAmount(unit.water_shared_monthly_fee);
+    }
+  }
+
+  const line = (monthly) =>
+    monthly > 0 ? { monthly, months, total: Math.round(monthly * months * 100) / 100 } : null;
+
+  const electricity = line(sums.electricity);
+  const water = line(sums.water);
+  if (!electricity && !water) return null;
+
+  return {
+    electricity,
+    water,
+    total: (electricity?.total ?? 0) + (water?.total ?? 0),
+  };
+}
+
 const SPECIAL_DOC_DEFS = [
   // Deceased owner (وريث/متوفى)
   { key: "Image_inheritance_certificate", label: "صك حصر الإرث" },
@@ -273,6 +311,14 @@ export function mapOrderDetailView(orderData = {}) {
       doc_fee_vat: orderData.total_price?.vat,
       doc_fee_vat_label: pick(orderData.total_price?.vat_label, orderData.total_price?.details?.vat_label),
       doc_fee: pick(orderData.total_price?.total_price, orderData.total_price?.fee),
+      // رسوم المستندات الإضافية (أنواع صكوك محددة) — تُعرض فقط عندما تكون > 0.
+      document_surcharge: toAmount(
+        pick(orderData.total_price?.document_surcharge, orderData.total_price?.details?.document_surcharge)
+      ),
+      // رسوم نقل العدادات باسم المستأجر (ضمن الإجمالي).
+      meter_fees_total: toAmount(orderData.total_price?.details?.meter_fees_total),
+      // العداد المشترك (بند عقد — ليس ضمن رسومنا).
+      shared_meters: buildSharedMeters(units, step4, orderData),
       // Amount actually paid to the platform for documentation (number when paid,
       // otherwise the API sends a label such as "لم يتم الدفع").
       fees: pick(summary.amount_payment, orderData.amount_payment),

@@ -16,6 +16,7 @@ import {
   SettingsTableRow,
   SettingsTd,
   SettingsPageShell,
+  StatusBadge,
 } from "@/components/system-settings/shared";
 import { fetchBothContractTypes } from "@/components/system-settings/settings-list/fetch-contract-type-lists";
 import {
@@ -31,9 +32,19 @@ const HEADERS = [
   "الاسم",
   { label: "نوع العقد", className: "text-center" },
   { label: "تصنيف الوثيقة", className: "text-center" },
+  { label: "المدة (شهر)", className: "text-center" },
   { label: "السعر", className: "text-center" },
+  { label: "الحالة", className: "text-center" },
   { label: "الإجراءات", className: "text-left" },
 ];
+
+const COLUMNS = HEADERS.length;
+
+function isActivePeriod(item) {
+  const value = item?.is_active;
+  if (value === undefined || value === null) return true;
+  return value === true || value === 1 || value === "1" || value === "true";
+}
 
 export default function OrderDurationPage(props) {
   useUnwrapPageProps(props?.params, props?.searchParams);
@@ -57,11 +68,11 @@ export default function OrderDurationPage(props) {
         }
       />
 
-      <SettingsTable headers={HEADERS} minWidth="860px">
+      <SettingsTable headers={HEADERS} minWidth="980px">
         {isLoading ? (
-          <SettingsLoadingRows colSpan={5} />
+          <SettingsLoadingRows colSpan={COLUMNS} />
         ) : data.length === 0 ? (
-          <SettingsEmptyRow colSpan={5} />
+          <SettingsEmptyRow colSpan={COLUMNS} />
         ) : (
           data.map((item) => (
             <SettingsTableRow key={item.id}>
@@ -73,7 +84,13 @@ export default function OrderDurationPage(props) {
                 {getInstrumentTypeLabel(item.instrument_type)}
               </SettingsTd>
               <SettingsTd className="text-center tabular-nums">
+                {item?.months != null && item.months !== "" ? item.months : "—"}
+              </SettingsTd>
+              <SettingsTd className="text-center tabular-nums">
                 {formatContractPeriodPrice(item?.price) || "—"}
+              </SettingsTd>
+              <SettingsTd className="text-center">
+                <StatusBadge active={isActivePeriod(item)} />
               </SettingsTd>
               <SettingsTd>
                 <div className="flex items-center justify-end gap-2">
