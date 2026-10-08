@@ -50,7 +50,7 @@ export default function NotificationDispatchLog() {
         title="سجل الإرسال"
         description={
           lastRun?.at
-            ? `آخر تشغيل للإشعارات المجدولة: ${new Date(lastRun.at).toLocaleString("ar-SA-u-nu-latn", {
+            ? `آخر تشغيل للإشعارات المجدولة: ${new Date(lastRun.at).toLocaleString("ar-SA-u-ca-gregory-nu-latn", {
                 timeZone: "Asia/Riyadh",
                 dateStyle: "medium",
                 timeStyle: "short",

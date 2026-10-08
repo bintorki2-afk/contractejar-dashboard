@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -450,6 +451,14 @@ export function AppVersionCard({ data, canEdit }) {
             </div>
           </div>
         ))}
+
+        <HelperText>
+          نفس الإصدارات تظهر في صفحة{" "}
+          <Link href="/home/settings/app-status" className="font-bold text-[#0B7A4C] underline">
+            حالة التطبيق والإصدارات
+          </Link>{" "}
+          (وفيها أيضاً إيقاف/تشغيل الموقع والتطبيق).
+        </HelperText>
 
         <div className="space-y-1.5 text-right">
           <label htmlFor="appver-message" className="text-xs font-bold text-gray-700 dark:text-white/80">
