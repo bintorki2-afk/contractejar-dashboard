@@ -11,6 +11,7 @@ import { SIDEBAR_NAV, isFeatureDisabled } from "@/src/lib/permissions";
 import {
   BarChart3,
   ClipboardList,
+  FileSignature,
   Loader2,
   Menu,
   Moon,
@@ -42,6 +43,7 @@ const NAV_ICONS = {
   '/home/reports': BarChart3,
   '/home/settings': Settings,
   '/home/orders': ClipboardList,
+  '/home/lessor-change': FileSignature,
   '/home/invoices': ReceiptText,
 };
 

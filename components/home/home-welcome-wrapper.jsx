@@ -17,6 +17,7 @@ import {
     UserPlus,
     Radio,
     Wallet,
+    FileSignature,
     FileText,
     Users,
     BarChart3,
@@ -39,6 +40,7 @@ const QUICK_ACTION_ICONS = {
     orders: ClipboardList,
     clients: Users,
     'return-orders': RotateCcw,
+    'lessor-change': FileSignature,
     reports: BarChart3,
     invoices: Receipt,
 }

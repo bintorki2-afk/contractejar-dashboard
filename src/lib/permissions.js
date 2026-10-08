@@ -30,6 +30,7 @@ export const PERMISSION_SECTIONS = {
   contract_whatsapp: 'contract_whatsapp',
   instrument_settings: 'instrument_settings',
   coupons: 'coupons',
+  lessor_change: 'lessor_change',
   blogs: 'blogs',
   ads: 'ads',
   faqs: 'faqs',
@@ -224,6 +225,7 @@ export const ROUTE_SECTION_RULES = [
   { prefix: '/home/settings', section: PERMISSION_SECTIONS.settings },
   { prefix: '/home/roles-and-employees', section: ROLES_AND_EMPLOYEES_SECTIONS },
   { prefix: '/home/return-orders', section: PERMISSION_SECTIONS.returned_request },
+  { prefix: '/home/lessor-change', section: PERMISSION_SECTIONS.lessor_change },
   { prefix: '/home/orders', section: ORDERS_SECTIONS },
   { prefix: '/home/reports', section: PERMISSION_SECTIONS.analytics },
   { prefix: '/home/users', section: PERMISSION_SECTIONS.users },
@@ -302,6 +304,7 @@ export const SIDEBAR_NAV = [
     group: 'secondary',
     items: [
       { label: 'جميع الطلبات', href: '/home/orders', section: ORDERS_SECTIONS },
+      { label: 'طلبات تغيير المؤجر', href: '/home/lessor-change', section: PERMISSION_SECTIONS.lessor_change },
       { label: 'الفواتير', href: '/home/invoices', section: null },
     ],
   },

@@ -111,6 +111,16 @@ export default function TenantFinancialGroup({ order, onEdit }) {
               <FeeLine label="رسوم التوثيق">
                 <Money value={financial.doc_fee_base ?? financial.doc_fee} />
               </FeeLine>
+              {Number(financial.document_surcharge) > 0 ? (
+                <FeeLine label="رسوم المستندات الإضافية">
+                  <Money value={financial.document_surcharge} />
+                </FeeLine>
+              ) : null}
+              {Number(financial.meter_fees_total) > 0 ? (
+                <FeeLine label="رسوم نقل العدادات باسم المستأجر">
+                  <Money value={financial.meter_fees_total} />
+                </FeeLine>
+              ) : null}
               <FeeLine label="ضريبة القيمة المضافة">
                 {isZeroAmount(financial.doc_fee_vat) || !hasValue(financial.doc_fee_vat) ? (
                   <span className="text-xs font-black text-green-700 dark:text-[#6EE7B7]">
@@ -162,6 +172,29 @@ export default function TenantFinancialGroup({ order, onEdit }) {
             {hasValue(terms.daily_fine) ? <Money value={terms.daily_fine} /> : <span className="font-bold text-[#D1D5DB] dark:text-white/25">—</span>}
           </div>
         </div>
+
+        {financial.shared_meters ? (
+          <div className="pt-2 border-t border-[#EEF1F0] dark:border-white/10 space-y-1.5">
+            <p className="text-[11px] font-black text-brand-dark dark:text-[#6EE7B7]">
+              رسوم العداد المشترك على المستأجر
+              <span className="mr-1 font-bold text-gray-400 dark:text-white/40">(بند عقد — ليس ضمن رسوم التوثيق)</span>
+            </p>
+            {[
+              ["الكهرباء", financial.shared_meters.electricity],
+              ["المياه", financial.shared_meters.water],
+            ]
+              .filter(([, line]) => line)
+              .map(([label, line]) => (
+                <div key={label} className="flex items-center justify-between gap-3 text-xs">
+                  <span className="text-gray-400 dark:text-white/40 font-medium">{label}</span>
+                  <span className="font-bold text-[#4B5563] dark:text-white/70 tabular-nums" dir="rtl">
+                    {line.monthly.toLocaleString("en-US")} ريال/شهر × {line.months} شهر ={" "}
+                    <Money value={line.total} />
+                  </span>
+                </div>
+              ))}
+          </div>
+        ) : null}
 
         <div className="pt-2 border-t border-[#EEF1F0] dark:border-white/10 space-y-1.5">
           <p className="text-[11px] font-black text-brand-dark dark:text-[#6EE7B7]">الشروط الإضافية</p>
