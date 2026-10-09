@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { toast } from "sonner";
-import { BadgeCheck, Check, Copy, FileText, Hand, Send, X } from "lucide-react";
+import { BadgeCheck, Check, Copy, FileText, Hand, X } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa6";
 import { nextStageForRow } from "@/src/lib/order-status-keys";
 import { toSaudiMobileDialDigits } from "@/src/lib/format-phone";
@@ -26,8 +26,8 @@ function formatRelativeShort(dateString) {
   return `${days} يوم`;
 }
 
-const STAGE_ROW_LABELS = { received: "استلمت", draft_sent: "أرسلت المسودة", notarized: "وثّقت" };
-const STAGE_ROW_ICONS = { received: Hand, draft_sent: Send, notarized: BadgeCheck };
+const STAGE_ROW_LABELS = { received: "استلمت", notarized: "وثّقت" };
+const STAGE_ROW_ICONS = { received: Hand, notarized: BadgeCheck };
 
 export function buildAllOrderColumns({
   onView,

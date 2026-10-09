@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, ChevronLeft, Hand, Send } from "lucide-react";
+import { BadgeCheck, ChevronLeft, Hand } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import OrderActionsMenu from "@/components/realtime-orders/order-actions-menu";
@@ -8,8 +8,8 @@ import { nextStageForRow } from "@/src/lib/order-status-keys";
 import { formatSaudiMobileDisplay, toSaudiMobileDialDigits } from "@/src/lib/format-phone";
 import { DelayBadge, StatusPill } from "./status-pill";
 
-const STAGE_LABELS = { received: "استلمت", draft_sent: "أرسلت المسودة", notarized: "وثّقت" };
-const STAGE_ICONS = { received: Hand, draft_sent: Send, notarized: BadgeCheck };
+const STAGE_LABELS = { received: "استلمت", notarized: "وثّقت" };
+const STAGE_ICONS = { received: Hand, notarized: BadgeCheck };
 
 /**
  * «جميع الطلبات» على الجوال (د14): بطاقات مكدّسة بدل الجدول — الحالة والتأخير والعميل والدفع،

@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { buildOrderJourney, formatJourneyTime } from "@/src/lib/order-journey";
 
 /**
- * رحلة الطلب (د10): الدفع → قيد المراجعة → الاستلام → المسودة → التوثيق → مكتمل.
+ * رحلة الطلب (د10/هـ): قيد المراجعة → مستلم من الموظف → تم التوثيق.
  * لكل خطوة: من نفّذها ومتى، والخطوة الحالية مميّزة. أفقية على الشاشات الواسعة وعمودية على الجوال.
  */
 export default function OrderJourney({ orderData, className }) {
@@ -34,7 +34,7 @@ export default function OrderJourney({ orderData, className }) {
         )}
       </div>
 
-      <ol className="grid grid-cols-1 gap-0 md:grid-cols-6 md:gap-2">
+      <ol className="grid grid-cols-1 gap-0 md:grid-cols-3 md:gap-2">
         {journey.steps.map((step, index) => {
           const last = index === journey.steps.length - 1;
           const time = formatJourneyTime(step.at);

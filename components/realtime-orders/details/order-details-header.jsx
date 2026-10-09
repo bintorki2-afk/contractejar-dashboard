@@ -20,7 +20,6 @@ import {
   Paperclip,
   Phone,
   Printer,
-  Send,
   Tag,
   Undo2,
   Upload,
@@ -48,11 +47,9 @@ import {
 import { getOrderContractUuid } from "@/components/orders/messages/order-section-message-utils";
 import { fetchContractPaymentLink } from "@/components/orders/shared/payment-gateway";
 import { getSendErrorTitle } from "@/components/orders/messages/order-send-error-utils";
-import { DRAFT_RULE_HINT, statusRequiresDraftFirst } from "@/src/lib/draft-rule";
 import { DelayBadge, StatusPill } from "@/components/orders/status-pill";
 
-// د16: أزرار «إرسال المسودة عبر واتساب / تم التوثيق» السريعة استُبدلت بشريط «الخطوة التالية»
-// (OrderStageBar) الذي يستدعي مراحل الخادم ويفتح واتساب برسالة القالب.
+// د16/هـ: أزرار المراحل السريعة في شريط «الخطوة التالية»؛ لا توجد مرحلة «إرسال المسودة» (دفعة هـ).
 
 const ACTION_PILLS = [
   {
@@ -66,12 +63,6 @@ const ACTION_PILLS = [
     label: "رفع تحديث العقار",
     Icon: Upload,
     iconClass: "text-[#2563EB]",
-  },
-  {
-    id: "send_draft",
-    label: "إرسال المسودة",
-    Icon: Send,
-    iconClass: "text-[#B45309]",
   },
   {
     id: "missing_attachment",
@@ -122,10 +113,8 @@ export default function OrderDetailsHeader({
   onPayLink,
   onRefund,
   onPropertyUpdate,
-  onSendDraft,
   onMissingAttachment,
   onEjarDocumentation,
-  onQuickSendDraft,
   onQuickNotarized,
   onSendSectionError,
   onViewExpanded,
@@ -255,10 +244,6 @@ export default function OrderDetailsHeader({
     }
     if (id === "property_update") {
       onPropertyUpdate?.();
-      return;
-    }
-    if (id === "send_draft") {
-      onSendDraft?.();
       return;
     }
     if (id === "missing_attachment") {
@@ -592,19 +577,7 @@ function StatusSelect({ order, statuses = [], onStatusChange, disabled }) {
                       : "text-gray-700 dark:text-white/80"
                   )}
                 >
-                  <span className="flex flex-col gap-0.5">
-                    <span>{label}</span>
-                    {statusRequiresDraftFirst(status) ? (
-                      <span
-                        className={cn(
-                          "text-[10.5px] font-semibold",
-                          active ? "text-white/80" : "text-[#B45309] dark:text-amber-300"
-                        )}
-                      >
-                        {DRAFT_RULE_HINT}
-                      </span>
-                    ) : null}
-                  </span>
+                  <span>{label}</span>
                 </DropdownMenuItem>
               );
             })
@@ -622,9 +595,7 @@ function StatusSelect({ order, statuses = [], onStatusChange, disabled }) {
           pendingStatus
             ? `هل تريد تغيير حالة الطلب إلى «${
                 pendingStatus.name ?? pendingStatus.label
-              }»؟${
-                statusRequiresDraftFirst(pendingStatus) ? ` (${DRAFT_RULE_HINT})` : ""
-              }`
+              }»؟`
             : ""
         }
         confirmLabel="تغيير الحالة"

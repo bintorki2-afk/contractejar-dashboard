@@ -34,7 +34,6 @@ const CHANNEL_META = {
 
 const KEY_LABELS = {
   stage_received: "مرحلة: استلمت",
-  stage_draft_sent: "مرحلة: أرسلت المسودة",
   stage_notarized: "مرحلة: وثّقت",
   data_missing: "بيانات ناقصة",
   refund: "استرجاع المبلغ",
@@ -43,7 +42,6 @@ const KEY_LABELS = {
   status_received_by_employee: "الحالة: مستلم من الموظف",
   status_on_hold: "الحالة: معلق",
   status_cancelled: "الحالة: ملغى",
-  draft_sent: "إرسال المسودة",
   notarized: "التوثيق",
 };
 

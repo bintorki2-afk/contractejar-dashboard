@@ -143,11 +143,9 @@ function OrderDetailsBody() {
         refundLabel={canRefundPayments ? "استرجاع المبلغ" : undefined}
         appliedDiscount={orderData?.applied_discount ?? null}
         onPropertyUpdate={() => dialogs.setPropertyUpdateOpen(true)}
-        onSendDraft={() => dialogs.setSendDraftOpen(true)}
         onMissingAttachment={() => dialogs.setCorrectionRequestOpen(true)}
         onEjarDocumentation={() => dialogs.setEjarDocumentationOpen(true)}
-        onQuickSendDraft={() => dialogs.openQuickStatus("send_draft")}
-        onQuickNotarized={() => dialogs.openQuickStatus("notarized")}
+        onQuickNotarized={() => dialogs.openQuickStatus()}
         onSendSectionError={dialogs.setSectionErrorContext}
         onViewExpanded={() => setExpandedViewOpen(true)}
         statuses={statuses}

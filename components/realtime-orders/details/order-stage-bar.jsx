@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { BadgeCheck, Check, ExternalLink, Hand, Loader2, Send } from "lucide-react";
+import { BadgeCheck, Check, ExternalLink, Hand, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useConfirm } from "@/components/shared/confirm-provider";
 import {
@@ -13,11 +13,10 @@ import {
 import { formatSaudiMobileDisplay } from "@/src/lib/format-phone";
 import { EjarCopyButtons } from "./ejar-copy";
 
-const STAGE_ICONS = { received: Hand, draft_sent: Send, notarized: BadgeCheck };
+const STAGE_ICONS = { received: Hand, notarized: BadgeCheck };
 
 const STAGE_HINTS = {
   received: "استلم الطلب باسمك ليبدأ العمل عليه — سيُبلَّغ العميل وتُفتح رسالة واتساب جاهزة.",
-  draft_sent: "بعد رفع المسودة في إيجار: أدخل رقمها ثم أرسلها للعميل عبر واتساب.",
   notarized: "بعد موافقة العميل وتوثيق العقد في إيجار: أدخل نوع الصك ورقمه كما أُضيف في إيجار.",
 };
 
@@ -145,7 +144,7 @@ export function buildStageBody(fields = [], values = {}) {
 }
 
 /**
- * شريط «الخطوة التالية» (د16): استلمت ← أرسلت المسودة ← وثّقت.
+ * شريط «الخطوة التالية» (د16/هـ): استلمت ← وثّقت.
  * كل خطوة تستدعي POST /admin/orders/{id}/stage/{stage}، وتفتح واتساب برسالة القالب، وتعرض الخطوة التالية.
  */
 export default function OrderStageBar({ orderId, canEdit = true, className }) {
@@ -209,9 +208,7 @@ export default function OrderStageBar({ orderId, canEdit = true, className }) {
       description:
         nextStage === "received"
           ? "سيُسجَّل الطلب باسمك ويُبلَّغ العميل، ثم تُفتح رسالة واتساب جاهزة."
-          : nextStage === "draft_sent"
-            ? "ستتغير حالة الطلب إلى «إرسال المسودة» ويُبلَّغ العميل، ثم تُفتح رسالة المسودة في واتساب."
-            : "ستتغير حالة الطلب إلى «موثّق في إيجار» ويُبلَّغ العميل، ثم تُفتح رسالة التوثيق في واتساب.",
+          : "ستتغير حالة الطلب إلى «موثّق في إيجار» ويُبلَّغ العميل، ثم تُفتح رسالة التوثيق في واتساب.",
       confirmLabel: label,
     });
     if (!ok) return;

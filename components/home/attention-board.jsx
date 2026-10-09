@@ -11,7 +11,6 @@ import {
   Hand,
   Loader2,
   RefreshCw,
-  Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOrdersAttention } from "@/src/hooks/use-orders-attention";
@@ -36,20 +35,12 @@ const LANES = [
     viewAll: "/home/realtime-orders",
   },
   {
-    key: "awaiting_draft",
-    title: "بانتظار المسودة",
-    hint: "مستلمة — أرسل مسودة إيجار للعميل",
-    icon: Send,
-    tone: "info",
-    viewAll: "/home/orders?tab=received_by_employee",
-  },
-  {
     key: "awaiting_notarize",
     title: "بانتظار التوثيق",
-    hint: "أُرسلت المسودة — وثّق في إيجار",
+    hint: "مستلمة — وثّق في إيجار",
     icon: BadgeCheck,
     tone: "violet",
-    viewAll: "/home/orders?tab=whatsapp_draft",
+    viewAll: "/home/orders?tab=received_by_employee",
   },
   {
     key: "delayed",
@@ -160,8 +151,8 @@ export default function AttentionBoard() {
     onError: () => setPendingId(null),
   });
 
-  const total = (counts.awaiting_receive ?? 0) + (counts.awaiting_draft ?? 0) + (counts.awaiting_notarize ?? 0);
-  // الافتراضي: أول قسم فيه طلبات (بالترتيب: استلام ← مسودة ← توثيق ← متأخرة).
+  const total = (counts.awaiting_receive ?? 0) + (counts.awaiting_notarize ?? 0);
+  // الافتراضي: أول قسم فيه طلبات (بالترتيب: استلام ← توثيق ← متأخرة).
   const firstNonEmpty = LANES.find((l) => (counts?.[l.key] ?? 0) > 0)?.key ?? "awaiting_receive";
   const activeKey = selected ?? firstNonEmpty;
   const activeLane = LANES.find((l) => l.key === activeKey) ?? LANES[0];
@@ -216,7 +207,7 @@ export default function AttentionBoard() {
       ) : (
         <>
           {/* أربع خانات بالعدد — كل خانة تعرض قائمتها تحتها */}
-          <div role="tablist" aria-label="أقسام عليك الحين" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div role="tablist" aria-label="أقسام عليك الحين" className="grid grid-cols-2 gap-3 lg:grid-cols-3">
             {LANES.map((lane) => {
               const Icon = lane.icon;
               const tone = TONES[lane.tone];
