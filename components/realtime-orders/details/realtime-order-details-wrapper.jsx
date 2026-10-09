@@ -22,6 +22,8 @@ import BankTransferDialog from "./bank-transfer-dialog";
 import { UnpaidBanner, UnpaidDialog, markUnpaidPopupSeen, unpaidPopupSeen } from "./unpaid-notice";
 import { normalizePaymentState } from "@/src/lib/payment-state";
 import DataRequestBadge from "./data-request-badge";
+import ChargesPanel from "./charges-panel";
+import AddFeeDialog from "./add-fee-dialog";
 import { InlineEditProvider } from "./inline-edit";
 import ShortcutsHelp from "@/components/orders/shortcuts-help";
 import { ORDER_DETAIL_SHORTCUTS, useOrderDetailShortcuts } from "@/src/hooks/use-orders-shortcuts";
@@ -68,6 +70,12 @@ function OrderDetailsBody() {
   const dialogs = useOrderDetailsDialogs({ orderData, id, canReturn, refetch, statuses });
   const [expandedViewOpen, setExpandedViewOpen] = useState(false);
   const [refundOpen, setRefundOpen] = useState(false);
+  const [refundPrefill, setRefundPrefill] = useState(null);
+  const [addFeeOpen, setAddFeeOpen] = useState(false);
+  const openRefund = (prefill = null) => {
+    setRefundPrefill(prefill);
+    setRefundOpen(true);
+  };
   const [sideMode, setSideMode] = useState("attachments");
   const [attachmentKey, setAttachmentKey] = useState(null);
   const [mobileAttachmentsOpen, setMobileAttachmentsOpen] = useState(false);
@@ -146,7 +154,7 @@ function OrderDetailsBody() {
     onSelect: setAttachmentKey,
     mode: sideMode,
     onModeChange: setSideMode,
-    historyProps: { canRefund: canRefundPayments, onRefund: () => setRefundOpen(true), canNotify: canEditOrder, canDiscount: canDiscountOrder },
+    historyProps: { canRefund: canRefundPayments, onRefund: () => openRefund(null), canNotify: canEditOrder, canDiscount: canDiscountOrder },
   };
 
   return (
@@ -174,7 +182,8 @@ function OrderDetailsBody() {
         onOpenNotes={handleOpenNotes}
         onPayLink={dialogs.handlePayLink}
         onBankTransfer={() => openBankTransfer(null)}
-        onRefund={() => (canRefundPayments ? setRefundOpen(true) : dialogs.openReturn(orderData))}
+        onAddFee={() => setAddFeeOpen(true)}
+        onRefund={() => (canRefundPayments ? openRefund(null) : dialogs.openReturn(orderData))}
         badges={<DataRequestBadge orderData={orderData} canEdit={canEditOrder} />}
         onPropertyUpdate={() => dialogs.setPropertyUpdateOpen(true)}
         onRequestData={(section) => dialogs.openDataRequest(section)}
@@ -187,6 +196,16 @@ function OrderDetailsBody() {
           setMobileAttachmentsOpen(true);
           document.getElementById("order-attachments")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
         }}
+      />
+
+      {/* دفعة هـ (E5): فروقات السعر / الرسوم المعلّقة / مستحق الاسترجاع */}
+      <ChargesPanel
+        orderData={orderData}
+        canEdit={canEditOrder}
+        canRecordTransfer={canRecordTransfer}
+        canRefund={canRefundPayments}
+        onBankTransfer={(charge) => openBankTransfer(charge)}
+        onRefundDue={(amount) => openRefund({ amount, reason: "استرجاع فرق سعر بعد تعديل الطلب" })}
       />
 
       {/* الشاشة المقسومة: يمين = البيانات (تمرير داخلي) · يسار = المرفقات (ثابتة) */}
@@ -222,7 +241,8 @@ function OrderDetailsBody() {
         </div>
       </div>
 
-      <RefundDialog open={refundOpen} onOpenChange={setRefundOpen} orderData={orderData} />
+      <RefundDialog open={refundOpen} onOpenChange={setRefundOpen} orderData={orderData} prefill={refundPrefill} />
+      <AddFeeDialog open={addFeeOpen} onOpenChange={setAddFeeOpen} orderData={orderData} />
       <BankTransferDialog
         open={bankTransfer.open}
         onOpenChange={(next) => setBankTransfer((prev) => ({ ...prev, open: next }))}

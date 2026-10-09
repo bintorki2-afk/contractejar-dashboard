@@ -29,7 +29,7 @@ function toAsciiNumber(value) {
  * استرجاع عبر Moyasar (د9): كلي/جزئي + سبب ← POST /admin/payments/{payment}/refund.
  * يُعرض فقط لمن يملك payments.refund (مدير النظام ضمنياً).
  */
-export default function RefundDialog({ open, onOpenChange, orderData }) {
+export default function RefundDialog({ open, onOpenChange, orderData, prefill = null }) {
   const payments = (orderData?.payments ?? []).filter((p) => p?.status === "success" || p?.status === "paid");
   const defaultPayment = pickRefundablePayment(payments);
   const [paymentId, setPaymentId] = useState(defaultPayment?.id ?? null);
@@ -41,9 +41,10 @@ export default function RefundDialog({ open, onOpenChange, orderData }) {
   if (open && !seeded) {
     setSeeded(true);
     setPaymentId(defaultPayment?.id ?? null);
-    setMode("full");
-    setAmount("");
-    setReason("");
+    // دفعة هـ (E5): refund_due ← استرجاع جزئي معبّأ بالفرق وسببه.
+    setMode(prefill?.amount ? "partial" : "full");
+    setAmount(prefill?.amount ? String(prefill.amount) : "");
+    setReason(prefill?.reason ?? "");
     setError(null);
   }
   if (!open && seeded) setSeeded(false);

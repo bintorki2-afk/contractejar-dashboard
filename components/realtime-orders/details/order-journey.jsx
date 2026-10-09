@@ -183,7 +183,7 @@ export default function OrderJourney({ orderData, orderId, canEdit = true, canFo
             className="w-full max-w-[380px] border-brand-line text-[12px] text-[#6B7570] dark:border-white/10 dark:text-white/50 sm:w-auto sm:border-e-2 sm:pe-3"
           >
             {notes.map((n) => (
-              <p key={n.key} className="truncate" title={n.text}>
+              <p key={n.key} className="line-clamp-2" title={n.text}>
                 <b className="text-[#2F4A3B] dark:text-white/70">
                   {n.who}
                   {n.at ? <span dir="ltr" className="tabular-nums"> · {formatJourneyShort(n.at)}</span> : null}:
