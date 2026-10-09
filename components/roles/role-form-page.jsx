@@ -3,6 +3,7 @@
 import { ChevronLeft, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { PERMISSION_ACTION_LABELS } from "@/src/lib/permissions";
 
 const FIELD_LABEL =
   "block text-[12.5px] font-bold text-[#3a4b44] dark:text-[#bcd]";
@@ -234,7 +235,7 @@ export function RolePermissionsSection({
                         disabled={isPending}
                         className="size-4 accent-[#0B5A3C] dark:accent-emerald-500 shrink-0"
                       />
-                      {action.action_label_ar ?? action.action}
+                      {action.action_label_ar ?? PERMISSION_ACTION_LABELS[action.action] ?? action.action}
                     </label>
                   );
                 })}

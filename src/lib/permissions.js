@@ -46,7 +46,20 @@ export const PERMISSION_SECTIONS = {
   website_images: 'website_images',
 };
 
-export const PERMISSION_ACTIONS = ['view', 'create', 'edit', 'delete', 'retrieve', 'refund']; // refund: payments فقط (د9)
+// refund / record_transfer / add_fee: قسم «المدفوعات» فقط (د9 + دفعة هـ).
+export const PERMISSION_ACTIONS = ['view', 'create', 'edit', 'delete', 'retrieve', 'refund', 'record_transfer', 'add_fee'];
+
+/** تسميات عربية احتياطية للأفعال عندما لا يرسل الخادم `action_label_ar`. */
+export const PERMISSION_ACTION_LABELS = {
+  view: 'عرض القسم',
+  create: 'إضافة',
+  edit: 'تعديل',
+  delete: 'حذف',
+  retrieve: 'استرجاع',
+  refund: 'استرجاع المدفوعات',
+  record_transfer: 'تسجيل حوالة بنكية',
+  add_fee: 'إضافة رسوم',
+};
 
 /**
  * أعلام الميزات (Feature flags) — عقد إيجار.

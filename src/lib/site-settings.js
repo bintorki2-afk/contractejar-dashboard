@@ -328,3 +328,66 @@ export function buildAutoAssignPayload(form = {}) {
     auto_assign_employee_ids: Array.isArray(form.employee_ids) ? form.employee_ids.map(Number) : [],
   };
 }
+
+/* ------------------------------------------------------------------ */
+/* الحوالة البنكية (دفعة هـ — E2): بنك + آيبان + اسم صاحب الحساب.
+   تُقرأ من `data.bank_transfer` وتُحفظ بالمفاتيح `bank_name, bank_iban, bank_account_name`.
+   لا تظهر للعميل في الموقع/التطبيق — الموظف يرسلها بنفسه عبر قالب «تعليمات الحوالة البنكية». */
+
+export const BANK_TRANSFER_FIELDS = [
+  { key: "bank_name", label: "اسم البنك", placeholder: "مصرف الراجحي", dir: "rtl" },
+  { key: "bank_iban", label: "رقم الآيبان (IBAN)", placeholder: "SA00 0000 0000 0000 0000 0000", dir: "ltr" },
+  { key: "bank_account_name", label: "اسم صاحب الحساب", placeholder: "مؤسسة عقدي العقارية", dir: "rtl" },
+];
+export const BANK_TRANSFER_KEYS = BANK_TRANSFER_FIELDS.map((f) => f.key);
+
+export const emptyBankTransferForm = BANK_TRANSFER_KEYS.reduce((acc, key) => {
+  acc[key] = "";
+  return acc;
+}, {});
+
+export function extractBankTransferSettings(response) {
+  const data = unwrapSettings(response);
+  const raw = data?.bank_transfer && typeof data.bank_transfer === "object" ? data.bank_transfer : {};
+  const legacy = data?.settings && typeof data.settings === "object" ? data.settings : {};
+  return {
+    form: BANK_TRANSFER_KEYS.reduce((acc, key) => {
+      acc[key] = toInputValue(raw[key] ?? legacy[key]);
+      return acc;
+    }, {}),
+    isConfigured: Boolean(raw.is_configured ?? (raw.bank_iban && raw.bank_name)),
+    note: raw.note ?? null,
+  };
+}
+
+/** يطبّع الآيبان: حروف كبيرة بلا مسافات. */
+export function normalizeIban(value) {
+  return String(value ?? "").replace(/\s+/g, "").toUpperCase();
+}
+
+/** يرجع {field: message} للأخطاء؛ الحقول الثلاثة اختيارية لكن الآيبان إن كُتب يجب أن يكون سعودياً صحيحاً. */
+export function validateBankTransferForm(form = {}) {
+  const errors = {};
+  const iban = normalizeIban(form.bank_iban);
+  if (iban && !/^SA\d{22}$/.test(iban)) {
+    errors.bank_iban = "الآيبان السعودي يبدأ بـ SA ويتكوّن من 24 خانة (مثل SA0380000000608010167519)";
+  }
+  if (iban && !String(form.bank_name ?? "").trim()) {
+    errors.bank_name = "اكتب اسم البنك مع الآيبان";
+  }
+  return errors;
+}
+
+export function buildBankTransferPayload(form = {}) {
+  return {
+    bank_name: String(form.bank_name ?? "").trim(),
+    bank_iban: normalizeIban(form.bank_iban),
+    bank_account_name: String(form.bank_account_name ?? "").trim(),
+  };
+}
+
+/** عرض الآيبان بمجموعات رباعية للقراءة. */
+export function formatIbanDisplay(value) {
+  const iban = normalizeIban(value);
+  return iban ? iban.replace(/(.{4})/g, "$1 ").trim() : "";
+}
