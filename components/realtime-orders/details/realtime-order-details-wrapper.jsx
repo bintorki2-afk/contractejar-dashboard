@@ -19,7 +19,6 @@ import OrderDetailsDialogs from "./order-details-dialogs";
 import ContractExpandedViewDialog from "./contract-expanded-view-dialog";
 import { mapOrderDetailView } from "./map-order-detail";
 import OrderJourney from "./order-journey";
-import OrderStageBar from "./order-stage-bar";
 import OrderHistoryPanel from "./order-history-panel";
 import RefundDialog from "./refund-dialog";
 import { InlineEditProvider } from "./inline-edit";
@@ -79,7 +78,7 @@ function OrderDetailsBody() {
   const detailShortcuts = useOrderDetailShortcuts({
     enabled: Boolean(orderData),
     onStage: () => {
-      const btn = document.querySelector('[aria-label="الخطوة التالية"] button.h-12');
+      const btn = document.querySelector('[aria-label="رحلة الطلب"] button[data-next-stage]');
       if (btn) {
         btn.scrollIntoView({ block: "center", behavior: "smooth" });
         btn.click();
@@ -154,9 +153,7 @@ function OrderDetailsBody() {
         isStatusPending={dialogs.isChangingStatus}
       />
 
-      <OrderStageBar orderId={orderData.id ?? id} canEdit={canEditOrder} />
-
-      <OrderJourney orderData={orderData} />
+      <OrderJourney orderData={orderData} orderId={orderData.id ?? id} canEdit={canEditOrder} canForce={isAdmin} className="rounded-2xl border border-brand-line bg-white px-4 py-4 sm:px-5 dark:bg-[#0F1C16] dark:border-white/10" />
 
       <div className="grid grid-cols-1 items-start gap-5 min-[1500px]:grid-cols-[minmax(0,1fr)_380px]">
         <div className="min-w-0">

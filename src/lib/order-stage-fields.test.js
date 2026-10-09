@@ -5,7 +5,7 @@ import {
   isStageFieldRequired,
   isStageFieldVisible,
   validateStageValues,
-} from "@/components/realtime-orders/details/order-stage-bar";
+} from "@/components/realtime-orders/details/stage-fields";
 
 const SAMPLE_FIELDS = [
   { name: "deed_number", type: "string", required: true, label_ar: "رقم الصك" },

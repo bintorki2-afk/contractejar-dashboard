@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Lock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,7 @@ import {
   buildStageBody,
   initialStageValues,
   validateStageValues,
-} from "@/components/realtime-orders/details/order-stage-bar";
+} from "@/components/realtime-orders/details/stage-fields";
 import { STAGE_LABELS, useOrderStages, useRunOrderStage } from "@/src/hooks/use-order-stage";
 
 /**
@@ -55,6 +55,10 @@ export default function StageActionDialog({ order, open, onOpenChange, onDone })
   });
 
   const label = stages?.next_stage_label ?? STAGE_LABELS[stage] ?? "الخطوة التالية";
+  // دفعة هـ: «وثّقت» مقفول حتى يُسجَّل الدفع / تُحصَّل الرسوم المعلّقة — الخادم يرفض بـ 422 أيضاً.
+  const locked = Boolean(stages?.next_stage_locked);
+  const lockMessage = stages?.next_stage_lock_message || stages?.payment_state?.notarize_block_message || "الخطوة مقفولة حتى يُسجَّل الدفع.";
+  const warnings = Array.isArray(stages?.warnings) ? stages.warnings : [];
 
   const submit = () => {
     if (!stage) return;
@@ -79,6 +83,20 @@ export default function StageActionDialog({ order, open, onOpenChange, onDone })
                 : "لا توجد مرحلة متاحة لهذا الطلب الآن."}
           </DialogDescription>
         </DialogHeader>
+
+        {!isLoading && stage && locked ? (
+          <p role="alert" className="flex items-start gap-2 rounded-xl border border-[#F5C9C6] bg-[#FDECEC] px-3 py-2.5 text-[12.5px] font-bold text-[#B42318] dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
+            <Lock className="mt-0.5 size-4 shrink-0" />
+            {lockMessage}
+          </p>
+        ) : null}
+        {!isLoading && stage
+          ? warnings.map((w) => (
+              <p key={w.code ?? w.message} className="rounded-xl bg-[#FFF7E6] px-3 py-2 text-[12.5px] font-bold text-[#7A4B00] dark:bg-amber-500/10 dark:text-amber-300">
+                ⚠ {w.message}
+              </p>
+            ))
+          : null}
 
         {isLoading ? (
           <div className="flex justify-center py-6">
@@ -110,7 +128,7 @@ export default function StageActionDialog({ order, open, onOpenChange, onDone })
             <button
               type="button"
               onClick={submit}
-              disabled={run.isPending}
+              disabled={run.isPending || locked}
               className="h-10 px-5 rounded-xl bg-brand-deep text-white text-sm font-bold hover:bg-brand-deep/90 disabled:opacity-60 inline-flex items-center gap-2"
             >
               {run.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
