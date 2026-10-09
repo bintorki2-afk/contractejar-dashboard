@@ -68,15 +68,16 @@ export default function PreviousOrdersChip({ summary, mobile, currentId, classNa
             const paid = item.is_paid || ["paid", "partially_refunded", "partially_paid"].includes(item.payment_state?.status);
             return (
               <DropdownMenuItem key={item.id} asChild className="cursor-pointer rounded-xl px-3 py-2.5 text-[13.5px] focus:bg-[#EEF5F0] dark:focus:bg-white/[0.06]">
-                <Link href={`/home/orders/${item.id}`} className="flex w-full items-center gap-1.5 whitespace-nowrap">
-                  <span className="font-extrabold text-brand-deep tabular-nums dark:text-emerald-300">#{item.uuid}</span>
-                  <span>· {item.type_label ?? item.type}</span>
-                  <span className={cn("·", paid ? "" : "")}>·</span>
-                  <span className={paid ? "font-bold text-brand-deep dark:text-emerald-300" : "font-bold text-[#B42318] dark:text-red-300"}>
-                    {paid ? `مدفوع${item.payment_state?.paid_total ? ` ${sar(item.payment_state.paid_total)}` : ""}` : "غير مدفوع"}
+                <Link href={`/home/orders/${item.id}`} className="flex w-full min-w-0 items-center gap-2">
+                  <span className="flex min-w-0 flex-1 flex-wrap items-center gap-x-1.5 gap-y-0.5 leading-5">
+                    <span className="font-extrabold text-brand-deep tabular-nums dark:text-emerald-300">#{item.uuid}</span>
+                    <span className="text-[#6B7B71] dark:text-white/50">· {item.type_label ?? item.type}</span>
+                    <span className={cn("font-bold", paid ? "text-brand-deep dark:text-emerald-300" : "text-[#B42318] dark:text-red-300")}>
+                      · {paid ? `مدفوع${item.payment_state?.paid_total ? ` ${sar(item.payment_state.paid_total)}` : ""}` : "غير مدفوع"}
+                    </span>
+                    <span className="text-[#33403B] dark:text-white/70">· {item.status_label}</span>
                   </span>
-                  <span>· {item.status_label}</span>
-                  <span className="ms-auto text-[12px] text-[#6B7B71] tabular-nums dark:text-white/50" dir="ltr">
+                  <span className="shrink-0 text-[11.5px] text-[#6B7B71] tabular-nums dark:text-white/50" dir="ltr">
                     {shortDate(item.created_at)}
                   </span>
                 </Link>

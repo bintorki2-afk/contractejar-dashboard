@@ -103,7 +103,7 @@ export default function OrderJourney({ orderData, orderId, canEdit = true, canFo
   return (
     <>
       <section aria-label="رحلة الطلب" className={cn("flex flex-wrap items-start gap-3", className)} dir="rtl">
-        <ol className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:gap-3">
+        <ol className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:gap-3 lg:w-auto lg:flex-1">
           {journey.steps.map((step, index) => {
             const last = index === journey.steps.length - 1;
             const time = formatJourneyShort(step.at);
@@ -180,14 +180,18 @@ export default function OrderJourney({ orderData, orderId, canEdit = true, canFo
         {notes.length ? (
           <aside
             aria-label="ملاحظات الموظفين"
-            className="w-full max-w-[380px] border-brand-line text-[12px] text-[#6B7570] dark:border-white/10 dark:text-white/50 sm:w-auto sm:border-e-2 sm:pe-3"
+            className="w-full border-t border-brand-line pt-2 text-[12px] text-[#6B7570] dark:border-white/10 dark:text-white/50 lg:w-auto lg:max-w-[380px] lg:border-t-0 lg:border-e-2 lg:pe-3 lg:pt-0"
           >
             {notes.map((n) => (
               <p key={n.key} className="line-clamp-2" title={n.text}>
-                <b className="text-[#2F4A3B] dark:text-white/70">
-                  {n.who}
-                  {n.at ? <span dir="ltr" className="tabular-nums"> · {formatJourneyShort(n.at)}</span> : null}:
-                </b>{" "}
+                <b className="text-[#2F4A3B] dark:text-white/70">{n.who}</b>
+                {n.at ? (
+                  <span className="text-[#8A958F] dark:text-white/40">
+                    {" "}
+                    (<bdi dir="ltr" className="tabular-nums">{formatJourneyShort(n.at)}</bdi>)
+                  </span>
+                ) : null}
+                {" — "}
                 {n.text}
               </p>
             ))}

@@ -126,14 +126,14 @@ export default function ChargesPanel({ orderData, canEdit = true, canRecordTrans
             className="flex flex-wrap items-center gap-2 rounded-[12px] border border-[#F1D59A] bg-[#FFF7E6] px-4 py-2.5 text-[13px] font-bold text-[#7A4B00] dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300"
           >
             <Coins className="size-4 shrink-0" />
-            <span className="min-w-0 flex-1">
+            <span className="min-w-0 flex-1 basis-[240px]">
               {pendingChargeBanner(c)}
               <span className="ms-1 text-[11.5px] font-semibold text-[#9A6100]/80">
                 · {chargeKindLabel(c)} · بانتظار الدفع{c.created_by_name ? ` · أضافها ${c.created_by_name}` : ""}
               </span>
             </span>
             {canEdit ? (
-              <div className="flex flex-wrap items-center gap-1.5">
+              <div className="flex w-full flex-wrap items-center gap-1.5 sm:w-auto">
                 <span className="text-[12px] font-semibold">طلب الدفع ▸</span>
                 <button type="button" disabled={busy} onClick={() => link.mutate({ orderId: orderData.id, chargeId: c.id })} className={cn(btn, "bg-brand-deep text-white hover:bg-brand-deep/90 dark:bg-emerald-500 dark:text-[#0B1411]")} title="رابط Moyasar بمبلغ الرسوم فقط + رسالة واتساب">
                   {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Link2 className="size-3.5" />}
@@ -156,7 +156,7 @@ export default function ChargesPanel({ orderData, canEdit = true, canRecordTrans
       {refundDue > 0 ? (
         <div role="alert" data-refund-due className="flex flex-wrap items-center gap-2 rounded-[12px] border border-[#BFE0CC] bg-[#E3F3EA] px-4 py-2.5 text-[13px] font-bold text-brand-deep dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
           <RotateCcw className="size-4 shrink-0" />
-          <span className="min-w-0 flex-1">بعد التعديل صار المستحق أقل مما دُفع — مستحق للعميل {sar(refundDue)}.</span>
+          <span className="min-w-0 flex-1 basis-[240px]">بعد التعديل صار المستحق أقل مما دُفع — مستحق للعميل {sar(refundDue)}.</span>
           {canRefund ? (
             <button type="button" onClick={() => onRefundDue?.(refundDue)} className={cn(btn, "bg-brand-deep text-white hover:bg-brand-deep/90 dark:bg-emerald-500 dark:text-[#0B1411]")}>
               <RotateCcw className="size-3.5" /> استرجاع الفرق ({sar(refundDue)})
