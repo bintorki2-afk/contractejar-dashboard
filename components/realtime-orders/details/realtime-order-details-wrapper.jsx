@@ -109,6 +109,9 @@ function OrderDetailsBody() {
       if (!digits) toast.error("لا يوجد رقم جوال للعميل");
       else window.open(orderData?.creator_mobile?.whatsapp_url || `https://wa.me/${digits}`, "_blank", "noopener,noreferrer");
     },
+    onDataRequest: () => dialogs.openDataRequest(null),
+    onAddFee: canAddFee ? () => setAddFeeOpen(true) : undefined,
+    onBankTransfer: canRecordTransfer ? () => openBankTransfer(null) : undefined,
   });
 
   useEffect(() => {
