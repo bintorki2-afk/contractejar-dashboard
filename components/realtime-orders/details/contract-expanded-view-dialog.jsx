@@ -2,9 +2,10 @@
 
 import { X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import OrderGroupsLayout from "./order-groups-layout";
+import OrderDataPanel from "./order-data-panel";
 
-export default function ContractExpandedViewDialog({ open, onOpenChange, order }) {
+/** عرض مكبّر (دفعة هـ): نفس أقسام إيجار الستة بخط أكبر داخل نافذة واسعة — للقراءة فقط. */
+export default function ContractExpandedViewDialog({ open, onOpenChange, order, orderData }) {
   const handleClose = () => onOpenChange(false);
 
   return (
@@ -12,7 +13,7 @@ export default function ContractExpandedViewDialog({ open, onOpenChange, order }
       <DialogContent
         closeButton={false}
         dir="rtl"
-        className="gap-0 overflow-hidden rounded-[20px] border-0 p-0 sm:max-w-[min(900px,calc(100vw-32px))] max-h-[min(92vh,1200px)] bg-[#F4F6F5] dark:bg-[#0B1411]"
+        className="gap-0 overflow-hidden rounded-[20px] border-0 p-0 sm:max-w-[min(1100px,calc(100vw-32px))] max-h-[min(92vh,1200px)] bg-[#F4F6F5] dark:bg-[#0B1411]"
       >
         <DialogTitle className="sr-only">عرض مكبّر للعقد</DialogTitle>
 
@@ -37,9 +38,9 @@ export default function ContractExpandedViewDialog({ open, onOpenChange, order }
 
         <div
           id="bigBody"
-          className="bigbody overflow-y-auto max-h-[calc(min(92vh,1200px)-72px)] p-5"
+          className="bigbody overflow-y-auto max-h-[calc(min(92vh,1200px)-72px)] p-5 text-[115%] [&_[data-cell]_span]:text-[1.1em]"
         >
-          {order ? <OrderGroupsLayout order={order} /> : null}
+          {orderData ? <OrderDataPanel orderData={orderData} canEdit={false} /> : null}
         </div>
       </DialogContent>
     </Dialog>
