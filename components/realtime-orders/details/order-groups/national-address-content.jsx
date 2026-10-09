@@ -76,11 +76,11 @@ function TextAddressPanel({ address }) {
   const fields = [
     { label: "العنوان المختصر", value: address.short_address },
     { label: "المدينة", value: address.city },
-    { label: "الحي", value: address.district },
-    { label: "رقم المبنى", value: address.building },
-    { label: "الشارع", value: address.street },
-    { label: "الرمز البريدي", value: address.postal_code },
-    { label: "الرقم الإضافي", value: address.additional_number },
+    { label: "الحي", value: address.district, editKey: "neighborhood" },
+    { label: "رقم المبنى", value: address.building, editKey: "building_number" },
+    { label: "الشارع", value: address.street, editKey: "street" },
+    { label: "الرمز البريدي", value: address.postal_code, editKey: "postal_code" },
+    { label: "الرقم الإضافي", value: address.additional_number, editKey: "extra_figure" },
   ].filter((field) => hasValue(field.value));
 
   if (fields.length === 0) return null;
@@ -88,7 +88,7 @@ function TextAddressPanel({ address }) {
   return (
     <div className="space-y-2">
       {fields.map((field) => (
-        <Field key={field.label} label={field.label} value={field.value} />
+        <Field key={field.label} label={field.label} value={field.value} editKey={field.editKey} />
       ))}
     </div>
   );

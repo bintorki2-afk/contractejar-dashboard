@@ -4,8 +4,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const CHECKBOX_CLASS =
   "size-4 rounded-[3px] border-[#C4C4C4] shadow-none " +
-  "data-[state=checked]:bg-[#0E5F4E] data-[state=checked]:border-[#0E5F4E] data-[state=checked]:text-white " +
-  "data-[state=indeterminate]:bg-[#0E5F4E] data-[state=indeterminate]:border-[#0E5F4E] data-[state=indeterminate]:text-white " +
+  "data-[state=checked]:bg-[#0B5A3C] data-[state=checked]:border-[#0B5A3C] data-[state=checked]:text-white " +
+  "data-[state=indeterminate]:bg-[#0B5A3C] data-[state=indeterminate]:border-[#0B5A3C] data-[state=indeterminate]:text-white " +
   "dark:border-white/25";
 
 /**

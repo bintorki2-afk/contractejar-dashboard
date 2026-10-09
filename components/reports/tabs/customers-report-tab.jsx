@@ -16,10 +16,10 @@ export default function CustomersReportTab({ period, dateFrom, dateTo, contractT
   if (isLoading) return <Loader />;
   if (isError) return <ReportError title="العملاء" error={error} fallback="تعذّر تحميل تقرير العملاء." onRetry={refetch} />;
   const k = data?.kpis ?? {};
-  const kpis = [["total", "إجمالي العملاء", k.total, "users"], ["new", "عملاء جدد", k.new, "userPlus"], ["returning", "عملاء عائدون", k.returning, "userCheck"], ["avg", "متوسط العقود لكل عميل", k.avg_contracts_per_customer, "file"], ["incomplete", "لم يكملوا الطلب", k.incomplete, "xCircle"]].map(([key, label, value, icon]) => ({ key, label, value: value ?? 0, icon, isText: key === "avg" }));
+  const kpis = [["total", "إجمالي العملاء", k.total, "users"], ["new", "عملاء جدد (في الفترة)", k.new, "userPlus"], ["active", "عملاء نشطون (طلبوا في الفترة)", k.active, "activity"], ["returning", "عملاء عائدون", k.returning, "userCheck"], ["avg", "متوسط العقود لكل عميل", k.avg_contracts_per_customer, "file"], ["incomplete", "لم يكملوا الطلب", k.incomplete, "xCircle"]].map(([key, label, value, icon]) => ({ key, label, value: value ?? 0, icon, isText: key === "avg" }));
   return (
     <div className="flex flex-col gap-5">
-      <ReportKpiGrid items={kpis} columns="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" />
+      <ReportKpiGrid items={kpis} columns="grid-cols-2 sm:grid-cols-3 xl:grid-cols-6" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
        

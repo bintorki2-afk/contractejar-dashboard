@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/shared/confirm-provider";
 import { useState } from "react";
 import { toast } from "sonner";
 import { usePermissions } from "@/src/hooks/use-permissions";
@@ -30,6 +31,7 @@ const EMPTY_FORM = {
 };
 
 export default function ServicePagesView() {
+  const confirm = useConfirm();
   const { can } = usePermissions();
   const canCreate = can(PERMISSION_SECTIONS.analytics, "create");
   const canEdit = can(PERMISSION_SECTIONS.analytics, "edit");
@@ -69,8 +71,9 @@ export default function ServicePagesView() {
     });
   };
 
-  const handleDelete = (row) => {
-    if (!window.confirm(`حذف «${row.title}»؟`)) return;
+  const handleDelete = async (row) => {
+    const ok = await confirm({ title: "حذف الصفحة", description: `حذف «${row.title}»؟`, confirmLabel: "حذف", destructive: true });
+    if (!ok) return;
     remove.mutate(row.id, {
       onSuccess: () => toast.success("تم حذف الصفحة"),
       onError: (err) =>
@@ -185,7 +188,7 @@ export default function ServicePagesView() {
                 style={{
                   fontSize: 12,
                   fontWeight: 800,
-                  color: "#0b5f4c",
+                  color: "#0B5A3C",
                   margin: 0,
                 }}
               >

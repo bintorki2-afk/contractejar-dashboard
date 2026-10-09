@@ -23,12 +23,12 @@ const VARIANT_STYLES = {
   },
   default: {
     icon: Bell,
-    accent: "border-[#0c6055]",
+    accent: "border-[#0B5A3C]",
     iconBg: "bg-[#E8F5F3]",
-    iconColor: "text-[#0c6055]",
+    iconColor: "text-[#0B5A3C]",
     badge: "إشعار",
-    badgeClass: "bg-[#E8F5F3] text-[#0c6055]",
-    actionClass: "bg-[#0c6055] hover:bg-[#0a4f47]",
+    badgeClass: "bg-[#E8F5F3] text-[#0B5A3C]",
+    actionClass: "bg-[#0B5A3C] hover:bg-[#0a4f47]",
   },
 };
 

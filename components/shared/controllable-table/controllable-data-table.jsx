@@ -85,8 +85,8 @@ function SortableHeaderButton({ label, active, direction, onClick }) {
       title="ترتيب"
       className={cn(
         "inline-flex items-center gap-1 transition-colors",
-        "hover:text-[#0E5F4E] dark:hover:text-[#5FD0A8]",
-        active && "text-[#0B5F4C] dark:text-[#5FD0A8]"
+        "hover:text-[#0B5A3C] dark:hover:text-[#5FD0A8]",
+        active && "text-[#0B5A3C] dark:text-[#5FD0A8]"
       )}
     >
       <span>{label}</span>
@@ -111,6 +111,7 @@ export default function ControllableDataTable({
   getRowKey = (row, index) => row?.id ?? index,
   onRowClick,
   getRowHighlight,
+  activeRowId = null,
   emptyMessage = "لا توجد بيانات متوفرة حالياً",
   isLoading = false,
   className,
@@ -258,12 +259,16 @@ export default function ControllableDataTable({
           ) : (
             sortedData.map((row, index) => {
               const highlighted = getRowHighlight?.(row);
+              const isActive = activeRowId != null && String(row?.id) === String(activeRowId);
               return (
                 <tr
                   key={getRowKey(row, index)}
+                  data-row-id={row?.id ?? undefined}
+                  aria-selected={isActive || undefined}
                   onClick={() => onRowClick?.(row)}
                   className={cn(
                     "group transition-colors",
+                    isActive && "outline outline-2 -outline-offset-2 outline-brand-green/70",
                     highlighted
                       ? "bg-[#FFFAF0] dark:bg-[#221D0E]"
                       : "bg-white dark:bg-transparent",

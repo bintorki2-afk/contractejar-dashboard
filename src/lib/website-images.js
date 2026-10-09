@@ -61,8 +61,8 @@ export const PUBLIC_WEBSITE_ORIGIN =
 
 /**
  * Best-effort resolved URL for a row.
- * API often returns `https://aqid.subcodeco.com/website/...` which 404s — those static
- * assets are served from the public site (`aqdi.sa`). Uploaded media on other paths
+ * (سجل قديم مخفي — د4) الـ API القديم كان يعيد روابط `/website/...` على خادم آخر تُرجع 404 —
+ * تلك الملفات الثابتة كانت على الموقع القديم. Uploaded media on other paths
  * keep their absolute URL as-is.
  */
 export function resolveImageUrl(item = {}) {

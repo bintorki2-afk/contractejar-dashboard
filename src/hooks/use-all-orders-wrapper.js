@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { AlertCircle, Ban, CheckCircle2, Undo2 } from "lucide-react";
 import { mapRealtimeTableOrder } from "@/components/realtime-orders/map-realtime-order";
 import {
   getStatusCaseFields,
@@ -38,25 +37,30 @@ import {
 import { axiosInstance } from "@/src/utils/axios";
 import { useChangeOrderStatus } from "@/src/hooks/use-change-order-status";
 import { useDeleteOrderFlow } from "@/src/hooks/use-delete-order-flow";
-import { getAllOrdersExtraFilterStatuses } from "@/src/lib/contract-statuses";
+import { tabToOrderListParams } from "@/src/lib/order-status-keys";
+import { useOrderStatusCounts } from "@/src/hooks/use-order-status-counts";
 
-const COMPLETION_FILTERS = ["authenticated", "incomplete"];
-const STATUS_PILLS = ["canceled", "returned"];
 const DEFAULT_PER_PAGE = 20;
 
-export const ALL_ORDERS_FILTER_PILLS = [
-  { id: "authenticated", label: "موثق", Icon: CheckCircle2 },
-  { id: "canceled", label: "ملغي", Icon: Ban },
-  { id: "returned", label: "مسترجع", Icon: Undo2 },
-  { id: "incomplete", label: "طلب غير مكتمل", Icon: AlertCircle },
+/** فلتر الدفع (مستقل عن تبويب الحالة): الكل / مدفوع / غير مدفوع. */
+export const PAYMENT_FILTERS = [
+  { id: "all", label: "الكل" },
+  { id: "paid", label: "مدفوع" },
+  { id: "unpaid", label: "غير مدفوع" },
 ];
 
-const PILL_PERMISSIONS = {
-  authenticated: PERMISSION_SECTIONS.request_classification,
-  canceled: PERMISSION_SECTIONS.request_classification,
-  returned: PERMISSION_SECTIONS.returned_request,
-  incomplete: PERMISSION_SECTIONS.incomplete_request,
-};
+const VALID_TABS_RE = /^[a-z_]+$/;
+
+function readInitialTab(lockedFilter) {
+  if (lockedFilter === "returned") return "refunded";
+  if (typeof window === "undefined") return "all";
+  try {
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    return tab && VALID_TABS_RE.test(tab) ? tab : "all";
+  } catch {
+    return "all";
+  }
+}
 
 export function useAllOrdersWrapper({
   lockedFilter = null,
@@ -82,32 +86,20 @@ export function useAllOrdersWrapper({
     can(PERMISSION_SECTIONS.incomplete_request, "view") ||
     can(PERMISSION_SECTIONS.request_classification, "view") ||
     can(PERMISSION_SECTIONS.returned_request, "view");
+  // د18: أزرار المراحل في الصف = صلاحية «استلمت» في الخادم (all_requests.edit).
+  const canStage = isAdmin || can(PERMISSION_SECTIONS.all_requests, "edit");
   const canReturn =
     isAdmin ||
     can(PERMISSION_SECTIONS.returned_request, "create") ||
     can(PERMISSION_SECTIONS.returned_request, "edit");
 
-  const {
-    activeItems: statusItems,
-    returnedStatusId,
-    canceledStatusId,
-  } = useContractStatuses();
-
-  const visiblePills = ALL_ORDERS_FILTER_PILLS.filter((pill) => {
-    if (lockedFilter && STATUS_PILLS.includes(pill.id)) return false;
-    // لا توجد حالة «استرجاع» بالاسم → لا نعرض الفلتر (بدل الاحتياط بحالة أخرى).
-    if (pill.id === "returned" && returnedStatusId == null) return false;
-    const section = PILL_PERMISSIONS[pill.id];
-    if (!section) return true;
-    return isAdmin || can(section, "view");
-  });
+  const { activeItems: statusItems } = useContractStatuses();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [activeFilters, setActiveFilters] = useState(() =>
-    lockedFilter ? [lockedFilter] : []
-  );
-  const [extraStatusId, setExtraStatusId] = useState(null);
+  // دفعة د (D1): الافتراضي = جميع الحالات. التبويب يُحفظ في الرابط (?tab=) ليُشارك ويُستعاد.
+  const [tab, setTabState] = useState(() => readInitialTab(lockedFilter));
+  const [paymentFilter, setPaymentFilter] = useState("all");
   const [contractType, setContractType] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -118,10 +110,17 @@ export function useAllOrdersWrapper({
   const [pendingStatusChange, setPendingStatusChange] = useState(null);
   const [manageStatusesOpen, setManageStatusesOpen] = useState(false);
 
-  const extraStatuses = useMemo(
-    () => (lockedFilter ? [] : getAllOrdersExtraFilterStatuses(statusItems)),
-    [statusItems, lockedFilter]
-  );
+  const setTab = (next) => {
+    if (lockedFilter) return;
+    const value = next || "all";
+    setTabState(value);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (value === "all") url.searchParams.delete("tab");
+      else url.searchParams.set("tab", value);
+      window.history.replaceState(window.history.state, "", url.toString());
+    }
+  };
 
   useEffect(() => {
     const handler = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 500);
@@ -131,8 +130,8 @@ export function useAllOrdersWrapper({
   // Any list-param change sends the user back to the first page.
   const pageResetKey = JSON.stringify([
     debouncedSearch,
-    activeFilters,
-    extraStatusId,
+    tab,
+    paymentFilter,
     contractType,
     perPage,
   ]);
@@ -142,37 +141,28 @@ export function useAllOrdersWrapper({
     setCurrentPage(1);
   }
 
-  const listParams = useMemo(() => {
-    const hasAuthenticated = activeFilters.includes("authenticated");
-    const hasIncomplete = activeFilters.includes("incomplete");
-    const hasReturned = activeFilters.includes("returned");
-    const hasCanceled = activeFilters.includes("canceled");
-    const hasExtraStatus = extraStatusId != null && extraStatusId !== "";
+  const statusCounts = useOrderStatusCounts({
+    search: debouncedSearch,
+    contractType: contractType || undefined,
+    enabled: !lockedFilter,
+  });
+  const statusTabs = statusCounts.tabs;
 
+  const listParams = useMemo(() => {
+    const tabParams = tabToOrderListParams(tab);
+    const isCompleted =
+      paymentFilter === "paid" ? 1 : paymentFilter === "unpaid" ? 0 : undefined;
+    // الخادم (متابعة 1) يطبّق status_key مع فلتر الدفع — لا حاجة لرقم الحالة.
     return buildAdminOrdersParams({
       page: currentPage,
       perPage,
       search: debouncedSearch,
-      isCompleted: hasAuthenticated ? 1 : hasIncomplete ? 0 : undefined,
-      statusId: hasExtraStatus
-        ? extraStatusId
-        : hasCanceled
-          ? canceledStatusId
-          : hasReturned
-            ? returnedStatusId
-            : undefined,
+      isCompleted: tabParams.tab === "incomplete" ? undefined : isCompleted,
+      statusKey: tabParams.status_key,
+      tab: tabParams.tab,
       contractType: contractType || undefined,
     });
-  }, [
-    activeFilters,
-    canceledStatusId,
-    contractType,
-    currentPage,
-    debouncedSearch,
-    extraStatusId,
-    perPage,
-    returnedStatusId,
-  ]);
+  }, [contractType, currentPage, debouncedSearch, paymentFilter, perPage, tab]);
 
   const {
     items: tableItems,
@@ -261,35 +251,6 @@ export function useAllOrdersWrapper({
     }
   };
 
-  const handleToggleFilter = (id) => {
-    if (lockedFilter && STATUS_PILLS.includes(id)) return;
-    setActiveFilters((prev) => {
-      const isOn = prev.includes(id);
-      if (isOn) return prev.filter((item) => item !== id);
-
-      if (STATUS_PILLS.includes(id)) setExtraStatusId(null);
-
-      let next = prev;
-      if (COMPLETION_FILTERS.includes(id)) {
-        next = next.filter((item) => !COMPLETION_FILTERS.includes(item));
-      }
-      if (STATUS_PILLS.includes(id)) {
-        next = next.filter((item) => !STATUS_PILLS.includes(item));
-      }
-      return [...next, id];
-    });
-  };
-
-  const handleExtraStatusChange = (statusId) => {
-    if (lockedFilter) return;
-    setExtraStatusId(statusId);
-    if (statusId != null) {
-      setActiveFilters((prev) =>
-        prev.filter((item) => !STATUS_PILLS.includes(item))
-      );
-    }
-  };
-
   const exportParams = useMemo(() => {
     const params = { ...listParams };
     delete params.page;
@@ -316,11 +277,16 @@ export function useAllOrdersWrapper({
     canManageStatuses,
     canExport,
     canReturn,
-    visiblePills,
+    canStage,
     searchQuery,
     setSearchQuery,
-    activeFilters,
-    extraStatusId,
+    tab,
+    setTab,
+    paymentFilter,
+    setPaymentFilter,
+    statusTabs,
+    statusTabsLoading: statusCounts.isLoading,
+    refetchStatusCounts: statusCounts.refetch,
     contractType,
     setContractType,
     currentPage,
@@ -339,7 +305,6 @@ export function useAllOrdersWrapper({
     manageStatusesOpen,
     setManageStatusesOpen,
     statusItems,
-    extraStatuses,
     tableOrders,
     pagination,
     tableLoading,
@@ -351,14 +316,15 @@ export function useAllOrdersWrapper({
     handlePrint,
     handleBatchPrint,
     isBatchPrinting,
-    handleToggleFilter,
-    handleExtraStatusChange,
     handleExport,
     isExporting,
     exportParams,
     listParams,
     // delete-order flow
     canDelete: deleteFlow.canDelete,
+    deleteForce: deleteFlow.deleteForce,
+    setDeleteForce: deleteFlow.setDeleteForce,
+    canForceDelete: deleteFlow.canForceDelete,
     deleteLabel: deleteFlow.deleteLabel,
     deleteCount: deleteFlow.deleteCount,
     deleteDialogOpen: deleteFlow.deleteDialogOpen,

@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/shared/confirm-provider";
 import { useCallback, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, Loader2 } from "lucide-react";
@@ -25,6 +26,7 @@ const PANEL_CLASS = cn(
 );
 
 export default function ClientDiscountWrapper() {
+  const confirm = useConfirm();
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -66,9 +68,10 @@ export default function ClientDiscountWrapper() {
     },
   });
 
-  const handleDeactivate = (couponId) => {
+  const handleDeactivate = async (couponId) => {
     if (!couponId) return;
-    if (!window.confirm("هل أنت متأكد من إلغاء تفعيل هذا الخصم؟")) return;
+    const ok = await confirm({ title: "إلغاء تفعيل الخصم", description: "هل أنت متأكد من إلغاء تفعيل هذا الخصم؟", confirmLabel: "إلغاء التفعيل", destructive: true });
+    if (!ok) return;
     deactivateCoupon(couponId);
   };
 

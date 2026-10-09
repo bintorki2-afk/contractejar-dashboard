@@ -51,11 +51,11 @@ function invoiceStyles(isPaid) {
       align-items: flex-start;
       gap: 16px;
     }
-    .brand { color: #0B5345; }
+    .brand { color: #0A4D33; }
     .brand h1 { margin: 0; font-size: 28px; }
     .brand p { margin: 4px 0 0; font-size: 13px; color: #6B7280; font-weight: 600; }
     .meta { text-align: left; font-size: 13px; color: #4B5563; line-height: 1.8; }
-    .rule { height: 2px; background: #0B5345; margin: 18px 0; border: 0; }
+    .rule { height: 2px; background: #0A4D33; margin: 18px 0; border: 0; }
     .boxes { display: flex; gap: 10px; }
     .box {
       flex: 1;
@@ -78,7 +78,7 @@ function invoiceStyles(isPaid) {
       justify-content: space-between;
       align-items: center;
       background: #E8F5F1;
-      color: #0B5345;
+      color: #0A4D33;
       font-weight: 800;
       padding: 12px 14px;
       border-radius: 8px;

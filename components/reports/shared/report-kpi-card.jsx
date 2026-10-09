@@ -67,7 +67,7 @@ export default function ReportKpiCard({ label, value, icon = "file", tone, isTex
         <Icon className="size-[18px]" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-22 font-bold text-gray-900 leading-tight truncate dark:text-white">
+        <p className={cn("font-bold text-gray-900 leading-tight dark:text-white tabular-nums", isText ? "text-lg" : "text-22 truncate")}>
           {formatValue(value, isText)}
         </p>
         <p className="text-xs text-gray-400 mt-0.5 leading-snug dark:text-white/50">{label}</p>

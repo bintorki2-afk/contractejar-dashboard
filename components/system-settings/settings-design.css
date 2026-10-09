@@ -1,7 +1,7 @@
 /* Pixel-matched settings chrome from design.html #setWrap / #setEditor */
 
 .set-page {
-  --set-brand: #0e5f4e;
+  --set-brand: #0B5A3C;
   --set-brand-mid: #0b7a4c;
   --set-ink: #123;
   --set-muted: #8a978f;
@@ -62,7 +62,7 @@
 
 .set-page .xbtn {
   border: none;
-  background: #0e5f4e;
+  background: #0B5A3C;
   color: #fff;
   border-radius: 10px;
   padding: 8px 14px;
@@ -99,15 +99,15 @@
 }
 
 .set-page .mkt-subtab.on {
-  background: #0e5f4e;
+  background: #0B5A3C;
   color: #fff;
-  border-color: #0e5f4e;
+  border-color: #0B5A3C;
 }
 
 .set-page .cpf-sec-t {
   font-size: 13.5px;
   font-weight: 900;
-  color: #0b5f4c;
+  color: #0B5A3C;
   margin-bottom: 10px;
 }
 
@@ -199,7 +199,7 @@
   height: 38px;
   border-radius: 11px;
   background: #e9f5ef;
-  color: #0e5f4e;
+  color: #0B5A3C;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -352,7 +352,7 @@
 .set-page .mk-mini {
   border: 1px solid #cfe3da;
   background: #fff;
-  color: #0b5f4c;
+  color: #0B5A3C;
   border-radius: 8px;
   padding: 5px 11px;
   font-family: inherit;

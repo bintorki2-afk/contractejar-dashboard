@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 
-const HEADERS = ["المسار", "رسوم السنة الأولى", "يدفع بعد", "الخصم", "هامش عقدي", "الفحص"];
+const HEADERS = ["المسار", "رسوم السنة الأولى", "يدفع بعد", "الخصم", "هامش المنصة", "الفحص"];
 
 function formatAmount(value) {
   return value.toLocaleString("en-US");

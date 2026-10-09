@@ -10,6 +10,7 @@ import { usePermissions } from "@/src/hooks/use-permissions";
 import { SIDEBAR_NAV, isFeatureDisabled } from "@/src/lib/permissions";
 import {
   BarChart3,
+  BookOpen,
   ClipboardList,
   FileSignature,
   Loader2,
@@ -18,16 +19,18 @@ import {
   ReceiptText,
   Settings,
   Sun,
+  Trash2,
   TrendingUp,
+  Undo2,
   UserRound,
   Users2,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HiMiniArrowPathRoundedSquare } from "react-icons/hi2";
 import { LuLogOut } from "react-icons/lu";
 import { useSidebarStore } from "@/src/stores/sidebar-store";
 import { useUserStore } from "@/src/stores/user-store";
+import { roleLabelAr } from "@/src/lib/role-labels";
 import { useUnreceivedOrdersWatcher } from "@/src/hooks/use-unreceived-orders-watcher";
 import { useReturnedOrdersCount } from "@/src/hooks/use-returned-orders-count";
 import { getWorkPeriodLabel } from "@/components/roles-and-employees/shared";
@@ -37,7 +40,7 @@ import { toast } from "sonner";
 const NAV_ICONS = {
   '/home/realtime-orders': Menu,
   '/home/clients': Users2,
-  '/home/return-orders': HiMiniArrowPathRoundedSquare,
+  '/home/return-orders': Undo2,
   '/home/roles-and-employees': UserRound,
   '/home/marketing-and-content': TrendingUp,
   '/home/reports': BarChart3,
@@ -45,6 +48,8 @@ const NAV_ICONS = {
   '/home/orders': ClipboardList,
   '/home/lessor-change': FileSignature,
   '/home/invoices': ReceiptText,
+  '/home/trash': Trash2,
+  '/home/guide': BookOpen,
 };
 
 const DESKTOP_MEDIA = '(min-width: 1201px)';
@@ -61,17 +66,20 @@ function NavLink({ item, pathname, collapsed, badgeCount }) {
     <Link
       href={item.href}
       title={collapsed ? item.label : undefined}
-      className={`group flex h-11 items-center rounded-xl text-sm font-medium transition-colors ${
+      aria-current={isActive ? 'page' : undefined}
+      className={`group relative flex h-11 items-center rounded-xl text-sm transition-colors ${
         isActive
-          ? 'bg-white/10 text-brand-accent'
-          : 'text-sidebar-foreground/90 hover:bg-white/[0.06] hover:text-sidebar-foreground'
+          ? 'bg-brand-mint font-bold text-brand-deep dark:bg-white/10 dark:text-brand-accent'
+          : 'font-semibold text-[#33403B] hover:bg-[#F3F7F5] hover:text-brand-deep dark:text-sidebar-foreground/90 dark:hover:bg-white/[0.06] dark:hover:text-sidebar-foreground'
       } ${collapsed ? 'w-11 mx-auto justify-center px-0' : 'justify-between gap-2.5 px-3.5'}`}
     >
       <span className={`flex min-w-0 items-center gap-2.5 ${collapsed ? '' : 'flex-1'}`}>
         <Icon
           size={18}
           className={`size-[18px] shrink-0 ${
-            isActive ? 'text-brand-accent' : 'text-brand-accent/80 group-hover:text-brand-accent'
+            isActive
+              ? 'text-brand-deep dark:text-brand-accent'
+              : 'text-[#6B7570] group-hover:text-brand-deep dark:text-brand-accent/80 dark:group-hover:text-brand-accent'
           }`}
         />
         {!collapsed && <span className="truncate">{item.label}</span>}
@@ -114,7 +122,7 @@ export default function SideData() {
   const visibleNav = SIDEBAR_NAV.map((group) => ({
     ...group,
     items: group.items.filter(
-      (item) => !isFeatureDisabled(item.href) && isReady && can(item.section, 'view')
+      (item) => !isFeatureDisabled(item.href) && isReady && can(item.section, item.action ?? 'view')
     ),
   })).filter((group) => group.items.length > 0);
 
@@ -122,11 +130,7 @@ export default function SideData() {
   const panelWidth = EXPANDED_WIDTH;
 
   const userName = user?.name || 'مستخدم';
-  const userRole =
-    user?.role_title ||
-    user?.role_relation?.name ||
-    user?.role?.name ||
-    '—';
+  const userRole = roleLabelAr(user) || '—';
   const userWorkPeriod = user?.work_period ? getWorkPeriodLabel(user.work_period) : null;
   const userInitial = userName.trim().charAt(0) || 'م';
 
@@ -151,7 +155,7 @@ export default function SideData() {
 
       <div
         id="side-data"
-        className={`relative flex h-screen shrink-0 flex-col overflow-hidden border-e border-white/10 bg-gradient-to-b from-sidebar to-sidebar-dark transition-all duration-300 max-[1200px]:absolute max-[1200px]:inset-s-0 max-[1200px]:inset-y-0 max-[1200px]:z-[100] ${
+        className={`relative flex h-screen shrink-0 flex-col overflow-hidden border-e border-brand-line bg-white dark:border-white/10 dark:bg-gradient-to-b dark:from-sidebar dark:to-sidebar-dark transition-all duration-300 max-[1200px]:absolute max-[1200px]:inset-s-0 max-[1200px]:inset-y-0 max-[1200px]:z-[100] ${
           isSidebarOpen
             ? `${panelWidth} translate-x-0`
             : `${COLLAPSED_WIDTH} translate-x-0 max-[1200px]:w-0 max-[1200px]:!p-0 max-[1200px]:!overflow-hidden max-[1200px]:border-e-0 max-[1200px]:translate-x-full`
@@ -165,11 +169,11 @@ export default function SideData() {
             >
               <Link
                 href="/home"
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-accent/15 ring-1 ring-brand-accent/25"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-mint ring-1 ring-brand-line dark:bg-brand-accent/15 dark:ring-brand-accent/25"
               >
                 <Image
                   src={logo}
-                  alt="عقدي"
+                  alt="عقد إيجار"
                   width={28}
                   height={36}
                   className="h-7 w-auto object-contain"
@@ -177,11 +181,11 @@ export default function SideData() {
               </Link>
               {!isCollapsed ? (
                 <div className="min-w-0 flex-1 pe-10">
-                  <h2 className="truncate text-15 font-bold leading-tight text-sidebar-foreground">
-                    لوحة الموظفين
+                  <h2 className="truncate text-15 font-extrabold leading-tight text-brand-deep dark:text-sidebar-foreground">
+                    عقد إيجار
                   </h2>
-                  <p className="mt-0.5 truncate text-11 font-normal text-sidebar-foreground/55">
-                    إدارة طلبات العقود
+                  <p className="mt-0.5 truncate text-11 font-semibold text-[#6B7570] dark:text-sidebar-foreground/55">
+                    لوحة الموظفين
                   </p>
                 </div>
               ) : null}
@@ -190,7 +194,7 @@ export default function SideData() {
                 onClick={toggleTheme}
                 title={isDark ? "الوضع الفاتح" : "الوضع الداكن"}
                 aria-label={isDark ? "الوضع الفاتح" : "الوضع الداكن"}
-                className={`flex h-9 w-9 items-center justify-center rounded-lg text-sidebar-foreground/70 transition-colors hover:bg-white/10 hover:text-sidebar-foreground ${
+                className={`flex h-9 w-9 items-center justify-center rounded-lg text-[#6B7570] transition-colors hover:bg-brand-mint hover:text-brand-deep dark:text-sidebar-foreground/70 dark:hover:bg-white/10 dark:hover:text-sidebar-foreground ${
                   isCollapsed
                     ? "shrink-0"
                     : "absolute end-1 top-1"
@@ -204,12 +208,12 @@ export default function SideData() {
               </button>
             </div>
 
-            <div className="mx-1 mb-3 h-px bg-white/10" />
+            <div className="mx-1 mb-3 h-px bg-brand-line dark:bg-white/10" />
 
             <div className="min-h-0 flex-1 overflow-y-auto no-scrollbar">
               {visibleNav.map((group, groupIndex) => (
                 <div key={group.group}>
-                  {groupIndex > 0 && <div className="mx-1 my-3 h-px bg-white/10" />}
+                  {groupIndex > 0 && <div className="mx-1 my-3 h-px bg-brand-line dark:bg-white/10" />}
                   <div className="flex flex-col gap-1">
                     {group.items.map((item) => (
                       <div key={item.href} className="relative">
@@ -239,7 +243,7 @@ export default function SideData() {
                     type="button"
                     onClick={openProfile}
                     title={userName}
-                    className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-white/10 text-sm font-bold text-sidebar-foreground transition-colors hover:bg-white/[0.14] ring-1 ring-white/10"
+                    className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl bg-brand-mint text-sm font-bold text-brand-deep transition-colors ring-1 ring-brand-line dark:bg-white/10 dark:text-sidebar-foreground dark:hover:bg-white/[0.14] dark:ring-white/10"
                   >
                     <AvatarImage
                       src={user?.profile_image}
@@ -255,7 +259,7 @@ export default function SideData() {
                     onClick={() => logout()}
                     disabled={logoutLoading}
                     title="تسجيل الخروج"
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-sidebar-foreground/70 transition-colors hover:bg-white/10 hover:text-sidebar-foreground"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-[#6B7570] transition-colors hover:bg-brand-mint hover:text-brand-deep dark:text-sidebar-foreground/70 dark:hover:bg-white/10 dark:hover:text-sidebar-foreground"
                   >
                     {logoutLoading ? (
                       <Loader2 className="size-4 animate-spin" />
@@ -265,13 +269,13 @@ export default function SideData() {
                   </button>
                 </div>
               ) : (
-                <div className="relative rounded-2xl bg-white/[0.08] p-2.5 pe-11 ring-1 ring-white/10">
+                <div className="relative rounded-2xl bg-[#F5F7F6] p-2.5 pe-11 ring-1 ring-brand-line dark:bg-white/[0.08] dark:ring-white/10">
                   <button
                     type="button"
                     onClick={openProfile}
-                    className="flex w-full min-w-0 items-center gap-2.5 rounded-xl p-1 -m-1 text-start transition-colors hover:bg-white/[0.06]"
+                    className="flex w-full min-w-0 items-center gap-2.5 rounded-xl p-1 -m-1 text-start transition-colors hover:bg-white dark:hover:bg-white/[0.06]"
                   >
-                    <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-accent/20 text-sm font-bold text-brand-accent ring-2 ring-brand-accent/25">
+                    <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-mint text-sm font-bold text-brand-deep ring-2 ring-brand-line dark:bg-brand-accent/20 dark:text-brand-accent dark:ring-brand-accent/25">
                       <AvatarImage
                         src={user?.profile_image}
                         alt=""
@@ -282,20 +286,20 @@ export default function SideData() {
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex min-w-0 items-center gap-1.5">
-                        <span className="truncate text-13 font-semibold text-sidebar-foreground">
+                        <span className="truncate text-13 font-bold text-[#14231D] dark:text-sidebar-foreground">
                           {userName}
                         </span>
                         {userRole && userRole !== '—' ? (
                           <span
                             title={userRole}
-                            className="shrink-0 rounded bg-brand-accent/20 px-1 py-px text-[8px] font-bold leading-tight text-brand-accent ring-1 ring-brand-accent/25"
+                            className="shrink-0 rounded-full bg-brand-mint px-1.5 py-px text-[9.5px] font-bold leading-tight text-brand-deep ring-1 ring-brand-line dark:bg-brand-accent/20 dark:text-brand-accent dark:ring-brand-accent/25"
                           >
                             {userRole}
                           </span>
                         ) : null}
                       </span>
                       {userWorkPeriod ? (
-                        <span className="mt-0.5 block truncate text-11 leading-snug text-sidebar-foreground/55">
+                        <span className="mt-0.5 block truncate text-11 leading-snug text-[#6B7570] dark:text-sidebar-foreground/55">
                           {userWorkPeriod}
                         </span>
                       ) : null}
@@ -307,7 +311,7 @@ export default function SideData() {
                     disabled={logoutLoading}
                     title="تسجيل الخروج"
                     aria-label="تسجيل الخروج"
-                    className="absolute end-2.5 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-sidebar-foreground/70 transition-colors hover:bg-white/10 hover:text-sidebar-foreground disabled:opacity-60"
+                    className="absolute end-2.5 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-[#6B7570] transition-colors hover:bg-white hover:text-[#B42318] dark:text-sidebar-foreground/70 dark:hover:bg-white/10 dark:hover:text-sidebar-foreground disabled:opacity-60"
                   >
                     {logoutLoading ? (
                       <Loader2 className="size-4 animate-spin" />

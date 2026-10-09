@@ -28,7 +28,7 @@ export default function OrdersPagination({ pagination, currentPage, onPageChange
 
   const navBtn = cn(
     "w-9 h-9 rounded-full border flex items-center justify-center transition-all disabled:opacity-50",
-    "border-[#E3E8E6] text-[#98A39E] hover:bg-[#0E5F4E] hover:text-white hover:border-[#0E5F4E]",
+    "border-[#E3E8E6] text-[#98A39E] hover:bg-[#0B5A3C] hover:text-white hover:border-[#0B5A3C]",
     "dark:border-[#2C5648] dark:text-[#9FC0B4] dark:hover:bg-emerald-500 dark:hover:text-[#0B1411] dark:hover:border-emerald-500",
     "disabled:hover:bg-transparent disabled:hover:text-[#98A39E] dark:disabled:hover:text-[#9FC0B4]"
   );
@@ -60,7 +60,7 @@ export default function OrdersPagination({ pagination, currentPage, onPageChange
             className={cn(
               "w-9 h-9 rounded-full flex items-center justify-center text-13 font-medium transition-all",
               currentPage === page
-                ? "bg-[#0E5F4E] text-white shadow-lg shadow-[#0E5F4E]/20 dark:bg-emerald-500 dark:text-[#0B1411] dark:shadow-none"
+                ? "bg-[#0B5A3C] text-white shadow-lg shadow-[#0B5A3C]/20 dark:bg-emerald-500 dark:text-[#0B1411] dark:shadow-none"
                 : "border border-[#E3E8E6] text-[#98A39E] hover:bg-[#F3F4F6] dark:border-[#2C5648] dark:text-[#9FC0B4] dark:hover:bg-[#1B3A2E]"
             )}
           >

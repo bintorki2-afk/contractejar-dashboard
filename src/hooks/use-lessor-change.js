@@ -128,10 +128,28 @@ export function useDeleteLessorChangeRequest() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id) => axiosInstance.post(`${LESSOR_CHANGE_API}/${id}/delete`).then((res) => res?.data),
-    onSuccess: (response) => {
-      toast.success(response?.message || "تم حذف الطلب");
+    // د12: الحذف ينقل إلى السلة (30 يوماً) مع «تراجع».
+    mutationFn: (id) => axiosInstance.delete(`${LESSOR_CHANGE_API}/${id}`).then((res) => res?.data),
+    onSuccess: (_response, id) => {
       queryClient.invalidateQueries({ queryKey: [LESSOR_CHANGE_LIST_KEY] });
+      queryClient.invalidateQueries({ queryKey: ["lessor-change-trash"] });
+      toast.success("نُقل الطلب إلى السلة", {
+        description: "يمكن استعادته خلال 30 يوماً من «السلة».",
+        duration: 10000,
+        action: {
+          label: "تراجع",
+          onClick: async () => {
+            try {
+              await axiosInstance.post(`${LESSOR_CHANGE_API}/${id}/restore`);
+              queryClient.invalidateQueries({ queryKey: [LESSOR_CHANGE_LIST_KEY] });
+              queryClient.invalidateQueries({ queryKey: ["lessor-change-trash"] });
+              toast.success("تمت استعادة الطلب");
+            } catch (e) {
+              toast.error(e?.response?.data?.message || "تعذرت الاستعادة");
+            }
+          },
+        },
+      });
     },
     onError: (err) => {
       toast.error(err?.response?.data?.message || err?.message || "تعذر حذف الطلب");

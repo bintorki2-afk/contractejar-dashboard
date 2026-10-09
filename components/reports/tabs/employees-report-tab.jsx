@@ -14,7 +14,7 @@ const TH =
 
 const TD = "px-3 py-3 text-13 text-gray-700 border-b border-status-neutral-bg whitespace-nowrap dark:text-white/70 dark:border-white/10";
 
-const CHART_COLORS = ["#0B5345", "#0D9488", "#1E40AF", "#7C3AED", "#CA8A04", "#DC2626", "#6B7280"];
+const CHART_COLORS = ["#0A4D33", "#0D9488", "#1E40AF", "#7C3AED", "#CA8A04", "#DC2626", "#6B7280"];
 
 function StatusPill({ isOnDuty, label }) {
   return (

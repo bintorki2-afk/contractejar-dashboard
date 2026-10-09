@@ -46,7 +46,7 @@ function SummaryStrip({ summary }) {
           key={card.key}
           className="rounded-xl border border-[#e4ede9] bg-white px-3.5 py-3 text-center dark:border-white/10 dark:bg-white/[0.03]"
         >
-          <div className="text-[19px] font-black text-[#0b5f4c] dark:text-emerald-300">
+          <div className="text-[19px] font-black text-[#0B5A3C] dark:text-emerald-300">
             {summary?.[card.key] ?? 0}
           </div>
           <div className="mt-0.5 text-[11px] font-bold text-[#8a978f] dark:text-white/45">
@@ -294,7 +294,7 @@ export default function WebsiteImagesSection() {
                         ) : null}
                       </td>
                       <td>
-                        <code dir="ltr" className="rounded bg-[#eef5f1] px-1.5 py-0.5 text-[11.5px] font-bold text-[#0b5f4c] dark:bg-white/[0.06] dark:text-emerald-300">
+                        <code dir="ltr" className="rounded bg-[#eef5f1] px-1.5 py-0.5 text-[11.5px] font-bold text-[#0B5A3C] dark:bg-white/[0.06] dark:text-emerald-300">
                           {row.key}
                         </code>
                       </td>

@@ -33,7 +33,7 @@ Don't assume one `lib` or one `components` dir — check whether an import is `@
 ### Data fetching
 
 - All HTTP calls go through `axiosInstance` in [src/utils/axios.js](src/utils/axios.js). It auto-attaches the Bearer token from `useUserStore`/localStorage and force-logs-out + redirects to `/login` on a 401.
-- Client-side base URL is same-origin `/api`; `next.config.mjs` rewrites `/api/:path*` to `API_PROXY_TARGET` (defaults to the صقر ١ Railway backend `https://aqdi-new-backend-main-production.up.railway.app/api`; never `aqid.subcodeco.com`). Server-side (no `window`) falls back to `NEXT_PUBLIC_BASE_URL` from `.env`.
+- Client-side base URL is same-origin `/api`; `next.config.mjs` rewrites `/api/:path*` to `API_PROXY_TARGET` (defaults to the صقر ١ Railway backend `https://aqdi-new-backend-main-production.up.railway.app/api`; never another project's server). Server-side (no `window`) falls back to `NEXT_PUBLIC_BASE_URL` from `.env`. `BACKEND_ASSET_ORIGIN` (optional, defaults to the origin of `API_PROXY_TARGET`) is used by `src/lib/asset-url.js` to absolutize `/storage/...` and signed file links.
 - Data fetching/mutations use TanStack React Query (`@tanstack/react-query`). The provider is `ReactQueryProvider` ([src/utils/providers/react-query-provider.jsx](src/utils/providers/react-query-provider.jsx)), wired in `src/app/layout.js`. Feature-specific query/mutation hooks live in `src/hooks/*` (e.g. `useGetHome.js`, `use-paperworks.js`).
 - Prefer adding a `use*` hook in `src/hooks/` over calling `axiosInstance` directly from a component/page.
 

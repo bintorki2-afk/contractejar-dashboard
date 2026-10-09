@@ -14,7 +14,7 @@ import RealtimeStatusFilterBar from "./realtime-status-filter-bar";
 import RealtimeOrdersTablePagination from "./realtime-orders-table-pagination";
 import RealtimeOrdersDialogs from "./realtime-orders-dialogs";
 import { buildRealtimeOrderColumns } from "./realtime-orders-columns";
-import ConfirmDialog from "@/components/shared/confirm-dialog";
+import TrashConfirmDialog from "@/components/orders/trash-confirm-dialog";
 import { cn } from "@/lib/utils";
 import { REALTIME_ORDERS_QUERY_KEY } from "@/src/hooks/use-realtime-new-orders";
 import { useRealtimeOrdersWrapper } from "@/src/hooks/use-realtime-orders-wrapper";
@@ -215,19 +215,7 @@ export default function RealtimeOrdersWrapper() {
         canEditStatus={vm.canEditStatus}
       />
 
-      <ConfirmDialog
-        open={vm.deleteDialogOpen}
-        onOpenChange={vm.setDeleteDialogOpen}
-        title={vm.deleteCount > 1 ? "حذف الطلبات" : "حذف الطلب"}
-        description={`سيتم حذف ${
-          vm.deleteLabel ?? "الطلب"
-        } نهائيًا مع جميع البيانات المرتبطة. لا يمكن التراجع عن هذا الإجراء.`}
-        confirmLabel="حذف نهائيًا"
-        cancelLabel="إلغاء"
-        destructive
-        isPending={vm.isDeletingOrder}
-        onConfirm={vm.confirmDeleteOrder}
-      />
+      <TrashConfirmDialog vm={vm} />
     </div>
   );
 }

@@ -57,7 +57,7 @@ export default function UtilitySidePanel() {
             aria-label="إغلاق"
             className={cn(
               "flex size-8 items-center justify-center rounded-full transition-colors",
-              "bg-[#0E5F4E] text-white hover:bg-[#0B5345]",
+              "bg-[#0B5A3C] text-white hover:bg-[#0A4D33]",
               "dark:bg-emerald-500 dark:hover:bg-emerald-400 dark:text-[#0B1411]"
             )}
           >

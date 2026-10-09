@@ -1,8 +1,8 @@
 /* Pixel-matched styles from design.html #mktWrap — scoped to .mkt-page */
 
 .mkt-page {
-  --mkt-brand: #0b5f4c;
-  --mkt-brand-deep: #0e5f4e;
+  --mkt-brand: #0B5A3C;
+  --mkt-brand-deep: #0B5A3C;
   --mkt-brand-mid: #0b7a4c;
   --mkt-line: #e5eee9;
   --mkt-muted: #6b7c76;
@@ -111,7 +111,7 @@
   gap: 18px;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, #0e5f4e, #0b7a4c);
+  background: linear-gradient(135deg, #0B5A3C, #0b7a4c);
   color: #fff;
   border-radius: 18px;
   padding: 20px 24px;
@@ -228,7 +228,7 @@
   border-right-color: #16c79a;
 }
 .mkt-page .ckpi.e .ckpi-v {
-  color: #0b5f4c;
+  color: #0B5A3C;
 }
 .mkt-page .ckpi.b {
   border-right-color: #3a5f8a;
@@ -523,9 +523,9 @@
 }
 
 .mkt-page .mkt-subtab.on {
-  background: #0e5f4e;
+  background: #0B5A3C;
   color: #fff;
-  border-color: #0e5f4e;
+  border-color: #0B5A3C;
 }
 
 .mkt-page .mkt-syncbar {
@@ -598,8 +598,8 @@
 }
 
 .mkt-page .mkt-syncb {
-  border: 1px solid #0e5f4e;
-  background: #0e5f4e;
+  border: 1px solid #0B5A3C;
+  background: #0B5A3C;
   color: #fff;
   border-radius: 9px;
   padding: 8px 14px;
@@ -845,7 +845,7 @@
 }
 .mkt-page .mkt-crawlprogress-fill {
   height: 100%;
-  background: #0e5f4e;
+  background: #0B5A3C;
   border-radius: 999px;
   transition: width 0.4s ease;
 }
@@ -867,7 +867,7 @@
   transform: translateY(-2px);
 }
 .mkt-page .mkt-crawlstat.active {
-  box-shadow: 0 0 0 2px #0e5f4e inset;
+  box-shadow: 0 0 0 2px #0B5A3C inset;
 }
 
 .mkt-page .mkt-sev {
@@ -918,14 +918,14 @@
 }
 
 .mkt-page .mkt-catb.on {
-  background: #0e5f4e;
+  background: #0B5A3C;
   color: #fff;
-  border-color: #0e5f4e;
+  border-color: #0B5A3C;
 }
 
 .mkt-page .xbtn {
   border: none;
-  background: #0e5f4e;
+  background: #0B5A3C;
   color: #fff;
   border-radius: 10px;
   padding: 8px 14px;
@@ -938,7 +938,7 @@
 .mkt-page .mk-mini {
   border: 1px solid #d8e7e0;
   background: #fff;
-  color: #0b5f4c;
+  color: #0B5A3C;
   border-radius: 8px;
   padding: 5px 10px;
   font: inherit;
@@ -980,7 +980,7 @@
 }
 
 .mkt-page .mk-best {
-  border-top: 3px solid #0e5f4e;
+  border-top: 3px solid #0B5A3C;
 }
 
 .mkt-page .mkt-cmp {
@@ -1075,7 +1075,7 @@
   font-size: 10.5px;
   font-weight: 800;
   background: #eef5f1;
-  color: #0b5f4c;
+  color: #0B5A3C;
   border-radius: 8px;
   padding: 2px 8px;
 }
@@ -1127,7 +1127,7 @@
   transform: translateX(-18px);
 }
 .mkt-page .mkt-switch input:focus-visible + span {
-  outline: 2px solid #0b5f4c;
+  outline: 2px solid #0B5A3C;
   outline-offset: 2px;
 }
 

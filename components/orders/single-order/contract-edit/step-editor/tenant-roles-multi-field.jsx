@@ -79,7 +79,7 @@ export default function TenantRolesMultiField({ formValues, onPatch, fieldErrors
               <label className="flex cursor-pointer items-start gap-3">
                 <input
                   type="checkbox"
-                  className="mt-1 size-4 accent-[var(--brand-hover,#0C6055)]"
+                  className="mt-1 size-4 accent-[var(--brand-hover,#0B5A3C)]"
                   checked={checked}
                   onChange={(e) => toggleRole(role.id, e.target.checked)}
                 />

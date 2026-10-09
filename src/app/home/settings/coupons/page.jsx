@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/shared/confirm-provider";
 import {
   useUnwrapPageProps
 } from "@/src/hooks/use-unwrap-page-props";
@@ -54,6 +55,7 @@ function couponTypeLabel(type) {
 }
 
 export default function CouponsPage(props) {
+  const confirm = useConfirm();
   useUnwrapPageProps(props?.params, props?.searchParams);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -135,7 +137,15 @@ export default function CouponsPage(props) {
                         dir="ltr"
                         checked={isActive}
                         disabled={isToggling}
-                        onCheckedChange={(checked) => toggleStatus({ id: coupon.id, checked })}
+                        onCheckedChange={async (checked) => {
+                          const ok = await confirm({
+                            title: checked ? "تفعيل الكوبون" : "إيقاف الكوبون",
+                            description: `${checked ? "تفعيل" : "إيقاف"} الكوبون «${coupon.code ?? coupon.name ?? ""}»؟`,
+                            confirmLabel: checked ? "تفعيل" : "إيقاف",
+                            destructive: !checked,
+                          });
+                          if (ok) toggleStatus({ id: coupon.id, checked });
+                        }}
                       />
                     </PermissionGate>
                   </div>

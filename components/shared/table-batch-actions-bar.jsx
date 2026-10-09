@@ -47,7 +47,7 @@ export default function TableBatchActionsBar({
         disabled={isPrinting}
         className={cn(
           "inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl text-[12.5px] font-bold transition-colors",
-          "bg-[#0E5F4E] text-white hover:bg-[#0B4E40] disabled:opacity-60"
+          "bg-[#0B5A3C] text-white hover:bg-[#0B4E40] disabled:opacity-60"
         )}
       >
         <Printer className="size-4" strokeWidth={2.2} />

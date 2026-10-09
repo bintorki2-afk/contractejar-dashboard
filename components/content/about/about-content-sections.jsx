@@ -16,6 +16,7 @@ import AboutStorySectionForm from "@/components/content/about/about-story-sectio
 import AboutValuesSectionForm from "@/components/content/about/about-values-section-form";
 import AboutVisionMissionSectionForm from "@/components/content/about/about-vision-mission-section-form";
 import PageSeoForm from "@/components/content/page-seo-form";
+import SectionEmptyNote from "@/components/content/section-empty-note";
 import Loader from "@/components/home/loader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePermissions } from "@/src/hooks/use-permissions";
@@ -31,7 +32,7 @@ const ABOUT_CONTENT_TABS = [
   { value: "story", label: "قصتنا", icon: BarChart3, sectionKey: "story", Form: AboutStorySectionForm },
   { value: "vision-mission", label: "الرؤية والرسالة", icon: Telescope, sectionKey: "vision_mission", Form: AboutVisionMissionSectionForm },
   { value: "beneficiaries", label: "المستفيدون", icon: Users, sectionKey: "beneficiaries", Form: AboutBeneficiariesSectionForm },
-  { value: "values", label: "قيم عقدي", icon: HeartHandshake, sectionKey: "values", Form: AboutValuesSectionForm },
+  { value: "values", label: "قيمنا", icon: HeartHandshake, sectionKey: "values", Form: AboutValuesSectionForm },
 ];
 
 export default function AboutContentSections() {
@@ -90,11 +91,14 @@ export default function AboutContentSections() {
               canEdit={canEditSeo}
             />
           ) : (
+            <>
+            <SectionEmptyNote data={sections[tab.sectionKey]} />
             <tab.Form
               initialData={sections[tab.sectionKey]}
               saveEndpoint={CONTENT_PAGE_ENDPOINTS.about}
               queryKey={QUERY_KEY}
             />
+            </>
           )}
         </TabsContent>
       ))}

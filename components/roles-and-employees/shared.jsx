@@ -1,5 +1,6 @@
 "use client";
 
+import { roleKeyToArabic } from "@/src/lib/role-labels";
 import { useMemo, useState } from "react";
 import AvatarImage from "@/components/shared/avatar-image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -69,7 +70,7 @@ export function RoleBadge({ role, colorIndex = 0, className }) {
         className
       )}
     >
-      {role || "غير محدد"}
+      {roleKeyToArabic(role) || "غير محدد"}
     </span>
   );
 }

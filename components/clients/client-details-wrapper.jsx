@@ -1,19 +1,20 @@
 "use client";
 
-import { useMemo } from "react";
+import { useConfirm } from "@/components/shared/confirm-provider";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, Home } from "lucide-react";
 import { cn, safeInternalPath } from "@/lib/utils";
 import Loader from "@/components/home/loader";
 import { useClientDetail, useBlockClient, useDeleteClient } from "@/src/hooks/use-clients";
-import { classifyOrderStatus, formatJoinedLabel } from "./client-details/client-details-format";
+import { formatJoinedLabel } from "./client-details/client-details-format";
 import ClientHeaderActions from "./client-details/client-header-actions";
 import ClientProfileCard from "./client-details/client-profile-card";
 import ClientStatsGrid from "./client-details/client-stats-grid";
 import ClientOrdersSection from "./client-details/client-orders-section";
 
 export default function ClientDetailsWrapper() {
+  const confirm = useConfirm();
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -21,23 +22,34 @@ export default function ClientDetailsWrapper() {
   const from = searchParams.get("from") || "/home/clients";
   const backUrl = safeInternalPath(from, "/home/clients");
 
-  const { client, contracts, isLoading, isError } = useClientDetail(clientId);
+  const { client, isLoading, isError } = useClientDetail(clientId);
   const { mutate: toggleBlock, isPending: isBlocking } = useBlockClient();
   const { mutate: deleteClient, isPending: isDeleting } = useDeleteClient();
 
-  const orders = useMemo(
-    () => (contracts ?? []).map((order) => ({ ...order, statusKey: classifyOrderStatus(order) })),
-    [contracts]
-  );
-
-  const handleBlock = () => {
+  const handleBlock = async () => {
     if (!clientId) return;
+    const blocking = !client?.blocked;
+    const ok = await confirm({
+      title: blocking ? "حظر العميل" : "إلغاء حظر العميل",
+      description: blocking
+        ? `حظر «${client?.name ?? "العميل"}»؟ لن يتمكن من إنشاء طلبات جديدة.`
+        : `إلغاء حظر «${client?.name ?? "العميل"}»؟`,
+      confirmLabel: blocking ? "حظر" : "إلغاء الحظر",
+      destructive: blocking,
+    });
+    if (!ok) return;
     toggleBlock(clientId);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!clientId) return;
-    if (!window.confirm("هل أنت متأكد من حذف هذا العميل؟ لا يمكن التراجع عن هذا الإجراء.")) {
+    const ok = await confirm({
+      title: "حذف العميل",
+      description: "هل أنت متأكد من حذف هذا العميل؟ لا يمكن التراجع عن هذا الإجراء.",
+      confirmLabel: "حذف العميل",
+      destructive: true,
+    });
+    if (!ok) {
       return;
     }
     deleteClient(clientId, {
@@ -111,7 +123,7 @@ export default function ClientDetailsWrapper() {
 
       <ClientStatsGrid client={client} />
 
-      <ClientOrdersSection orders={orders} clientId={clientId} backUrl={backUrl} />
+      <ClientOrdersSection clientId={clientId} userId={client.id} backUrl={backUrl} />
 
       <section className="flex flex-col gap-3">
         <div className="inline-flex items-center gap-2">

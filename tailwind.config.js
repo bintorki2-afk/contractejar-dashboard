@@ -65,15 +65,23 @@ module.exports = {
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
 				brand: {
-					main: '#0c6055',
-					dark: '#0B5345',
-					hover: '#0004E2',
+					// د22: موحّدة مع الموقع
+					main: '#0B5A3C',
+					dark: '#0A4D33',
+					hover: '#169963',
 					sec: '#453B2F',
 					text: '#363636',
 					accent: '#10B981',
 					'accent-hover': '#0E9F6E',
 					// text color used on top of the brand-dark/emerald accent in dark mode
 					ink: '#0B1411',
+					// ── هوية الموقع (contractejar.com) — دفعة د ──
+					deep: '#0B5A3C',      // الأخضر الأساسي للموقع
+					green: '#169963',     // الأخضر الثانوي (أزرار/روابط)
+					mint: '#E9FBF5',      // سطح نعناعي ناعم
+					'mint-strong': '#D3F2E6',
+					surface: '#F5F7F6',   // خلفية الصفحات
+					line: '#E3ECE8',      // حدود البطاقات
 				},
 				// recurring "content card" surface used by the client-detail-style pages
 				panel: {
@@ -83,8 +91,8 @@ module.exports = {
 					dark: '#0F1C16',
 				},
 				sidebar: {
-					DEFAULT: '#0D3B31',
-					dark: '#08251F',
+					DEFAULT: '#0B3D2A',
+					dark: '#072519',
 					hover: '#124436',
 					foreground: '#E8F1EE',
 				},

@@ -81,8 +81,8 @@ export default function EditPaymentMessageDialog({
         onClick={() => setOpen(true)}
         className={
           triggerVariant === "add"
-            ? "h-10 rounded-xl border border-dashed border-[#C4C4C4] bg-white px-4 text-[13px] font-bold text-[#616161] hover:border-[#054D44] hover:text-[#054D44]"
-            : "h-9 rounded-xl border border-[#E6EBE9] bg-white px-3.5 text-[12px] font-bold text-[#054D44] shadow-none hover:bg-[#E8F5F1]"
+            ? "h-10 rounded-xl border border-dashed border-[#C4C4C4] bg-white px-4 text-[13px] font-bold text-[#616161] hover:border-[#0B5A3C] hover:text-[#0B5A3C]"
+            : "h-9 rounded-xl border border-[#E6EBE9] bg-white px-3.5 text-[12px] font-bold text-[#0B5A3C] shadow-none hover:bg-[#E8F5F1]"
         }
       >
         {triggerVariant === "add" ? (
@@ -134,7 +134,7 @@ export default function EditPaymentMessageDialog({
             type="button"
             variant="outline"
             onClick={() => setOpen(false)}
-            className="h-10 rounded-xl border-[#054D44]/30 px-4 text-[13px] font-bold text-[#054D44] hover:bg-[#E8F5F1]"
+            className="h-10 rounded-xl border-[#0B5A3C]/30 px-4 text-[13px] font-bold text-[#0B5A3C] hover:bg-[#E8F5F1]"
           >
             إلغاء
           </Button>
@@ -142,7 +142,7 @@ export default function EditPaymentMessageDialog({
             type="button"
             disabled={isPending}
             onClick={handleSubmit}
-            className="h-10 min-w-[96px] rounded-xl bg-[#054D44] px-5 text-[13px] font-bold text-white hover:bg-[#043F38]"
+            className="h-10 min-w-[96px] rounded-xl bg-[#0B5A3C] px-5 text-[13px] font-bold text-white hover:bg-[#043F38]"
           >
             {isPending ? (
               <Loader2 className="size-4 animate-spin" />

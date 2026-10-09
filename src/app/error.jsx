@@ -21,7 +21,7 @@ export default function Error({ error, reset }) {
         gap: '16px',
         padding: '24px',
         textAlign: 'center',
-        fontFamily: 'Tajawal, Arial, sans-serif',
+        fontFamily: 'var(--font-tajawal), "IBM Plex Sans Arabic", Arial, sans-serif',
       }}
     >
       <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', margin: 0 }}>

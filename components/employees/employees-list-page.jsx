@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/shared/confirm-provider";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import AddNewEmployeeDialog from "@/components/employees/add-employee-dialog";
@@ -25,6 +26,7 @@ import {
 } from "@/components/roles-and-employees/shared";
 
 export default function EmployeesListPage() {
+  const confirm = useConfirm();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
@@ -157,7 +159,18 @@ export default function EmployeesListPage() {
                         dir="ltr"
                         checked={employee.is_active}
                         disabled={isPendingChangeStatus}
-                        onCheckedChange={() => changeStatus(employee.id)}
+                        onCheckedChange={async () => {
+                          const activating = !employee.is_active;
+                          const ok = await confirm({
+                            title: activating ? "تفعيل حساب الموظف" : "إيقاف حساب الموظف",
+                            description: activating
+                              ? `تفعيل حساب «${employee.name}»؟ سيتمكن من الدخول للوحة.`
+                              : `إيقاف حساب «${employee.name}»؟ لن يتمكن من الدخول للوحة حتى يُعاد تفعيله.`,
+                            confirmLabel: activating ? "تفعيل" : "إيقاف",
+                            destructive: !activating,
+                          });
+                          if (ok) changeStatus(employee.id);
+                        }}
                       />
                     </PermissionGate>
                   </td>

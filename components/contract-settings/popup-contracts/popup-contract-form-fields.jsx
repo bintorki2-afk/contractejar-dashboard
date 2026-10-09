@@ -48,7 +48,7 @@ export default function PopupContractFormFields({
           onValueChange={onInstrumentTypeChange}
           disabled={instrumentTypeDisabled || options.length === 0}
         >
-          <SelectTrigger className="h-11 rounded-xl border-[#E6EBE9] bg-white px-3 text-[13px] focus:border-[#054D44] focus:ring-0 dark:border-white/10 dark:bg-white/[0.04]">
+          <SelectTrigger className="h-11 rounded-xl border-[#E6EBE9] bg-white px-3 text-[13px] focus:border-[#0B5A3C] focus:ring-0 dark:border-white/10 dark:bg-white/[0.04]">
             <SelectValue
               placeholder={
                 options.length === 0
@@ -74,7 +74,7 @@ export default function PopupContractFormFields({
             dir="ltr"
             checked={popupStatusContract}
             onCheckedChange={onPopupStatusContractChange}
-            className="data-[state=checked]:bg-[#054D44]"
+            className="data-[state=checked]:bg-[#0B5A3C]"
           />
         </label>
         <label className="flex items-center justify-between rounded-xl border border-[#E6EBE9] bg-white px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.04]">
@@ -83,7 +83,7 @@ export default function PopupContractFormFields({
             dir="ltr"
             checked={popupStatusRealestate}
             onCheckedChange={onPopupStatusRealestateChange}
-            className="data-[state=checked]:bg-[#054D44]"
+            className="data-[state=checked]:bg-[#0B5A3C]"
           />
         </label>
       </div>
@@ -110,7 +110,7 @@ export default function PopupContractFormFields({
             placeholder="مثال: ابدأ الآن"
             value={buttonText}
             onChange={(e) => onButtonTextChange(e.target.value)}
-            className="h-11 rounded-xl border-[#E6EBE9] text-[13px] focus-visible:border-[#054D44] focus-visible:ring-0 dark:border-white/10 dark:bg-white/[0.04]"
+            className="h-11 rounded-xl border-[#E6EBE9] text-[13px] focus-visible:border-[#0B5A3C] focus-visible:ring-0 dark:border-white/10 dark:bg-white/[0.04]"
           />
         </label>
         <label className="flex flex-col gap-1.5">
@@ -120,7 +120,7 @@ export default function PopupContractFormFields({
             placeholder="https://example.com"
             value={buttonLink}
             onChange={(e) => onButtonLinkChange(e.target.value)}
-            className="h-11 rounded-xl border-[#E6EBE9] text-[13px] focus-visible:border-[#054D44] focus-visible:ring-0 dark:border-white/10 dark:bg-white/[0.04]"
+            className="h-11 rounded-xl border-[#E6EBE9] text-[13px] focus-visible:border-[#0B5A3C] focus-visible:ring-0 dark:border-white/10 dark:bg-white/[0.04]"
           />
         </label>
       </div>

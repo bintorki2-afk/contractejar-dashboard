@@ -9,8 +9,17 @@ import { useSidebarStore } from '@/src/stores/sidebar-store';
 
 const POLL_INTERVAL = 30_000;
 
+// دفعة د: «بانتظار الاستلام» = طلبات مدفوعة لم يستلمها موظف (لوحة الانتباه في الخادم)،
+// لا «جديد» برقم حالة ثابت (كان يعدّ الطلبات غير المدفوعة أيضاً).
 export const fetchUnreceivedOrdersTotal = async () => {
-  const response = await axiosInstance.get('/admin/orders?status_id=1&per_page=1&page=1');
+  try {
+    const response = await axiosInstance.get('/admin/orders/attention', { params: { limit: 1 } });
+    const count = response?.data?.data?.counts?.awaiting_receive;
+    if (typeof count === 'number') return count;
+  } catch {
+    // احتياط لخادم أقدم بلا /attention
+  }
+  const response = await axiosInstance.get('/admin/orders?is_received=0&complete=1&per_page=1&page=1');
   return response?.data?.data?.pagination?.total ?? 0;
 };
 
@@ -19,8 +28,9 @@ function openNotificationsSidebar({ queryClient, setDisplayedPart }) {
   setDisplayedPart('notification');
 }
 
-// Polls unreceived-orders count and opens the notification sidebar
-// only on the جميع الطلبات page (`/home/orders`).
+// Polls unreceived-orders count and opens the notification sidebar on the
+// جميع الطلبات page (`/home/orders`) only when a NEW order arrives (count grows) —
+// not on every visit (it used to cover the list on page load).
 export function useUnreceivedOrdersWatcher() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -36,12 +46,6 @@ export function useUnreceivedOrdersWatcher() {
     refetchInterval: POLL_INTERVAL,
     refetchIntervalInBackground: true,
   });
-
-  useEffect(() => {
-    if (!isAllOrdersPage || total === undefined || total <= 0) return;
-
-    openNotificationsSidebar({ queryClient, setDisplayedPart });
-  }, [isAllOrdersPage, total, queryClient, setDisplayedPart]);
 
   useEffect(() => {
     if (total === undefined) return;

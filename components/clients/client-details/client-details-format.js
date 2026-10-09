@@ -10,12 +10,15 @@ export const FILTER_TABS = [
   { id: "processing", label: "قيد المعالجة" },
 ];
 
+// دفعة د (د2): نفس نطاق «جميع الطلبات» — الطلبات = خطوة ≥ 4 غير محذوفة؛ مدفوع/غير مدفوع منها؛
+// «مسودات غير مكتملة» = خطوة < 4 (تبويب «غير مكتمل»).
 export const STAT_DEFS = [
-  { key: "completed", label: "مكتمل", bar: "#10B981", barDark: "#34D399" },
-  { key: "draft", label: "مسودة", bar: "#94A3B8", barDark: "#94A3B8" },
-  { key: "incomplete", label: "غير مكتمل", bar: "#F97316", barDark: "#FB923C" },
-  { key: "properties", label: "عقارات", bar: "#0B5345", barDark: "#34D399" },
-  { key: "units", label: "وحدات", bar: "#0B5345", barDark: "#6EE7B7" },
+  { key: "ordersCount", label: "الطلبات", bar: "#0B5A3C", barDark: "#34D399" },
+  { key: "completed", label: "مدفوعة", bar: "#10B981", barDark: "#34D399" },
+  { key: "incomplete", label: "غير مدفوعة", bar: "#F97316", barDark: "#FB923C" },
+  { key: "incompleteDrafts", label: "مسودات غير مكتملة", bar: "#94A3B8", barDark: "#94A3B8" },
+  { key: "properties", label: "عقارات", bar: "#0A4D33", barDark: "#34D399" },
+  { key: "units", label: "وحدات", bar: "#0A4D33", barDark: "#6EE7B7" },
   {
     key: "refundedAmount",
     label: "مسترجع (ر.س)",

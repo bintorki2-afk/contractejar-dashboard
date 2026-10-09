@@ -1,6 +1,7 @@
 /** Reports tabs + filter config. Analytics data comes from src/hooks/use-reports.js. */
 
 export const REPORT_TABS = [
+  { id: "overview", label: "نظرة عامة" },
   { id: "orders", label: "الطلبات" },
   { id: "sales", label: "المبيعات والإيرادات", badge: "مالي" },
   { id: "profits", label: "الأرباح والتكاليف", badge: "مالي" },

@@ -12,7 +12,7 @@ Copy `.env.example` and provide real values. The table below lists everything.
 
 | Variable | Required? | What it is / where to get it |
 | --- | --- | --- |
-| `NEXT_PUBLIC_BASE_URL` | **Yes** | Production Laravel API base **including `/api`** (صقر ١ on Railway: `https://aqdi-new-backend-main-production.up.railway.app/api` — never `aqid.subcodeco.com`). Used by the server-side (SSR) axios client. |
+| `NEXT_PUBLIC_BASE_URL` | **Yes** | Production Laravel API base **including `/api`** (صقر ١ on Railway: `https://aqdi-new-backend-main-production.up.railway.app/api` — never another project's server). Used by the server-side (SSR) axios client. |
 | `API_PROXY_TARGET` | Recommended | Server-only rewrite target for `/api/*` — this is what the **browser** effectively talks to in production (see `next.config.mjs`). Set it to the same value as `NEXT_PUBLIC_BASE_URL`. If omitted it defaults to the صقر ١ Railway backend (see `next.config.mjs`). **Not** `NEXT_PUBLIC_`. |
 | `NEXT_PUBLIC_FIREBASE_API_KEY` | Optional* | Firebase console → Project settings → General → Your apps (Web). |
 | `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Optional* | Same place (e.g. `your-project.firebaseapp.com`). |

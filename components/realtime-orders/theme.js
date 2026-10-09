@@ -6,7 +6,7 @@
  */
 export const RT = {
   // Brand / surfaces — design.html .qsb/.fbtn active, .side gradient endpoints
-  brand: "#0E5F4E",
+  brand: "#0B5A3C",
   brandDeep: "#0B4F41",
   brandSoft: "#E8F5F1",
   pageBg: "#F4F5F4",
@@ -49,7 +49,7 @@ export const RT = {
   amberBadgeBg: "#FBF4E2",
   amberBadgeText: "#A3781E",
   viewBtnBg: "#F0F8F4",
-  viewBtnText: "#0B5F4C",
+  viewBtnText: "#0B5A3C",
   checkboxBlue: "#1F6FEB",
   // design.html .newstrip — gradient card housing the new-requests preview
   cardBorder: "#E8EEEC",
@@ -73,7 +73,7 @@ export const RT = {
     done: "#0B7A4C",
     refunded: "#557086",
     cancelled: "#B3472A",
-    live: "#0E5F4E",
+    live: "#0B5A3C",
   },
   // Approval badge tones (design.html .ap-pend/.ap-appr/.ap-rej/.ap-proc)
   approval: {

@@ -9,7 +9,7 @@ export const HOME_MOCK = {
     body: 'الإتقان ليس في كثرة العمل، بل في صدق النية وجودة الأداء. من يعمل بضمير يترك أثراً لا يُمحى.',
     verse: '﴿لِيَبْلُوَكُمْ أَيُّكُمْ أَحْسَنُ عَمَلًا﴾',
     footnote: 'العبرة بمعيار الجودة والإحسان، لا بالكثرة والقلة.',
-    brand_label: 'عقدي · لوحة الموظفين',
+    brand_label: 'عقد إيجار · لوحة الموظفين',
   },
 
   summary: {
@@ -49,7 +49,7 @@ export const HOME_MOCK = {
     },
     {
       id: 'return-orders',
-      label: 'طلبات الاسترجاع',
+      label: 'المرتجعات',
       href: '/home/return-orders',
       badge_count: 3,
     },
@@ -113,7 +113,7 @@ export function formatHomeCurrency(value, currency = 'SAR') {
   if (value === null || value === undefined) return '—'
   const num = Number(value)
   if (Number.isNaN(num)) return '—'
-  const formatted = num.toLocaleString('ar-EG', { maximumFractionDigits: 0 })
+  const formatted = num.toLocaleString('en-US', { maximumFractionDigits: 0 })
   return currency === 'SAR' ? `${formatted} ر.س` : `${formatted} ${currency}`
 }
 

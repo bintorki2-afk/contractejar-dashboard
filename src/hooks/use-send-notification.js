@@ -68,6 +68,16 @@ function buildPayload(target, form) {
     payload.kind = form.kind || "offer";
     const url = String(form.url ?? "").trim();
     if (url) payload.url = url;
+    // د24: كوبون اختياري + صلاحيته (يظهر للعميل مع زر نسخ في الموقع/التطبيق).
+    const coupon = String(form.couponCode ?? "").trim();
+    if (coupon) payload.coupon_code = coupon;
+    if (form.validUntil) payload.valid_until = form.validUntil;
+  }
+
+  // د24: شريحة البث لـ «جميع المستخدمين»: all | has_active_contract | city (+ city_id).
+  if (target === "all-users") {
+    payload.segment = form.segment || "all";
+    if (payload.segment === "city" && form.cityId) payload.city_id = Number(form.cityId) || form.cityId;
   }
 
   if (config.needsEmployee) {
@@ -93,3 +103,26 @@ export function useSendNotification({ onSuccess } = {}) {
     },
   });
 }
+
+export const BROADCAST_SEGMENTS = [
+  { value: "all", label: "كل العملاء" },
+  { value: "has_active_contract", label: "عملاء لديهم عقد مدفوع نشط" },
+  { value: "city", label: "عملاء مدينة محددة" },
+];
+
+/** POST /admin/notifications/broadcast/preview — عدد المستلمين + شكل الإشعار. */
+export async function previewBroadcast(form) {
+  const body = {
+    segment: form.segment || "all",
+    title: form.title || undefined,
+    body: form.body || undefined,
+    kind: form.kind || "offer",
+    coupon_code: form.couponCode || undefined,
+    valid_until: form.validUntil || undefined,
+  };
+  if (body.segment === "city" && form.cityId) body.city_id = Number(form.cityId) || form.cityId;
+  const res = await axiosInstance.post("/admin/notifications/broadcast/preview", body);
+  return res?.data?.data ?? null;
+}
+
+export { buildPayload as buildNotificationPayload };

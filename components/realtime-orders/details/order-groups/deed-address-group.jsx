@@ -29,10 +29,12 @@ export default function DeedAddressGroup({ order, onEdit }) {
         </div>
 
         <div className="space-y-2">
-          <Field label="اسم المالك" value={order.deed?.owner_name} />
-          <Field label="رقم الصك" value={order.deed?.number} />
-          <Field label="هوية المالك" value={order.deed?.owner_id} />
-          <Field label="جوال المالك" value={order.deed?.owner_phone} />
+          <Field label="اسم المالك" value={order.deed?.owner_name} editKey="name_owner" />
+          <Field label="رقم الصك" value={order.deed?.number} editKey="instrument_number" />
+          {order.deed?.date ? <Field label="تاريخ الصك" value={order.deed.date} /> : null}
+          <Field label="هوية المالك" value={order.deed?.owner_id} editKey="property_owner_id_num" />
+          <Field label="تاريخ ميلاد المالك" value={order.deed?.owner_dob} />
+          <Field label="جوال المالك" value={order.deed?.owner_phone} editKey="property_owner_mobile" />
           {order.deed?.is_deceased ? (
             <Field label="حالة المالك" value="متوفى" />
           ) : null}

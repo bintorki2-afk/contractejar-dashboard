@@ -87,10 +87,10 @@ export default function RealtimeOrdersTablePagination({
         <span
           className={cn(
             "font-extrabold tabular-nums px-1.5",
-            dark ? "text-[#5FD0A8]" : "text-[#0B5F4C]"
+            dark ? "text-[#5FD0A8]" : "text-[#0B5A3C]"
           )}
         >
-          {currentPage} / {lastPage}
+          <span dir="ltr">{currentPage} / {lastPage}</span>
         </span>
         <button
           type="button"

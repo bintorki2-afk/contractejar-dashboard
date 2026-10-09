@@ -52,7 +52,7 @@ export default function CommentList() {
               "dark:bg-[#13251E] dark:border-[#26473A]"
             )}
           >
-            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-[#F0F8F4] text-[#0E5F4E] dark:bg-[#1B3A2E] dark:text-emerald-300">
+            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-[#F0F8F4] text-[#0B5A3C] dark:bg-[#1B3A2E] dark:text-emerald-300">
               <MessageSquare size={18} strokeWidth={2} />
             </div>
             <p className="text-13 font-bold text-gray-700 dark:text-[#D6E5DE]">

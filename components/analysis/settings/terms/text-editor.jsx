@@ -115,8 +115,8 @@ const ToolbarButton = ({ onClick, isActive, disabled, title, children, compact }
       'inline-flex shrink-0 items-center justify-center rounded-md transition-colors',
       compact ? 'size-7' : 'size-8',
       isActive
-        ? 'bg-[#054D44] text-white dark:bg-emerald-500 dark:text-[#0B1411]'
-        : 'text-[#4B5563] hover:bg-[#E8F5F1] hover:text-[#054D44] dark:text-white/65 dark:hover:bg-white/10 dark:hover:text-emerald-300',
+        ? 'bg-[#0B5A3C] text-white dark:bg-emerald-500 dark:text-[#0B1411]'
+        : 'text-[#4B5563] hover:bg-[#E8F5F1] hover:text-[#0B5A3C] dark:text-white/65 dark:hover:bg-white/10 dark:hover:text-emerald-300',
       disabled && 'cursor-not-allowed opacity-35 hover:bg-transparent hover:text-[#4B5563] dark:hover:text-white/65'
     )}
   >
@@ -138,7 +138,7 @@ const ToolbarSelect = ({ compact, className, ...props }) => (
     {...props}
     className={cn(
       'shrink-0 appearance-none rounded-md border border-[#E6EBE9] bg-white text-[#374151] outline-none transition-colors',
-      'focus:border-[#054D44] focus:ring-1 focus:ring-[#054D44]/20',
+      'focus:border-[#0B5A3C] focus:ring-1 focus:ring-[#0B5A3C]/20',
       'dark:bg-[#0F1C16] dark:border-white/10 dark:text-white dark:[color-scheme:dark]',
       compact ? 'h-7 px-2 text-[11px]' : 'h-8 px-2.5 text-xs',
       className

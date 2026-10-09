@@ -58,6 +58,9 @@ export default function FaqsContentView() {
           </PermissionGate>
         }
       >
+        <p className="mb-3 text-[12.5px] text-[#6B7570] dark:text-white/50">
+          المصدر الوحيد للأسئلة الشائعة: ما تضيفه هنا يظهر مباشرة في صفحة «الأسئلة الشائعة» في الموقع والتطبيق.
+        </p>
         <SettingsTable headers={HEADERS} minWidth="860px">
           {isLoading ? (
             <SettingsLoadingRows colSpan={3} />

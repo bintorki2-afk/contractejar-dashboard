@@ -1,3 +1,4 @@
+import { fieldLabel } from "@/src/lib/field-labels";
 function pick(...values) {
   for (const value of values) {
     if (value == null || value === "") continue;
@@ -19,8 +20,11 @@ export function fileNameFromUrl(url) {
   if (!url) return null;
   try {
     const path = String(url).split("?")[0];
-    const name = path.split("/").pop();
-    return name || null;
+    const name = decodeURIComponent(path.split("/").pop() || "");
+    if (!name) return null;
+    // د6: الروابط الموقّعة تنتهي باسم الحقل (مثل image_instrument) — نعرض تسميته العربية.
+    const known = fieldLabel(name);
+    return known && known !== name ? known : name;
   } catch {
     return null;
   }

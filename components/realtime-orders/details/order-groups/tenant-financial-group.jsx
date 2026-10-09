@@ -51,15 +51,20 @@ export default function TenantFinancialGroup({ order, onEdit }) {
       >
         {order.tenant?.is_company ? (
           <div className="space-y-2">
-            <Field label="جوال المستأجر" value={order.tenant?.phone} />
-            <Field label="رقم السجل الموحّد" value={order.tenant?.registry_number} />
+            <Field label="جوال المستأجر" value={order.tenant?.phone} editKey="tenant_mobile" />
+            <Field label="رقم السجل الموحّد" value={order.tenant?.registry_number} editKey="tenant_entity_unified_registry_number" />
+            {order.tenant?.authorization ? <Field label="نوع التفويض" value={order.tenant.authorization} /> : null}
+            <Field label="هوية مالك السجل / الممثل" value={order.tenant?.rep_id} />
+            <Field label="جوال مالك السجل / الممثل" value={order.tenant?.rep_phone} />
+            <Field label="تاريخ ميلاد مالك السجل / الممثل" value={order.tenant?.rep_dob} />
             <Field label="المنطقة" value={order.tenant?.region} />
             <Field label="المدينة" value={order.tenant?.city} />
           </div>
         ) : (
           <div className="space-y-2">
-            <Field label="هوية المستأجر" value={order.tenant?.id_num} />
-            <Field label="جوال المستأجر" value={order.tenant?.phone} />
+            <Field label="هوية المستأجر" value={order.tenant?.id_num} editKey="tenant_id_num" />
+            <Field label="تاريخ ميلاد المستأجر" value={order.tenant?.dob} />
+            <Field label="جوال المستأجر" value={order.tenant?.phone} editKey="tenant_mobile" />
           </div>
         )}
       </AccentCard>
@@ -201,8 +206,14 @@ export default function TenantFinancialGroup({ order, onEdit }) {
                 <div key={label} className="flex items-center justify-between gap-3 text-xs">
                   <span className="text-gray-400 dark:text-white/40 font-medium">{label}</span>
                   <span className="font-bold text-[#4B5563] dark:text-white/70 tabular-nums" dir="rtl">
-                    {line.monthly.toLocaleString("en-US")} ريال/شهر × {line.months} شهر ={" "}
-                    <Money value={line.total} />
+                    {line.months > 0 ? (
+                      <>
+                        {line.monthly.toLocaleString("en-US")} ريال/شهر × {line.months} شهر ={" "}
+                        <Money value={line.total} />
+                      </>
+                    ) : (
+                      <>{line.monthly.toLocaleString("en-US")} ريال/شهر (مدة العقد غير محددة)</>
+                    )}
                   </span>
                 </div>
               ))}

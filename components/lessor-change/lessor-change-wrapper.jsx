@@ -189,7 +189,7 @@ export default function LessorChangeWrapper() {
             السابق
           </button>
           <span className="min-w-12 text-center font-semibold tabular-nums text-gray-900 dark:text-white">
-            {page}/{lastPage}
+            <span dir="ltr">{page} / {lastPage}</span>
           </span>
           <button
             type="button"
@@ -353,13 +353,13 @@ export default function LessorChangeWrapper() {
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null);
         }}
-        title="حذف طلب تغيير المؤجر"
+        title="نقل طلب تغيير المؤجر إلى السلة"
         description={
           deleteTarget
-            ? `سيتم حذف الطلب #${deleteTarget.order_number ?? deleteTarget.id} ولن يظهر في القائمة. هل أنت متأكد؟`
+            ? `سيُنقل الطلب #${deleteTarget.order_number ?? deleteTarget.id} إلى «السلة» ويمكن استعادته خلال 30 يوماً.`
             : ""
         }
-        confirmLabel="حذف"
+        confirmLabel="نقل إلى السلة"
         destructive
         isPending={deleteMutation.isPending}
         onConfirm={() =>

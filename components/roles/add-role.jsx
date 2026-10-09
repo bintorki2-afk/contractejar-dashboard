@@ -36,7 +36,7 @@ export default function AddRole() {
         name: '',
         title_ar: '',
         description: '',
-        color: '#0E5F4E',
+        color: '#0B5A3C',
     });
 
     const [activateAllPermissions, setActivateAllPermissions] = useState(false);

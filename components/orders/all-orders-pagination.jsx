@@ -117,7 +117,7 @@ export default function AllOrdersPagination({
               dark ? "text-white/80" : "text-gray-900"
             )}
           >
-            {currentPage} / {lastPage}
+            <span dir="ltr">{currentPage} / {lastPage}</span>
           </span>
           <button
             type="button"

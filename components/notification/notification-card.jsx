@@ -26,12 +26,18 @@ export default function NotifictionCard({ order }) {
 
   const waitingHours = Math.floor(getWaitingMinutes(order) / 60);
   const isOverdue = waitingHours >= OVERDUE_HOURS;
+  // تاريخ ميلادي بترتيب يوم/شهر/سنة ثابت (كان هجرياً بأرقام عربية ويُقلب في RTL).
   const dateLabel = order?.updated_at
-    ? new Date(order.updated_at).toLocaleDateString("ar-SA", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
+    ? new Date(order.updated_at)
+        .toLocaleString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })
+        .replace(",", " ·")
     : "";
   const waitingLabel = isOverdue
     ? `بلا استلام منذ ${waitingHours} ساعة`
@@ -77,8 +83,9 @@ export default function NotifictionCard({ order }) {
 
       <div className="flex flex-col gap-0.5">
         <span
+          dir="ltr"
           className={cn(
-            "text-11 font-bold",
+            "text-11 font-bold tabular-nums text-right",
             isOverdue ? "text-[#D33A2C]" : "text-[#98A39E] dark:text-[#9FC0B4]"
           )}
         >

@@ -37,7 +37,7 @@ export default function RealEstateDetailsWrapper() {
         title={pageTitle}
         isMain={false}
         first="الرئيــسية"
-        firstURL="/"
+        firstURL="/home"
         second="التقارير"
         secondURL="/home/reports?tab=properties"
         third={pageTitle}

@@ -20,6 +20,11 @@ const UNIT_FIELDS = [
   { key: "furnished", label: "مؤثثة" },
 ];
 
+const METER_FIELDS = [
+  { key: "electricity_meter", label: "عداد الكهرباء" },
+  { key: "water_meter", label: "عداد المياه" },
+];
+
 function UnitCard({ unit, onEdit }) {
   return (
     <div
@@ -44,6 +49,14 @@ function UnitCard({ unit, onEdit }) {
           <GridField key={key} label={label} value={unit[key]} />
         ))}
       </div>
+
+      {METER_FIELDS.some(({ key }) => unit[key]) ? (
+        <div className="mt-2.5 pt-2.5 border-t border-[#EEF1F0] dark:border-white/10 grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-2">
+          {METER_FIELDS.map(({ key, label }) => (
+            <GridField key={key} label={label} value={unit[key]} />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

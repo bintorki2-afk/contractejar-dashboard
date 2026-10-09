@@ -182,7 +182,7 @@ export default function ReportsTab() {
                     <th>الصرف</th>
                     <th>الإيراد</th>
                     <th>ROAS</th>
-                    <th>Leads</th>
+                    <th>العملاء المحتملون</th>
                     <th>تحويلات</th>
                     <th>CAC</th>
                     <th>الربح</th>

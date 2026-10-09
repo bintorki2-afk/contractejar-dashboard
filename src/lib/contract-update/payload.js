@@ -1,3 +1,4 @@
+import { humanizeFieldKeys } from "@/src/lib/field-labels";
 import { CONTRACT_STEP_KEYS } from "./step-values";
 import {
   parseTenantRoleIds,
@@ -93,7 +94,7 @@ export function mapApiValidationErrors(errors) {
   if (!errors || typeof errors !== "object") return {};
   const mapped = {};
   for (const [key, messages] of Object.entries(errors)) {
-    const message = Array.isArray(messages) ? messages[0] : String(messages);
+    const message = humanizeFieldKeys(Array.isArray(messages) ? messages[0] : String(messages));
     mapped[key] = message;
     // Laravel-style nested keys: tenant_role_values.3
     if (key.startsWith("tenant_role_values.")) {

@@ -110,7 +110,7 @@ export default function EmployeeKpisDetails() {
         title="مؤشرات الموظف"
         isMain={false}
         first="الرئيــسية"
-        firstURL="/"
+        firstURL="/home"
         second="الموظفون والأدوار"
         secondURL="/home/roles-and-employees?tab=performance"
         third="مؤشرات الموظف"

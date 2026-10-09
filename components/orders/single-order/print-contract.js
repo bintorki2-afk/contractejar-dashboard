@@ -44,9 +44,9 @@ const CONTRACT_PRINT_STYLES = `
       text-align: center;
       margin-bottom: 24px;
       padding-bottom: 16px;
-      border-bottom: 2px solid #0c6055;
+      border-bottom: 2px solid #0B5A3C;
     }
-    .header h1 { margin: 0 0 8px; font-size: 22px; color: #0c6055; }
+    .header h1 { margin: 0 0 8px; font-size: 22px; color: #0B5A3C; }
     .header p { margin: 4px 0; font-size: 13px; color: #555; }
     .section { margin-bottom: 22px; page-break-inside: avoid; }
     .section h2 {
@@ -54,7 +54,7 @@ const CONTRACT_PRINT_STYLES = `
       margin: 0 0 10px;
       padding: 8px 12px;
       background: #f5f5f5;
-      border-right: 4px solid #0c6055;
+      border-right: 4px solid #0B5A3C;
     }
     table { width: 100%; border-collapse: collapse; }
     td {

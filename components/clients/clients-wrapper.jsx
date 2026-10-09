@@ -148,7 +148,7 @@ export default function ClientsWrapper() {
   const statCards = summary
     ? [
         { key: "total", value: summary.total_customers, label: summary.total_customers_label, bar: "#10B981" },
-        { key: "website", value: summary.website_customers, label: summary.website_customers_label, bar: "#0B5345" },
+        { key: "website", value: summary.website_customers, label: summary.website_customers_label, bar: "#0A4D33" },
         { key: "google_play", value: summary.google_play_customers, label: summary.google_play_customers_label, bar: "#3B82F6" },
         { key: "apple_store", value: summary.apple_store_customers, label: summary.apple_store_customers_label, bar: "#6B7280" },
         { key: "banned", value: summary.banned, label: summary.banned_label, bar: "#F97316" },
@@ -198,7 +198,7 @@ export default function ClientsWrapper() {
               العملاء
             </h1>
             <p className="text-13 text-gray-400 dark:text-white/45 font-medium leading-relaxed">
-              كل عملاء عقدي - اضغط «عرض» لملف العميل الكامل
+              كل عملاء «عقد إيجار» - اضغط «عرض» لملف العميل الكامل
             </p>
           </div>
         </div>
@@ -286,7 +286,7 @@ export default function ClientsWrapper() {
           </button>
 
           <span className="min-w-12 text-center tabular-nums text-gray-900 dark:text-white font-semibold">
-            {page}/{lastPage}
+            <span dir="ltr">{page} / {lastPage}</span>
           </span>
 
           <button
@@ -355,8 +355,8 @@ export default function ClientsWrapper() {
                   title="ترتيب حسب تاريخ الانضمام"
                   className={cn(
                     "inline-flex items-center gap-1 transition-colors",
-                    "hover:text-[#0E5F4E] dark:hover:text-[#5FD0A8]",
-                    "text-[#0B5F4C] dark:text-[#5FD0A8]"
+                    "hover:text-[#0B5A3C] dark:hover:text-[#5FD0A8]",
+                    "text-[#0B5A3C] dark:text-[#5FD0A8]"
                   )}
                 >
                   تاريخ الانضمام
@@ -366,8 +366,8 @@ export default function ClientsWrapper() {
               <th className={cn(TH, "text-right")}>رقم العميل</th>
               <th className={cn(TH, "text-right")}>اسم العميل</th>
               <th className={cn(TH, "text-right")}>رقم الجوال</th>
-              <th className={cn(TH, "text-center px-2.5")}>مكتمل</th>
-              <th className={cn(TH, "text-center px-2.5")}>مسودة</th>
+              <th className={cn(TH, "text-center px-2.5")}>الطلبات</th>
+              <th className={cn(TH, "text-center px-2.5")}>مدفوعة</th>
               <th className={cn(TH, "text-center px-2.5")}>عقارات</th>
               <th className={cn(TH, "text-center px-2.5")}>وحدات</th>
               <th className={cn(TH, "text-center px-2.5")}>مسترجع</th>
@@ -462,10 +462,10 @@ export default function ClientsWrapper() {
                     </td>
 
                     <td className="px-2.5 py-3.5 text-center">
-                      <CountBadge value={row.completed} tone="completed" />
+                      <CountBadge value={row.ordersCount} tone="completed" />
                     </td>
                     <td className="px-2.5 py-3.5 text-center">
-                      <CountBadge value={row.draft} tone="draft" />
+                      <CountBadge value={row.completed} tone="draft" />
                     </td>
                     <td className="px-2.5 py-3.5 text-center">
                       <CountBadge value={row.properties} tone="property" />

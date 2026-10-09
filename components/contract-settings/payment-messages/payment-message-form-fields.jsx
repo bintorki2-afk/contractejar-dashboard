@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 const inputClass =
-  "h-11 rounded-xl border-[#E6EBE9] bg-white text-[13px] focus-visible:border-[#054D44] focus-visible:ring-0";
+  "h-11 rounded-xl border-[#E6EBE9] bg-white text-[13px] focus-visible:border-[#0B5A3C] focus-visible:ring-0";
 
 export default function PaymentMessageFormFields({ form, onChange }) {
   const update = (key, value) => onChange({ ...form, [key]: value });
@@ -20,7 +20,7 @@ export default function PaymentMessageFormFields({ form, onChange }) {
           value={form.message}
           onChange={(e) => update("message", e.target.value)}
           rows={4}
-          className="min-h-[100px] resize-none rounded-xl border-[#E6EBE9] bg-white text-[13px] focus-visible:border-[#054D44] focus-visible:ring-0"
+          className="min-h-[100px] resize-none rounded-xl border-[#E6EBE9] bg-white text-[13px] focus-visible:border-[#0B5A3C] focus-visible:ring-0"
         />
       </label>
 

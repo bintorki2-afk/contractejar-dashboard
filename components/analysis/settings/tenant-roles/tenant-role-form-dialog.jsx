@@ -174,13 +174,13 @@ export default function TenantRoleFormDialog({ role = null }) {
             dir="ltr"
             checked={form.hasUserInput}
             onCheckedChange={(checked) => setField("hasUserInput", checked)}
-            className="data-[state=checked]:bg-[#0E5F4E]"
+            className="data-[state=checked]:bg-[#0B5A3C]"
           />
         </div>
       </div>
 
       {form.hasUserInput ? (
-        <div className="flex flex-col gap-3.5 rounded-xl border border-[#0E5F4E]/15 bg-[#0E5F4E]/[0.04] p-3.5">
+        <div className="flex flex-col gap-3.5 rounded-xl border border-[#0B5A3C]/15 bg-[#0B5A3C]/[0.04] p-3.5">
           <label className="flex flex-col gap-1.5">
             <SettingsFieldLabel required>اسم حقل الإدخال</SettingsFieldLabel>
             <Input

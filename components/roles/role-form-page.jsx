@@ -45,7 +45,7 @@ export function RoleFormPageHeader({
           type="button"
           onClick={onSave}
           disabled={isSaving}
-          className="inline-flex items-center justify-center gap-2 bg-white dark:bg-[#0F1C16] border-[1.5px] border-[#E3E8E6] dark:border-white/15 rounded-xl px-3.5 py-2 text-[11px] font-extrabold text-[#33403B] dark:text-white/80 hover:border-[#CDEBDF] dark:hover:border-emerald-500/40 hover:text-[#0B5F4C] dark:hover:text-emerald-300 transition-colors disabled:opacity-60 min-w-[110px]"
+          className="inline-flex items-center justify-center gap-2 bg-white dark:bg-[#0F1C16] border-[1.5px] border-[#E3E8E6] dark:border-white/15 rounded-xl px-3.5 py-2 text-[11px] font-extrabold text-[#33403B] dark:text-white/80 hover:border-[#CDEBDF] dark:hover:border-emerald-500/40 hover:text-[#0B5A3C] dark:hover:text-emerald-300 transition-colors disabled:opacity-60 min-w-[110px]"
         >
           {isSaving ? (
             <>
@@ -70,7 +70,7 @@ export function RoleFormSection({ title, children, className }) {
       )}
     >
       {title ? (
-        <div className="text-[13.5px] font-black text-[#0B5F4C] dark:text-[#5fd0a8] mb-2.5">
+        <div className="text-[13.5px] font-black text-[#0B5A3C] dark:text-[#5fd0a8] mb-2.5">
           {title}
         </div>
       ) : null}
@@ -122,7 +122,7 @@ export function RoleFormFields({
         <div className="mt-1.5 flex items-center gap-2.5">
           <input
             type="color"
-            value={formData.color || "#0E5F4E"}
+            value={formData.color || "#0B5A3C"}
             onChange={(e) => onChange("color", e.target.value)}
             disabled={disabled}
             className="w-[46px] h-[38px] p-[3px] border border-[#d5e3dc] dark:border-[#2c5648] rounded-[9px] cursor-pointer bg-white dark:bg-[#0f241d] disabled:opacity-60"
@@ -158,7 +158,7 @@ export function RoleActivateAllToggle({ checked, onChange, disabled = false }) {
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
         disabled={disabled}
-        className="size-4 accent-[#0E5F4E] dark:accent-emerald-500"
+        className="size-4 accent-[#0B5A3C] dark:accent-emerald-500"
       />
       تفعيل كافة الصلاحيات لهذا الدور
     </label>
@@ -182,7 +182,7 @@ export function RolePermissionsSection({
   return (
     <RoleFormSection className="mt-3">
       <div className="flex items-center justify-between gap-3 flex-wrap mb-3.5">
-        <div className="text-[13.5px] font-black text-[#0B5F4C] dark:text-[#5fd0a8]">
+        <div className="text-[13.5px] font-black text-[#0B5A3C] dark:text-[#5fd0a8]">
           صلاحيات النظام{" "}
           <span className="text-[#8a978f] dark:text-white/45 font-normal">
             ({totalPermissions} صلاحية · {modules.length} وحدة)
@@ -192,7 +192,7 @@ export function RolePermissionsSection({
           type="button"
           onClick={onSelectAll}
           disabled={isPending || modules.length === 0}
-          className="border border-[#cfe3da] dark:border-[#2c5648] bg-white dark:bg-[#173029] text-[#0B5F4C] dark:text-[#5fd0a8] rounded-lg px-2.5 py-1.5 text-xs font-bold hover:bg-[#eef8f3] dark:hover:bg-[#1c352d] transition-colors disabled:opacity-50"
+          className="border border-[#cfe3da] dark:border-[#2c5648] bg-white dark:bg-[#173029] text-[#0B5A3C] dark:text-[#5fd0a8] rounded-lg px-2.5 py-1.5 text-xs font-bold hover:bg-[#eef8f3] dark:hover:bg-[#1c352d] transition-colors disabled:opacity-50"
         >
           تحديد الكل
         </button>
@@ -213,7 +213,7 @@ export function RolePermissionsSection({
               key={module.section_key}
               className="border border-[#e5eee9] dark:border-[#24463b] rounded-[13px] p-3 sm:px-[15px] bg-[#fbfdfc] dark:bg-[#12241d] transition-colors hover:border-[#cfe3da] dark:hover:border-[#356052] hover:shadow-[0_2px_10px_rgba(14,95,78,0.05)] dark:hover:shadow-none"
             >
-              <div className="text-[13.5px] font-extrabold text-[#0B5F4C] dark:text-[#5fd0a8] border-b border-[#eef4f1] dark:border-[#24463b] pb-2 mb-2">
+              <div className="text-[13.5px] font-extrabold text-[#0B5A3C] dark:text-[#5fd0a8] border-b border-[#eef4f1] dark:border-[#24463b] pb-2 mb-2">
                 {module.section_label_ar ?? module.section_key}
               </div>
               <div className="flex flex-col">
@@ -225,14 +225,14 @@ export function RolePermissionsSection({
                   return (
                     <label
                       key={action.permission_name}
-                      className="flex items-center gap-2 text-[12.5px] text-[#4a5b54] dark:text-[#bcd] px-2 py-1.5 -mx-2 rounded-lg cursor-pointer hover:bg-[#f2f8f5] dark:hover:bg-[#173a30] hover:text-[#0B5F4C] dark:hover:text-[#5fd0a8] transition-colors"
+                      className="flex items-center gap-2 text-[12.5px] text-[#4a5b54] dark:text-[#bcd] px-2 py-1.5 -mx-2 rounded-lg cursor-pointer hover:bg-[#f2f8f5] dark:hover:bg-[#173a30] hover:text-[#0B5A3C] dark:hover:text-[#5fd0a8] transition-colors"
                     >
                       <input
                         type="checkbox"
                         checked={checked}
                         onChange={() => onPermissionChange(action.permission_name)}
                         disabled={isPending}
-                        className="size-4 accent-[#0E5F4E] dark:accent-emerald-500 shrink-0"
+                        className="size-4 accent-[#0B5A3C] dark:accent-emerald-500 shrink-0"
                       />
                       {action.action_label_ar ?? action.action}
                     </label>

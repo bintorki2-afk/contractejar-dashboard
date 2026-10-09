@@ -206,7 +206,7 @@ export default function RealtimeOrdersToolbar({
     "size-10 rounded-xl flex items-center justify-center transition-all shrink-0 border relative",
     dark
       ? "border-white/10 bg-white/[0.05] text-white/80 hover:bg-white/[0.1]"
-      : "border-[#E3E8E6] bg-white text-[#33403B] hover:border-[#CDEBDF] hover:text-[#0B5F4C]"
+      : "border-[#E3E8E6] bg-white text-[#33403B] hover:border-[#CDEBDF] hover:text-[#0B5A3C]"
   );
 
   const toolbarControls = (
@@ -248,6 +248,7 @@ export default function RealtimeOrdersToolbar({
         />
         <input
           type="text"
+          data-orders-search
           value={searchQuery}
           onChange={(e) => onSearchChange?.(e.target.value)}
           placeholder={searchPlaceholder}
@@ -255,7 +256,7 @@ export default function RealtimeOrdersToolbar({
             "w-full h-10 rounded-xl pr-9 pl-9 text-[11px] font-bold transition-colors focus:outline-none",
             dark
               ? "bg-[#132620] border border-[#28453A] text-white placeholder:text-white/30 focus:border-[#34D399]/40"
-              : "bg-white border border-[#E3E8E6] text-[#22302C] placeholder:text-[#8A8A84] focus:border-[#0E5F4E]"
+              : "bg-white border border-[#E3E8E6] text-[#22302C] placeholder:text-[#8A8A84] focus:border-[#0B5A3C]"
           )}
         />
         {searchQuery ? (
@@ -294,7 +295,7 @@ export default function RealtimeOrdersToolbar({
           title="فلاتر"
           className={cn(
             roundBtn,
-            filtersOpen && "!bg-[#0E5F4E] !text-white !border-[#0E5F4E]"
+            filtersOpen && "!bg-[#0B5A3C] !text-white !border-[#0B5A3C]"
           )}
         >
           <Filter className="size-[16px]" />
@@ -335,7 +336,7 @@ export default function RealtimeOrdersToolbar({
             "h-10 px-3.5 rounded-xl border font-extrabold text-[11px] flex items-center gap-1.5 transition-all disabled:opacity-60",
             dark
               ? "border-[#28453A] bg-[#132620] text-[#C4D8D0] hover:bg-[#1A332B]"
-              : "border-[#E3E8E6] text-[#33403B] bg-white hover:border-[#CDEBDF] hover:text-[#0B5F4C]"
+              : "border-[#E3E8E6] text-[#33403B] bg-white hover:border-[#CDEBDF] hover:text-[#0B5A3C]"
           )}
         >
           {isExporting ? "جاري التصدير..." : "تصدير Excel"}
@@ -350,7 +351,7 @@ export default function RealtimeOrdersToolbar({
         className={cn(
           roundBtn,
           displayedPart === "notification" &&
-            "!bg-[#0E5F4E] !text-white !border-[#0E5F4E]"
+            "!bg-[#0B5A3C] !text-white !border-[#0B5A3C]"
         )}
       >
         <Bell className="size-[16px]" />
@@ -368,7 +369,7 @@ export default function RealtimeOrdersToolbar({
             className={cn(
               roundBtn,
               displayedPart === "payments" &&
-                "!bg-[#0E5F4E] !text-white !border-[#0E5F4E]"
+                "!bg-[#0B5A3C] !text-white !border-[#0B5A3C]"
             )}
           >
             <CreditCard className="size-[16px]" />

@@ -17,6 +17,7 @@ import ReportsHeader from "./shared/reports-header";
 import ReportsFilters from "./shared/reports-filters";
 import { REPORT_TABS } from "./mock-data";
 import OrdersReportTab from "./tabs/orders-report-tab";
+import OverviewReportTab from "./tabs/overview-report-tab";
 import SalesReportTab from "./tabs/sales-report-tab";
 import ProfitsReportTab from "./tabs/profits-report-tab";
 import OperatingExpensesReportTab from "./tabs/operating-expenses-report-tab";
@@ -26,7 +27,6 @@ import MarketingReportTab from "./tabs/marketing-report-tab";
 import PerformanceReportTab from "./tabs/performance-report-tab";
 
 const TAB_ALIASES = {
-  overview: "orders",
   financial: "sales",
   expenses: "operating-expenses",
   staff: "employees",
@@ -37,6 +37,7 @@ const TAB_ALIASES = {
 };
 
 const TAB_COMPONENTS = {
+  overview: OverviewReportTab,
   orders: OrdersReportTab,
   sales: SalesReportTab,
   profits: ProfitsReportTab,
@@ -47,10 +48,11 @@ const TAB_COMPONENTS = {
   performance: PerformanceReportTab,
 };
 
+// د3: «نظرة عامة» هي الافتراضية؛ باقي التبويبات تفاصيل ثانوية.
 function resolveTab(raw) {
-  if (!raw) return "orders";
+  if (!raw) return "overview";
   const normalized = TAB_ALIASES[raw] ?? raw;
-  return TAB_COMPONENTS[normalized] ? normalized : "orders";
+  return TAB_COMPONENTS[normalized] ? normalized : "overview";
 }
 
 function formatLastUpdated() {
@@ -202,6 +204,7 @@ export default function ReportsWrapper() {
         ))}
       </div>
 
+      {activeTab !== "overview" ? (
       <ReportsFilters
         period={period}
         onPeriodChange={updatePeriod}
@@ -214,6 +217,7 @@ export default function ReportsWrapper() {
         employee={employee}
         onEmployeeChange={(value) => updateFilter("employee_id", value, setEmployee)}
       />
+      ) : null}
 
       <div id="reports-print-area">
         <ActivePanel period={period} dateFrom={dateFrom} dateTo={dateTo} contractType={contractType} employee={employee} />

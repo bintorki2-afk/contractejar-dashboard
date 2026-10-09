@@ -12,7 +12,7 @@ function Chip({ active, onClick, children, dark }) {
       className={cn(
         "inline-flex items-center gap-1 rounded-full border px-3 py-[5px] text-[10.5px] font-extrabold transition-all whitespace-nowrap",
         active
-          ? "bg-[#0E5F4E] border-[#0E5F4E] text-white"
+          ? "bg-[#0B5A3C] border-[#0B5A3C] text-white"
           : dark
             ? "bg-[#132620] border-[#28453A] text-[#AFC8BE] hover:bg-[#1A332B]"
             : "bg-white border-[#E3E8E6] text-[#5F5E5A] hover:bg-[#F7FAF9]"

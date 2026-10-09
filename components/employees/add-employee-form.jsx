@@ -44,7 +44,7 @@ function FormSection({ title, children, className }) {
       )}
     >
       {title ? (
-        <div className="mb-3 text-[13.5px] font-black text-[#0B5F4C] dark:text-[#5fd0a8]">
+        <div className="mb-3 text-[13.5px] font-black text-[#0B5A3C] dark:text-[#5fd0a8]">
           {title}
         </div>
       ) : null}

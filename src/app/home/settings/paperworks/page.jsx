@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/shared/confirm-provider";
 import {
   useUnwrapPageProps
 } from "@/src/hooks/use-unwrap-page-props";
@@ -35,6 +36,7 @@ const HEADERS = [
 ];
 
 export default function PaperworksPage(props) {
+  const confirm = useConfirm();
   useUnwrapPageProps(props?.params, props?.searchParams);
 
   const queryClient = useQueryClient();
@@ -110,7 +112,7 @@ export default function PaperworksPage(props) {
                     <button
                       type="button"
                       disabled={deletePending}
-                      onClick={() => deletePaperwork(item.id)}
+                      onClick={async () => { if (await confirm({ title: "تأكيد الحذف", description: "حذف هذا العنصر نهائياً؟ لا يمكن التراجع.", confirmLabel: "حذف", destructive: true })) deletePaperwork(item.id); }}
                       className={SETTINGS_DELETE_TRIGGER_CLASS}
                     >
                       حذف

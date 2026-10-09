@@ -11,7 +11,7 @@ export const PAYMENT_MESSAGE_TYPE_META = {
     type: "success",
     label: "رسالة نجاح الدفع",
     description: "تظهر للعميل بعد إتمام عملية الدفع بنجاح",
-    accent: "#054D44",
+    accent: "#0B5A3C",
     accentSoft: "#E8F5F1",
     border: "#D7EBE4",
     badgeBg: "#E6F7EF",

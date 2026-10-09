@@ -34,7 +34,11 @@ import {
   SOCIAL_FIELDS,
   SOCIAL_HELPER_TEXT,
   validatePricingForm,
+  buildAutoAssignPayload,
+  extractAutoAssignSettings,
 } from "@/src/lib/site-settings";
+import { Switch } from "@/components/ui/switch";
+import { useConfirm } from "@/components/shared/confirm-provider";
 
 const INPUT_CLASS =
   "h-11 rounded-xl border-[#E4EBE8] bg-[#F8FAF9] text-13 font-semibold text-gray-900 focus-visible:ring-brand-dark/20 dark:border-white/10 dark:bg-white/[0.04] dark:text-white";
@@ -481,6 +485,136 @@ export function AppVersionCard({ data, canEdit }) {
 }
 
 /** الحاوية التي تُدرج في تبويب «الإعدادات العامة». */
+/** د15: الإسناد التلقائي للطلبات المدفوعة (تشغيل + الطريقة + الموظفون المشمولون). */
+export function AutoAssignCard({ data, canEdit }) {
+  const confirm = useConfirm();
+  const settings = extractAutoAssignSettings(data);
+  const [form, setForm] = useState(settings.form);
+  const [syncedData, setSyncedData] = useState(null);
+  if (data && data !== syncedData) {
+    setSyncedData(data);
+    setForm(settings.form);
+  }
+  const mutation = useSaveSiteSettings({
+    successMessage: "تم حفظ إعدادات الإسناد التلقائي",
+    errorFallback: "تعذر حفظ إعدادات الإسناد التلقائي",
+  });
+  const dirty =
+    form.enabled !== settings.form.enabled ||
+    form.strategy !== settings.form.strategy ||
+    [...form.employee_ids].sort().join(",") !== [...settings.form.employee_ids].sort().join(",");
+
+  const handleSave = async () => {
+    if (form.enabled !== settings.form.enabled) {
+      const ok = await confirm({
+        title: form.enabled ? "تشغيل الإسناد التلقائي" : "إيقاف الإسناد التلقائي",
+        description: form.enabled
+          ? "كل طلب يُدفع سيُسند فوراً لموظف ويُبلَّغ الموظف والعميل."
+          : "ستعود الطلبات المدفوعة إلى «بانتظار الاستلام» حتى يستلمها موظف يدوياً.",
+        confirmLabel: form.enabled ? "تشغيل" : "إيقاف",
+        destructive: !form.enabled,
+      });
+      if (!ok) return;
+    }
+    mutation.mutate(buildAutoAssignPayload(form));
+  };
+
+  const toggleEmployee = (id) =>
+    setForm((prev) => ({
+      ...prev,
+      employee_ids: prev.employee_ids.includes(id)
+        ? prev.employee_ids.filter((x) => x !== id)
+        : [...prev.employee_ids, id],
+    }));
+
+  return (
+    <CardShell
+      title="الإسناد التلقائي للطلبات"
+      description={settings.note || "يُسند الطلب المدفوع تلقائياً لموظف ويتحوّل إلى «مستلم من الموظف»."}
+      badge={
+        <SaveButton
+          onClick={handleSave}
+          disabled={!canEdit || mutation.isPending || !dirty}
+          pending={mutation.isPending}
+          label="حفظ الإسناد"
+        />
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <label className="flex items-center justify-between gap-3 rounded-xl bg-[#F3F9F6] px-4 py-3 dark:bg-white/[0.04]">
+          <span className="text-13 font-bold text-gray-900 dark:text-white">
+            {form.enabled ? "مُفعّل — يُسند كل طلب مدفوع تلقائياً" : "مُعطّل — الاستلام يدوي"}
+          </span>
+          <Switch
+            dir="ltr"
+            checked={form.enabled}
+            disabled={!canEdit}
+            onCheckedChange={(value) => setForm((prev) => ({ ...prev, enabled: value }))}
+            aria-label="تشغيل الإسناد التلقائي"
+          />
+        </label>
+
+        <div className={cn("flex flex-col gap-2", !form.enabled && "opacity-60")}>
+          <span className="text-xs font-bold text-gray-700 dark:text-white/80">طريقة التوزيع</span>
+          <div role="radiogroup" className="flex flex-wrap gap-2">
+            {settings.strategies.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                role="radio"
+                aria-checked={form.strategy === opt.value}
+                disabled={!canEdit}
+                onClick={() => setForm((prev) => ({ ...prev, strategy: opt.value }))}
+                className={cn(
+                  "h-10 rounded-xl border px-4 text-13 font-bold transition-colors",
+                  form.strategy === opt.value
+                    ? "border-brand-deep bg-brand-mint text-brand-deep dark:border-emerald-400 dark:bg-emerald-500/15 dark:text-emerald-300"
+                    : "border-[#E4EBE8] bg-white text-gray-700 dark:border-white/10 dark:bg-transparent dark:text-white/70"
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className={cn("flex flex-col gap-2", !form.enabled && "opacity-60")}>
+          <span className="text-xs font-bold text-gray-700 dark:text-white/80">
+            الموظفون المشمولون {form.employee_ids.length ? `(${form.employee_ids.length})` : "(الكل)"}
+          </span>
+          <HelperText>اتركها كلها بلا تحديد ليُشمل كل موظف لديه صلاحية استلام الطلبات.</HelperText>
+          {settings.eligible.length === 0 ? (
+            <p className="text-[12.5px] text-[#B42318]">لا يوجد موظف نشط بصلاحية استلام الطلبات.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {settings.eligible.map((emp) => {
+                const on = form.employee_ids.includes(Number(emp.id));
+                return (
+                  <button
+                    key={emp.id}
+                    type="button"
+                    aria-pressed={on}
+                    disabled={!canEdit}
+                    onClick={() => toggleEmployee(Number(emp.id))}
+                    className={cn(
+                      "h-9 rounded-full border px-3.5 text-[12.5px] font-bold transition-colors",
+                      on
+                        ? "border-brand-deep bg-brand-deep text-white"
+                        : "border-[#E4EBE8] bg-white text-gray-700 hover:border-brand-green/40 dark:border-white/10 dark:bg-transparent dark:text-white/70"
+                    )}
+                  >
+                    {emp.name}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </CardShell>
+  );
+}
+
 export default function SiteSettingsCards() {
   const { can, isReady } = usePermissions();
   const canEdit = isReady && can(PERMISSION_SECTIONS.settings, "edit");
@@ -508,6 +642,7 @@ export default function SiteSettingsCards() {
   return (
     <div className="flex flex-col gap-4">
       <PricingSettingsCard data={data} canEdit={canEdit} />
+      <AutoAssignCard data={data} canEdit={canEdit} />
       <SupportNumberCard data={data} canEdit={canEdit} />
       <SocialSettingsCard data={data} canEdit={canEdit} />
       <AppVersionCard data={data} canEdit={canEdit} />
