@@ -25,8 +25,10 @@ function buildKpis(k) {
     ["done", "موثّقة", pick(k, "documented_count", "done_count", "completed_count"), "checkCircle"],
     ["working", "قيد العمل", pick(k, "working_count", "active_count"), "activity", "warning"],
     ["canceled", "ملغاة", pick(k, "canceled_count", "cancelled_count"), "xCircle", "danger"],
-    // د3: refunded_count = طلبات استرجاع مؤكدة (refundable_contracts) — يختلف عن «مسترجعة» (حالة الطلب) في تبويب الطلبات.
-    ["refunded", "طلبات استرجاع مؤكدة", pick(k, "refunded_count"), "undo", "muted"],
+    // الخادم (متابعة 1): refunded_orders/refunded_count = الطلبات المسترجعة فعلاً (حالة «مسترجع» أو
+    // استرجاع Moyasar ناجح) — نفس رقم «مسترجعة» في تبويب الطلبات. طلبات الاسترجاع القديمة المؤكدة
+    // صارت مفتاحاً مستقلاً refund_requests_confirmed.
+    ["refunded", "مسترجعة", pick(k, "refunded_orders", "refunded_count"), "undo", "muted"],
     ["revenue", "الإيرادات (ريال)", pick(k, "revenue", "revenue_total"), "wallet"],
   ].map(([key, label, value, icon, tone]) => ({ key, label, value: value ?? 0, icon, tone }));
 }
