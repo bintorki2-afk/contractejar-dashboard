@@ -16,6 +16,8 @@ import { toast } from 'sonner'
 import { Bell, ChevronDown, ChevronRight, Loader2, PanelLeft } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { fetchUnreceivedOrdersTotal } from '@/src/hooks/use-unreceived-orders-watcher'
+import { useEmployeeNotifications } from '@/src/hooks/use-employee-notifications'
+import { unreadBadgeText } from '@/src/lib/employee-notifications'
 import { roleLabelAr } from '@/src/lib/role-labels'
 import { LuLogOut } from 'react-icons/lu'
 import { cn } from '@/lib/utils'
@@ -37,7 +39,7 @@ export default function Header({
     const router = useRouter();
     const pathname = usePathname();
     const showOrderMessages = isOrdersRelatedPath(pathname);
-    const { user } = useUserStore();
+    const { user, isAuthenticated } = useUserStore();
     const { setDisplayedPart, displayedPart, setOrderId, isSidebarOpen, toggleSidebar } = useSidebarStore();
     const { logout, logoutLoading } = useLogout();
     const { can, canRoute } = usePermissions();
@@ -50,6 +52,13 @@ export default function Header({
         refetchInterval: 30_000,
     });
     const hasUnread = canSeeOrders && unreceivedTotal > 0;
+    // دفعة هـ (D-1): عدّاد إشعارات الموظف (ردّ العميل / دفع رسوم) — استطلاع كل 60 ثانية.
+    const { unreadCount: employeeUnread } = useEmployeeNotifications({ enabled: Boolean(isAuthenticated) });
+    const employeeBadge = unreadBadgeText(employeeUnread);
+    const bellLabel = [
+        employeeUnread > 0 ? `${employeeUnread} إشعار غير مقروء` : null,
+        hasUnread ? `${unreceivedTotal} بانتظار الاستلام` : null,
+    ].filter(Boolean).join('، ');
 
     const redirectToEmployeePage = (view) => {
         if (!user?.id) {
@@ -196,11 +205,19 @@ export default function Header({
                         displayedPart === "notification" &&
                           "border-brand-main bg-brand-main text-white hover:bg-brand-main hover:text-white dark:border-emerald-500 dark:bg-emerald-500 dark:text-[#0B1411]"
                     )}
-                    aria-label={hasUnread ? `الإشعارات (${unreceivedTotal} بانتظار الاستلام)` : 'الإشعارات'}
+                    aria-label={bellLabel ? `الإشعارات (${bellLabel})` : 'الإشعارات'}
+                    data-bell-unread={employeeUnread || undefined}
                 >
                     <span className="relative inline-flex">
                         <Bell className="size-[18px]" strokeWidth={2} />
-                        {hasUnread ? (
+                        {employeeBadge ? (
+                            <span
+                                className="absolute -top-2 -end-2.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#E5484D] text-white text-[10px] font-black leading-[18px] text-center tabular-nums ring-2 ring-white dark:ring-[#0F1C16]"
+                                aria-hidden
+                            >
+                                {employeeBadge}
+                            </span>
+                        ) : hasUnread ? (
                             <span className="absolute -top-1 -end-1 size-2.5 rounded-full bg-[#E5484D] ring-2 ring-white dark:ring-[#0F1C16]" aria-hidden />
                         ) : null}
                     </span>

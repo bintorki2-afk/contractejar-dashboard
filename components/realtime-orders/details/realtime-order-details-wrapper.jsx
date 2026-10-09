@@ -208,7 +208,7 @@ function OrderDetailsBody() {
         canRecordTransfer={canRecordTransfer}
         canRefund={canRefundPayments}
         onBankTransfer={(charge) => openBankTransfer(charge)}
-        onRefundDue={(amount) => openRefund({ amount, reason: "استرجاع فرق سعر بعد تعديل الطلب" })}
+        onRefundDue={(amount) => openRefund({ amount, purpose: "refund_due", reason: "استرجاع فرق سعر بعد تعديل الطلب" })}
       />
 
       {/* الشاشة المقسومة: يمين = البيانات (تمرير داخلي) · يسار = المرفقات (ثابتة) */}
