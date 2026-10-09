@@ -55,6 +55,8 @@ function OrderDetailsBody() {
     can(PERMISSION_SECTIONS.request_classification, "edit") ||
     can(PERMISSION_SECTIONS.all_requests, "edit");
   const canEditOrder = isAdmin || can(PERMISSION_SECTIONS.all_requests, "edit");
+  // خصم على طلب غير مدفوع = تعديل بيانات العميل في الخادم (UserPolicy@update → users.edit).
+  const canDiscountOrder = isAdmin || can(PERMISSION_SECTIONS.users, "edit");
   // د9: الاسترجاع عبر Moyasar بصلاحية payments.refund (مدير النظام ضمنياً).
   const canRefundPayments = isAdmin || can(PERMISSION_SECTIONS.payments, "refund");
   const canAddStatus =
@@ -173,6 +175,7 @@ function OrderDetailsBody() {
           canRefund={canRefundPayments}
           onRefund={() => setRefundOpen(true)}
           canNotify={canEditOrder}
+          canDiscount={canDiscountOrder}
           className="min-[1500px]:sticky min-[1500px]:top-0"
         />
       </div>

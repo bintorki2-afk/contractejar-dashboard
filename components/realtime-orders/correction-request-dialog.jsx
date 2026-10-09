@@ -46,6 +46,12 @@ export default function CorrectionRequestDialog({ open, onOpenChange, order }) {
   );
   const message = selectedLabels.length > 0 ? buildCorrectionMessage(order, selectedLabels) : "";
 
+  // رقم واتساب العميل صاحب الطلب (نفس رقم رسائل المراحل)، وإلا جوال الطلب.
+  const waDigits = order?.customer_whatsapp_dial || toSaudiMobileDialDigits(order?.user_mobile ?? "");
+  const waHref = waDigits
+    ? `https://wa.me/${waDigits}${message ? `?text=${encodeURIComponent(message)}` : ""}`
+    : null;
+
   const handleClose = () => onOpenChange(false);
 
   return (
@@ -111,9 +117,9 @@ export default function CorrectionRequestDialog({ open, onOpenChange, order }) {
                   <i className="fa-regular fa-copy text-13" />
                   نسخ الرسالة
                 </button>
-                {order?.user_mobile ? (
+                {waHref ? (
                   <Link
-                    href={`https://wa.me/${toSaudiMobileDialDigits(order.user_mobile)}`}
+                    href={waHref}
                     target="_blank"
                     className="text-[12.5px] font-bold text-green-700 hover:opacity-80 transition-opacity inline-flex items-center gap-1.5"
                   >

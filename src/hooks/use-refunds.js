@@ -15,6 +15,11 @@ export function refundErrorMessage(error) {
     if (first) return String(first);
   }
   if (error?.response?.status === 403) return "ليست لديك صلاحية استرجاع المدفوعات";
+  // 502 = رفض/تعذّر بوابة الدفع: رسالة الخادم عربية ومقصودة للموظف («تعذّر الاسترجاع من بوابة الدفع: …»)،
+  // لكن معترض axios يستبدل رسائل 5xx بنص عام — نعرض الأصل هنا فقط.
+  if (error?.response?.status === 502 && typeof data?.server_message === "string" && /بوابة الدفع|Moyasar/.test(data.server_message)) {
+    return data.server_message;
+  }
   return data?.message || "تعذّر تنفيذ الاسترجاع";
 }
 

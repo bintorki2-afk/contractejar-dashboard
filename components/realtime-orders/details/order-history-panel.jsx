@@ -10,7 +10,7 @@ import OrderNotificationsTab from "./order-notifications-tab";
  * لوحة «سجل الطلب» الجانبية في تفاصيل الطلب: المدفوعات والاسترجاع (د9)،
  * سجل النشاط (د13)، الإشعارات المرسلة (د24).
  */
-export default function OrderHistoryPanel({ orderData, tabs: extraTabs = [], canRefund, onRefund, canNotify, className }) {
+export default function OrderHistoryPanel({ orderData, tabs: extraTabs = [], canRefund, onRefund, canNotify, canDiscount, className }) {
   const tabs = [
     {
       key: "activity",
@@ -29,7 +29,7 @@ export default function OrderHistoryPanel({ orderData, tabs: extraTabs = [], can
       key: "payments",
       label: "المدفوعات",
       count: (orderData?.refunds ?? []).length || null,
-      render: () => <OrderPaymentsTab orderData={orderData} canRefund={canRefund} onRefund={onRefund} />,
+      render: () => <OrderPaymentsTab orderData={orderData} canRefund={canRefund} onRefund={onRefund} canDiscount={canDiscount} />,
     },
   ];
   const [active, setActive] = useState(tabs[0]?.key);

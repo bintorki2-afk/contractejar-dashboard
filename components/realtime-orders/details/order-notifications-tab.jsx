@@ -18,7 +18,8 @@ const CHANNEL_LABELS = { push: "إشعار", whatsapp: "واتساب", sms: "ر�
 export const PUSH_RESULT = {
   sent: { label: "وصل للجهاز", cls: "bg-[#E3F4EA] text-[#0B7A4C]" },
   no_token: { label: "في الصندوق فقط (لا جهاز مسجّل)", cls: "bg-[#F0F4F2] text-[#4B5753]" },
-  disabled: { label: "الإشعارات معطّلة لدى العميل", cls: "bg-[#FFF4DE] text-[#9A6100]" },
+  // `disabled` من الخادم = إرسال Firebase غير مُعدّ على الخادم (ليس قرار العميل).
+  disabled: { label: "في الصندوق فقط (الإرسال للجوال غير مفعّل على الخادم)", cls: "bg-[#FFF4DE] text-[#9A6100]" },
   failed: { label: "فشل الإرسال", cls: "bg-[#FDECEC] text-[#B42318]" },
   prepared: { label: "رسالة جاهزة (فُتح واتساب)", cls: "bg-[#25D366]/12 text-[#128C4B]" },
 };

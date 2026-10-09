@@ -4,6 +4,7 @@ import { CreditCard, Undo2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { refundableAmount } from "@/src/hooks/use-refunds";
 import { formatJourneyTime } from "@/src/lib/order-journey";
+import ApplyOrderDiscountForm from "./apply-order-discount-form";
 
 function Minus({ value }) {
   return (
@@ -29,13 +30,16 @@ const PAYMENT_REFUND = {
 };
 
 /** المدفوعات + سجل الاسترجاع للطلب (د9). */
-export default function OrderPaymentsTab({ orderData, canRefund, onRefund }) {
+export default function OrderPaymentsTab({ orderData, canRefund, onRefund, canDiscount }) {
   const payments = orderData?.payments ?? [];
   const refunds = orderData?.refunds ?? [];
   const canRefundNow = canRefund && payments.some((p) => (p.status === "success" || p.status === "paid") && refundableAmount(p) > 0);
 
+  const isPaid = orderData?.is_paid === true || Number(orderData?.is_completed) === 1;
+
   return (
     <div className="flex flex-col gap-4">
+      {canDiscount && !isPaid ? <ApplyOrderDiscountForm orderData={orderData} /> : null}
       {canRefund ? (
         <button
           type="button"
