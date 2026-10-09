@@ -18,6 +18,9 @@ import OrderDetailsDialogs from "./order-details-dialogs";
 import ContractExpandedViewDialog from "./contract-expanded-view-dialog";
 import { mapOrderDetailView } from "./map-order-detail";
 import RefundDialog from "./refund-dialog";
+import BankTransferDialog from "./bank-transfer-dialog";
+import { UnpaidBanner, UnpaidDialog, markUnpaidPopupSeen, unpaidPopupSeen } from "./unpaid-notice";
+import { normalizePaymentState } from "@/src/lib/payment-state";
 import { InlineEditProvider } from "./inline-edit";
 import ShortcutsHelp from "@/components/orders/shortcuts-help";
 import { ORDER_DETAIL_SHORTCUTS, useOrderDetailShortcuts } from "@/src/hooks/use-orders-shortcuts";
@@ -67,6 +70,18 @@ function OrderDetailsBody() {
   const [sideMode, setSideMode] = useState("attachments");
   const [attachmentKey, setAttachmentKey] = useState(null);
   const [mobileAttachmentsOpen, setMobileAttachmentsOpen] = useState(false);
+  // دفعة هـ (د2): حوالة بنكية + بوب-أب «غير مدفوع» مرة واحدة لكل طلب في الجلسة.
+  const [bankTransfer, setBankTransfer] = useState({ open: false, charge: null });
+  const [unpaidOpen, setUnpaidOpen] = useState(false);
+  const [unpaidCheckedFor, setUnpaidCheckedFor] = useState(null);
+  if (orderData?.id && unpaidCheckedFor !== orderData.id) {
+    setUnpaidCheckedFor(orderData.id);
+    if (normalizePaymentState(orderData).status === "unpaid" && !unpaidPopupSeen(orderData.id)) {
+      markUnpaidPopupSeen(orderData.id);
+      setUnpaidOpen(true);
+    }
+  }
+  const openBankTransfer = (charge = null) => setBankTransfer({ open: true, charge });
 
   // د19: S = المرحلة التالية، W = واتساب العميل، ? = المساعدة.
   const detailShortcuts = useOrderDetailShortcuts({
@@ -138,6 +153,8 @@ function OrderDetailsBody() {
       className="flex min-h-full flex-col gap-3 bg-[#F3F5F2] transition-colors -m-[45px] p-[45px] pt-4 max-[1700px]:-m-[30px] max-[1700px]:p-[30px] max-[1700px]:pt-4 max-md:-m-4 max-md:p-4 max-md:pb-28 dark:bg-[#0B1411]"
       dir="rtl"
     >
+      <UnpaidBanner orderData={orderData} onPayLink={dialogs.handlePayLink} onBankTransfer={() => openBankTransfer(null)} canRecordTransfer={canRecordTransfer} />
+
       <OrderTopCard
         orderData={orderData}
         view={view}
@@ -155,6 +172,7 @@ function OrderDetailsBody() {
         onStatusChange={dialogs.handleStatusChange}
         onOpenNotes={handleOpenNotes}
         onPayLink={dialogs.handlePayLink}
+        onBankTransfer={() => openBankTransfer(null)}
         onRefund={() => (canRefundPayments ? setRefundOpen(true) : dialogs.openReturn(orderData))}
         onPropertyUpdate={() => dialogs.setPropertyUpdateOpen(true)}
         onRequestData={() => dialogs.setCorrectionRequestOpen(true)}
@@ -203,6 +221,20 @@ function OrderDetailsBody() {
       </div>
 
       <RefundDialog open={refundOpen} onOpenChange={setRefundOpen} orderData={orderData} />
+      <BankTransferDialog
+        open={bankTransfer.open}
+        onOpenChange={(next) => setBankTransfer((prev) => ({ ...prev, open: next }))}
+        orderData={orderData}
+        charge={bankTransfer.charge}
+      />
+      <UnpaidDialog
+        open={unpaidOpen}
+        onOpenChange={setUnpaidOpen}
+        orderData={orderData}
+        onPayLink={dialogs.handlePayLink}
+        onBankTransfer={() => openBankTransfer(null)}
+        canRecordTransfer={canRecordTransfer}
+      />
       <ShortcutsHelp open={detailShortcuts.helpOpen} onOpenChange={detailShortcuts.setHelpOpen} items={ORDER_DETAIL_SHORTCUTS} />
       <OrderDetailsDialogs id={id} orderData={orderData} view={view} dialogs={dialogs} />
       <ContractExpandedViewDialog open={expandedViewOpen} onOpenChange={setExpandedViewOpen} order={view} orderData={orderData} />

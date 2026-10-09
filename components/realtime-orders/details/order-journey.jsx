@@ -69,9 +69,10 @@ export default function OrderJourney({ orderData, orderId, canEdit = true, canFo
     receive.mutate({ orderId, stage: "received" });
   };
 
-  // زر الخطوة التالية يظهر بجانب الخطوة الحالية فقط.
+  // زر الخطوة التالية يظهر بجانب الخطوة التي ينفّذها (استلمت ← الخطوة 2، وثّقت ← الخطوة 3).
+  // طلب غير مدفوع: الخطوة الحالية «قيد المراجعة» لكن الاستلام متاح — فيظهر «استلمت» بجانب الخطوة 2.
   const buttonForStep = (step) => {
-    if (!step.current || journey.sideState || !nextStage) return null;
+    if (step.done || journey.sideState || !nextStage) return null;
     const isReceive = nextStage === "received" && step.key === "received_by_employee";
     const isNotarize = nextStage === "notarized" && step.key === "ejar_authenticated";
     if (!isReceive && !isNotarize) return null;
