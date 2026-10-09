@@ -106,12 +106,66 @@ function toAmount(value) {
 }
 
 /**
+ * Stored dates come as `DD-MM-YYYY` (hijri and most DOBs) or `YYYY-MM-DD`
+ * (gregorian start date). Show one format everywhere: `DD/MM/YYYY هـ|م`
+ * so an employee never has to guess the calendar (فحص Q1).
+ */
+export function formatCalendarDate(value, calendarType) {
+  if (value == null || value === "") return null;
+  const raw = String(value).trim();
+  const m = raw.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/) || null;
+  const d = m ? null : raw.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+  if (!m && !d) return raw;
+  const [day, month, year] = m ? [m[3], m[2], m[1]] : [d[1], d[2], d[3]];
+  const type = calendarType === "hijri" || calendarType === "gregorian"
+    ? calendarType
+    : Number(year) < 1600 ? "hijri" : "gregorian";
+  return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year} ${type === "hijri" ? "هـ" : "م"}`;
+}
+
+/** Contract length in months from what the order detail carries (server is the source). */
+export function resolveContractMonths(step4 = {}, orderData = {}) {
+  const total = Number(pick(step4.total_months, orderData.total_months));
+  if (total > 0) return total;
+  const years = Number(pick(step4.duration_years, orderData.duration_years)) || 0;
+  const extra = Number(pick(step4.duration_months, orderData.duration_months)) || 0;
+  if (years * 12 + extra > 0) return years * 12 + extra;
+  const term = pick(step4.contract_term_in_years, orderData.contract_term_in_years);
+  if (term && typeof term === "object") {
+    const months = Number(term.months);
+    if (months > 0) return months;
+    const byName = { "سنوي": 12, "سنة": 12, "سنتين": 24, "سنتان": 24, "ثلاث سنوات": 36 };
+    if (byName[term.period]) return byName[term.period];
+  }
+  return 0;
+}
+
+const METER_OWNERSHIP_LABELS = { owner: "باسم المالك", tenant: "باسم المستأجر", shared: "مشترك" };
+
+function meterLine(number, ownership, sharedFee) {
+  if (!number && !ownership) return null;
+  const parts = [number || "بدون رقم", METER_OWNERSHIP_LABELS[ownership] ?? ownership].filter(Boolean);
+  if (ownership === "shared" && toAmount(sharedFee) > 0) parts.push(`${toAmount(sharedFee)} ريال/شهر`);
+  return parts.join(" · ");
+}
+
+function floorLabel(value) {
+  if (value === 0 || value === "0") return "أرضي";
+  return value;
+}
+
+const AUTHORIZATION_LABELS = {
+  owner_and_representative_of_record: "مالك السجل وممثله",
+  agent_or_delegate: "وكيل أو مفوض عن مالك السجل",
+};
+
+/**
  * العداد المشترك: مبلغ شهري يدفعه المستأجر × مدة العقد — بند من بنود العقد
  * (يُعرض فقط ولا يدخل في إجمالي رسومنا). يُحسب من الوحدات عندما تكون ملكية
  * العداد `shared` ومعها رسم شهري، باستخدام `total_months` من الخطوة 4.
  */
 function buildSharedMeters(units = [], step4 = {}, orderData = {}) {
-  const months = Number(pick(step4.total_months, orderData.total_months)) || 0;
+  const months = resolveContractMonths(step4, orderData);
   const sums = { electricity: 0, water: 0 };
 
   for (const unit of units) {
@@ -293,6 +347,14 @@ export function mapOrderDetailView(orderData = {}) {
         pick(summary.property_owner_mobile, orderData.property_owner_mobile)
       ),
       owner_name: pick(summary.name_owner, orderData.name_owner),
+      owner_dob: formatCalendarDate(
+        pick(summary.property_owner_dob, orderData.property_owner_dob),
+        pick(orderData.type_dob_property_owner, summary.type_dob_property_owner)
+      ),
+      date: formatCalendarDate(
+        pick(summary.instrument_history, orderData.instrument_history),
+        pick(orderData.type_instrument_history, summary.type_instrument_history)
+      ),
       // Owner-by-agency (وكالة) fields
       agent_id: pick(
         summary.id_num_of_property_owner_agent,
@@ -338,6 +400,23 @@ export function mapOrderDetailView(orderData = {}) {
       type_label: tenantEntityLabel(pick(step3.tenant_entity, orderData.tenant_entity)),
       id_num: pick(step3.tenant_id_num, orderData.tenant_id_num),
       phone: formatSaudiMobileDisplay(pick(step3.tenant_mobile, orderData.tenant_mobile)),
+      dob: formatCalendarDate(
+        pick(step3.tenant_dob, orderData.tenant_dob),
+        pick(step3.type_tenant_dob, orderData.type_tenant_dob)
+      ),
+      // ممثل المنشأة (مالك السجل أو المفوّض) — تحتاجه إيجار.
+      authorization: (() => {
+        const v = pick(step3.authorization_type, orderData.authorization_type);
+        return v ? AUTHORIZATION_LABELS[v] ?? v : null;
+      })(),
+      rep_id: pick(step3.id_num_of_property_tenant_agent, orderData.id_num_of_property_tenant_agent),
+      rep_phone: formatSaudiMobileDisplay(
+        pick(step3.mobile_of_property_tenant_agent, orderData.mobile_of_property_tenant_agent)
+      ),
+      rep_dob: formatCalendarDate(
+        pick(step3.dob_of_property_tenant_agent, orderData.dob_of_property_tenant_agent),
+        pick(step3.type_dob_tenant_agent, orderData.type_dob_tenant_agent)
+      ),
       // Organization (مؤسسة/شركة) fields
       registry_number: pick(
         step3.tenant_entity_unified_registry_number,
@@ -361,7 +440,10 @@ export function mapOrderDetailView(orderData = {}) {
     financial: {
       paid,
       payment_method: pick(step4.payment_type_name, orderData.payment_type?.name_ar),
-      start_date: pick(step4.contract_starting_date, orderData.contract_starting_date),
+      start_date: formatCalendarDate(
+        pick(step4.contract_starting_date, orderData.contract_starting_date),
+        pick(step4.type_contract_starting_date, orderData.type_contract_starting_date)
+      ),
       duration: durationLabel(step4, orderData),
       frequency: pick(step4.payment_type_name, orderData.payment_type?.name_trans),
       rent: pick(
@@ -399,7 +481,7 @@ export function mapOrderDetailView(orderData = {}) {
       number: unit.unit_number,
       type: pick(unit.unit_type_name, unit.unit_type),
       use: pick(unit.unit_usage_name, unit.unit_usage),
-      floor: unit.floor_number,
+      floor: floorLabel(unit.floor_number),
       area: unit.unit_area != null ? `${unit.unit_area} م²` : null,
       rooms: pick(unit.number_of_rooms, unit.tootal_rooms),
       bathrooms: pick(unit.The_number_of_toilets, unit.The_number_of_the_toilet),
@@ -410,6 +492,16 @@ export function mapOrderDetailView(orderData = {}) {
               .filter(Boolean)
               .join(" / ")
           : null,
+      electricity_meter: meterLine(
+        unit.electricity_meter_number,
+        unit.electricity_meter_ownership,
+        unit.electricity_shared_monthly_fee
+      ),
+      water_meter: meterLine(
+        unit.water_meter_number,
+        unit.water_meter_ownership,
+        unit.water_shared_monthly_fee
+      ),
       furnished: unit.furnished === true || unit.furnished === 1 ? "نعم" : unit.furnished === false || unit.furnished === 0 ? "لا" : unit.furnished,
     })),
     units_count: orderData.units_count ?? units.length,

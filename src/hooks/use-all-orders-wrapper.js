@@ -152,23 +152,17 @@ export function useAllOrdersWrapper({
     const tabParams = tabToOrderListParams(tab);
     const isCompleted =
       paymentFilter === "paid" ? 1 : paymentFilter === "unpaid" ? 0 : undefined;
-    // الخادم يتجاهل status_key عند إرسال فلتر الدفع (complete/incomplete) — نستخدم رقم الحالة
-    // القادم من status-counts لنفس التبويب في هذه الحالة فقط (مسجّل في issues-for-backend).
-    const tabStatusId =
-      isCompleted !== undefined && tabParams.status_key
-        ? statusTabs.find((t) => t.key === tab)?.status_id ?? null
-        : null;
+    // الخادم (متابعة 1) يطبّق status_key مع فلتر الدفع — لا حاجة لرقم الحالة.
     return buildAdminOrdersParams({
       page: currentPage,
       perPage,
       search: debouncedSearch,
       isCompleted: tabParams.tab === "incomplete" ? undefined : isCompleted,
-      statusId: tabStatusId ?? undefined,
-      statusKey: tabStatusId ? undefined : tabParams.status_key,
+      statusKey: tabParams.status_key,
       tab: tabParams.tab,
       contractType: contractType || undefined,
     });
-  }, [contractType, currentPage, debouncedSearch, paymentFilter, perPage, tab, statusTabs]);
+  }, [contractType, currentPage, debouncedSearch, paymentFilter, perPage, tab]);
 
   const {
     items: tableItems,

@@ -61,3 +61,43 @@ describe("order detail — guest customer's WhatsApp", () => {
     expect(view.customer_whatsapp_dial).toBe("966551234567");
   });
 });
+
+describe("Q1 reflection fixes (دفعة د)", () => {
+  it("formats stored dates with their calendar", async () => {
+    const { formatCalendarDate } = await import("./map-order-detail.js");
+    expect(formatCalendarDate("01-05-1448", "hijri")).toBe("01/05/1448 هـ");
+    expect(formatCalendarDate("2026-11-01", "gregorian")).toBe("01/11/2026 م");
+    expect(formatCalendarDate("12-07-1990")).toBe("12/07/1990 م");
+    expect(formatCalendarDate(null)).toBeNull();
+  });
+
+  it("resolves contract months from the period when total_months is null (shared meter ≠ ×0)", async () => {
+    const { resolveContractMonths, mapOrderDetailView } = await import("./map-order-detail.js");
+    expect(resolveContractMonths({ contract_term_in_years: { id: 1, period: "سنوي" } })).toBe(12);
+    expect(resolveContractMonths({ contract_term_in_years: { id: 4, period: "سنتين", months: 24 } })).toBe(24);
+    expect(resolveContractMonths({ duration_years: 1, duration_months: 3 })).toBe(15);
+    const view = mapOrderDetailView({
+      step4: { contract_term_in_years: { id: 1, period: "سنوي" }, contract_starting_date: "01-05-1448", type_contract_starting_date: "hijri" },
+      units: [{ id: 1, unit_number: "11", floor_number: "0", electricity_meter_number: "E-1", electricity_meter_ownership: "tenant", water_meter_number: "W-1", water_meter_ownership: "shared", water_shared_monthly_fee: 50 }],
+    });
+    expect(view.financial.shared_meters.water).toEqual({ monthly: 50, months: 12, total: 600 });
+    expect(view.financial.start_date).toBe("01/05/1448 هـ");
+    expect(view.units[0].floor).toBe("أرضي");
+    expect(view.units[0].electricity_meter).toBe("E-1 · باسم المستأجر");
+    expect(view.units[0].water_meter).toBe("W-1 · مشترك · 50 ريال/شهر");
+  });
+
+  it("exposes institution representative + DOBs", async () => {
+    const { mapOrderDetailView } = await import("./map-order-detail.js");
+    const view = mapOrderDetailView({
+      tenant_entity: "institution", authorization_type: "owner_and_representative_of_record",
+      id_num_of_property_tenant_agent: "1034567890", mobile_of_property_tenant_agent: "566667777",
+      dob_of_property_tenant_agent: "10-09-1400", type_dob_tenant_agent: "hijri",
+      property_owner_dob: "20-02-1975", type_dob_property_owner: "gregorian",
+    });
+    expect(view.tenant.rep_id).toBe("1034567890");
+    expect(view.tenant.rep_dob).toBe("10/09/1400 هـ");
+    expect(view.tenant.authorization).toBe("مالك السجل وممثله");
+    expect(view.deed.owner_dob).toBe("20/02/1975 م");
+  });
+});

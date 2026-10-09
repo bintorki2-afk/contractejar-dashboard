@@ -109,8 +109,8 @@ export function isClosedStatusKey(key) {
 export function tabToOrderListParams(tab) {
   if (!tab || tab === "all") return {};
   if (tab === "incomplete") return { tab: "incomplete" };
-  // عدّاد تبويب «جديد» = صف «جديد» كاملاً (مدفوع + غير مدفوع)، بينما status_key=new = غير المدفوع فقط.
-  if (tab === "new") return { status_key: "new,paid" };
+  // الخادم (متابعة 1): تبويب «جديد» = غير المدفوع فقط و«تم الدفع» تبويب مستقل —
+  // كل تبويب يُرسل مفتاحه كما هو فيتطابق العدّاد مع القائمة.
   return { status_key: tab };
 }
 
@@ -118,6 +118,7 @@ export function tabToOrderListParams(tab) {
 const TAB_ORDER = [
   "all",
   "new",
+  "paid",
   "under_review",
   "received",
   "received_by_employee",
