@@ -3,7 +3,7 @@
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { CONTRACT_TYPE, INVOICE_STATUS } from "./mock-data";
+import { CONTRACT_TYPE, INVOICE_STATUS, PAYMENT_KIND } from "./mock-data";
 import RiyalIcon from "./riyal-icon";
 
 const TH =
@@ -40,6 +40,18 @@ function TypeBadge({ type }) {
   );
 }
 
+function KindBadge({ kind, label }) {
+  const meta = PAYMENT_KIND[kind] || PAYMENT_KIND.original;
+  return (
+    <span
+      data-payment-kind={kind}
+      className={cn("inline-flex items-center justify-center py-1 px-3 rounded-full text-10 font-bold whitespace-nowrap", meta.className)}
+    >
+      {label || meta.label}
+    </span>
+  );
+}
+
 function copyInvoiceNo(value) {
   navigator.clipboard.writeText(value);
   toast.success("تم نسخ رقم الفاتورة");
@@ -48,7 +60,7 @@ function copyInvoiceNo(value) {
 export default function InvoicesTable({ rows, isLoading, onSelectInvoice }) {
   return (
     <div className="w-full overflow-x-auto">
-      <table className="w-full border-collapse min-w-[1020px]">
+      <table className="w-full border-collapse min-w-[1120px]">
         <thead>
           <tr className="bg-[#F8FAF9] dark:bg-card">
             <th className={cn(TH, "px-4")}>رقم الفاتورة</th>
@@ -56,6 +68,7 @@ export default function InvoicesTable({ rows, isLoading, onSelectInvoice }) {
             <th className={TH}>جوال العميل</th>
             <th className={TH}>نوع العقد</th>
             <th className={TH}>المبلغ</th>
+            <th className={TH}>نوع العملية</th>
             <th className={TH}>المصدر</th>
             <th className={TH}>الحالة</th>
             <th className={TH}>التاريخ</th>
@@ -66,7 +79,7 @@ export default function InvoicesTable({ rows, isLoading, onSelectInvoice }) {
           {isLoading ? (
             Array.from({ length: 8 }).map((_, rowIndex) => (
               <tr key={`invoice-skel-${rowIndex}`}>
-                {Array.from({ length: 9 }).map((__, colIndex) => (
+                {Array.from({ length: 10 }).map((__, colIndex) => (
                   <td
                     key={`invoice-skel-${rowIndex}-${colIndex}`}
                     className="px-3 py-3.5 border-b border-[#EEF1F0] dark:border-white/[0.06]"
@@ -85,7 +98,7 @@ export default function InvoicesTable({ rows, isLoading, onSelectInvoice }) {
           ) : rows.length === 0 ? (
             <tr>
               <td
-                colSpan={9}
+                colSpan={10}
                 className="text-center py-16 text-13 text-gray-400 dark:text-white/35 font-medium"
               >
                 لا توجد فواتير مطابقة لبحثك
@@ -137,6 +150,9 @@ export default function InvoicesTable({ rows, isLoading, onSelectInvoice }) {
                 </td>
                 <td className="px-3 py-3.5 text-13 font-bold text-gray-900 dark:text-white tabular-nums whitespace-nowrap text-center">
                   {row.amount.toLocaleString("en-US")} <RiyalIcon />
+                </td>
+                <td className="px-3 py-3.5 text-center">
+                  <KindBadge kind={row.kind} label={row.kindLabel} />
                 </td>
                 <td className="px-3 py-3.5 text-13 font-medium dark:text-white/55 whitespace-nowrap text-center">
                   {row.source}

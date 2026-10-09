@@ -30,6 +30,11 @@ function buildKpis(k) {
     // صارت مفتاحاً مستقلاً refund_requests_confirmed.
     ["refunded", "مسترجعة", pick(k, "refunded_orders", "refunded_count"), "undo", "muted"],
     ["revenue", "الإيرادات (ريال)", pick(k, "revenue", "revenue_total"), "wallet"],
+    // دفعة هـ (E5): رسوم إضافية · فروقات السعر · استرجاعات · الصافي — نفس أرقام الخادم في كل مكان.
+    ["extra_fees", "رسوم إضافية (ريال)", pick(k, "extra_fees"), "filePlus", "warning"],
+    ["price_differences", "فروقات السعر (ريال)", pick(k, "price_differences"), "layers", "warning"],
+    ["refunds", "استرجاعات (ريال)", pick(k, "refunds"), "undo", "muted"],
+    ["net_revenue", "صافي الإيراد (ريال)", pick(k, "net_revenue"), "banknote"],
   ].map(([key, label, value, icon, tone]) => ({ key, label, value: value ?? 0, icon, tone }));
 }
 

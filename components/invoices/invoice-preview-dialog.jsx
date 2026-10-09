@@ -163,7 +163,7 @@ export default function InvoicePreviewDialog({ open, onOpenChange, invoice }) {
                       1
                     </td>
                     <td className="px-3 py-3 text-13 font-medium text-gray-900 dark:text-white leading-relaxed">
-                      {getInvoiceItemDescription(invoice.contractType)}
+                      {getInvoiceItemDescription(invoice.contractType, invoice.kind, invoice.raw)}
                     </td>
                   </tr>
                 </tbody>

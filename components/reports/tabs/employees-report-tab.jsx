@@ -119,7 +119,7 @@ export default function EmployeesReportTab({ period, dateFrom, dateTo }) {
 
       <ReportSectionCard title="ملخص الورديات والأداء – SLA استلام 5 دقائق">
         <div className="overflow-x-auto -mx-1">
-          <table className="w-full min-w-[1100px] border-collapse">
+          <table className="w-full min-w-[1500px] border-collapse">
             <thead>
               <tr>
                 <th className={TH}>الموظف</th>
@@ -135,6 +135,10 @@ export default function EmployeesReportTab({ period, dateFrom, dateTo }) {
                 <th className={TH}>التزام الاستلام</th>
                 <th className={TH}>متوسط المعالجة</th>
                 <th className={TH}>الإيراد</th>
+                <th className={TH} title="رسوم إضافية أضافها الموظف (العدد · المبلغ)">رسوم أضافها</th>
+                <th className={TH} title="فروقات سعر نتجت عن تعديلاته">فروقات سعر</th>
+                <th className={TH} title="طلبات مرفق ناقص أرسلها">طلبات مرفق</th>
+                <th className={TH} title="حوالات بنكية سجّلها (العدد · المبلغ)">حوالات سجّلها</th>
               </tr>
             </thead>
             <tbody>
@@ -167,12 +171,22 @@ export default function EmployeesReportTab({ period, dateFrom, dateTo }) {
                       <td className={TD}>{slaPercent != null ? `${slaPercent}%` : "—"}</td>
                       <td className={TD}>{item.avg_process?.value_label ?? "—"}</td>
                       <td className={TD}>{formatRevenue(item.revenue?.value)}</td>
+                      <td className={TD}>
+                        {item.fees_added_count ?? cardValue(item, "fees_added_count")}
+                        {Number(item.fees_added_amount) > 0 ? ` · ${formatRevenue(item.fees_added_amount)}` : ""}
+                      </td>
+                      <td className={TD}>{item.price_difference_count ?? cardValue(item, "price_difference_count")}</td>
+                      <td className={TD}>{item.data_requests_count ?? cardValue(item, "data_requests_count")}</td>
+                      <td className={TD}>
+                        {item.bank_transfers_recorded ?? cardValue(item, "bank_transfers_recorded")}
+                        {Number(item.bank_transfers_amount) > 0 ? ` · ${formatRevenue(item.bank_transfers_amount)}` : ""}
+                      </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td colSpan={13} className="text-center p-6 text-gray-400 text-sm dark:text-white/50">
+                  <td colSpan={17} className="text-center p-6 text-gray-400 text-sm dark:text-white/50">
                     لا توجد بيانات لعرضها في هذه الفترة.
                   </td>
                 </tr>

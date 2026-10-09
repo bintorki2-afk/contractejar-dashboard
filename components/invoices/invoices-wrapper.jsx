@@ -61,6 +61,7 @@ export default function InvoicesWrapper() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [kindFilter, setKindFilter] = useState("all");
   const [selectedInvoice, setSelectedInvoice] = useState(null);
 
   const { rows, isLoading } = usePaymentsList();
@@ -71,16 +72,17 @@ export default function InvoicesWrapper() {
     return rows.filter((row) => {
       if (statusFilter !== "all" && row.status !== statusFilter) return false;
       if (typeFilter !== "all" && row.contractType !== typeFilter) return false;
+      if (kindFilter !== "all" && (row.kind || "original") !== kindFilter) return false;
       if (!q) return true;
 
       return [row.invoiceNo, row.orderNo, row.mobile]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(q));
     });
-  }, [rows, searchQuery, statusFilter, typeFilter]);
+  }, [rows, searchQuery, statusFilter, typeFilter, kindFilter]);
 
   // Any filter change sends the user back to the first page.
-  const filterKey = JSON.stringify([searchQuery, statusFilter, typeFilter]);
+  const filterKey = JSON.stringify([searchQuery, statusFilter, typeFilter, kindFilter]);
   const [pageFilterKey, setPageFilterKey] = useState(filterKey);
   if (pageFilterKey !== filterKey) {
     setPageFilterKey(filterKey);
@@ -128,6 +130,8 @@ export default function InvoicesWrapper() {
           onStatusFilterChange={setStatusFilter}
           typeFilter={typeFilter}
           onTypeFilterChange={setTypeFilter}
+          kindFilter={kindFilter}
+          onKindFilterChange={setKindFilter}
           onExport={handleExport}
         />
 

@@ -14,6 +14,7 @@ export default function SalesReportTab({ period, dateFrom, dateTo, contractType,
   const kpis = [
     ["total_sales", "إجمالي المبيعات (ريال)", "wallet"], ["payments_count", "عدد عمليات الدفع", "receipt"],
     ["avg_order_value", "متوسط قيمة الطلب", "creditCard"], ["discounts_used", "الخصومات المستخدمة", "tag"],
+    ["extra_fees", "رسوم إضافية", "filePlus"], ["price_differences", "فروقات السعر", "layers"],
     ["refunds", "المبالغ المسترجعة", "undo"], ["net_revenue", "صافي الإيرادات", "banknote"],
   ].map(([key, label, icon]) => ({ key, label, value: data?.kpis?.[key] ?? 0, icon }));
   const money = (value) => `${Number(value ?? 0).toLocaleString("en-US")} ريال`;
@@ -56,9 +57,13 @@ export default function SalesReportTab({ period, dateFrom, dateTo, contractType,
           <ReportLineList items={[
             { label: "الخصومات الممنوحة", value: money(data?.summary?.discounts_granted), tone: "gold" },
             { label: "عدد الطلبات المخصومة", value: `${data?.summary?.discounted_orders_count ?? 0} طلب` },
-            { label: "المبالغ المسترجعة", value: money(data?.summary?.refunds_total) },
+            { label: "الإيراد الأصلي", value: money(data?.kpis?.original_revenue ?? data?.summary?.original_revenue) },
+            { label: `رسوم إضافية (${data?.kpis?.extra_fees_count ?? 0})`, value: money(data?.summary?.extra_fees ?? data?.kpis?.extra_fees), tone: "gold" },
+            { label: `فروقات السعر (${data?.kpis?.price_differences_count ?? 0})`, value: money(data?.summary?.price_differences ?? data?.kpis?.price_differences), tone: "gold" },
+            { label: `حوالات بنكية (${data?.kpis?.bank_transfers_count ?? 0})`, value: money(data?.kpis?.bank_transfers) },
+            { label: "المبالغ المسترجعة", value: money(data?.summary?.refunds_total ?? data?.summary?.refunds) },
             { label: "نسبة الاسترجاع من المبيعات", value: `${data?.summary?.refund_rate_percent ?? 0}%` },
-            { label: "صافي الإيرادات بعد الاسترجاع =", value: money(data?.summary?.net_revenue_after_refunds), tone: "green", bold: true },
+            { label: "الصافي = الأصلي + الإضافي + الفروقات − المسترجع", value: money(data?.summary?.net_revenue ?? data?.summary?.net_revenue_after_refunds), tone: "green", bold: true },
           ]} />
         </ReportSectionCard>
       </div>

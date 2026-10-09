@@ -27,6 +27,20 @@ function normalizePaymentsResponse(response) {
 const PAYMENT_METHOD_LABEL = {
   creditcard: "بطاقة ائتمان",
   moyasar: "ميسر",
+  bank_transfer: "حوالة بنكية",
+  mada: "مدى",
+  apple_pay: "Apple Pay",
+  stc_pay: "stc pay",
+  test: "بوابة تجريبية",
+};
+
+/** نوع العملية (دفعة هـ — 2.7): أصلية / فرق سعر / رسوم إضافية / حوالة بنكية / استرجاع. */
+export const PAYMENT_KIND_LABEL = {
+  original: "الدفعة الأصلية",
+  price_difference: "فرق سعر",
+  extra_fee: "رسوم إضافية",
+  bank_transfer: "حوالة بنكية",
+  refund: "استرجاع",
 };
 
 function formatPaymentDate(dateStr) {
@@ -50,6 +64,12 @@ export function mapPaymentToInvoiceRow(payment = {}) {
     amount: Number(payment.amount) || 0,
     currency: payment.tran_currency || "SAR",
     source: PAYMENT_METHOD_LABEL[payment.payment_method] || payment.payment_method || "—",
+    kind: payment.kind || "original",
+    kindLabel: payment.kind_label || PAYMENT_KIND_LABEL[payment.kind || "original"] || payment.kind || "—",
+    chargeId: payment.charge_id ?? null,
+    contractId: payment.contract_id ?? null,
+    reference: payment.reference ?? null,
+    receiptUrl: payment.receipt_url ?? null,
     status: payment.status || "unknown",
     date: formatPaymentDate(payment.payment_date),
     referenceNo: payment.contract_uuid || String(payment.id),
