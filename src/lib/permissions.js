@@ -55,7 +55,6 @@ export const PERMISSION_ACTIONS = ['view', 'create', 'edit', 'delete', 'retrieve
  * لإعادة تفعيل ميزة مستقبلًا: احذف مسارها من DISABLED_FEATURE_PREFIXES فقط.
  */
 export const DISABLED_FEATURE_PREFIXES = [
-  '/home/invoices',      // الفواتير
   '/home/leads',         // العملاء المحتملون
 ];
 
@@ -279,7 +278,8 @@ export const ROUTE_SECTION_RULES = [
   { prefix: '/home/clients', section: PERMISSION_SECTIONS.users },
   { prefix: '/home/leads', section: PERMISSION_SECTIONS.users },
   { prefix: '/home/realtime-orders', section: REALTIME_ORDERS_SECTIONS },
-  { prefix: '/home/invoices', section: null },
+  // د8: «الفواتير» مفعّلة — بيانات حقيقية من GET /admin/payments (payments.view).
+  { prefix: '/home/invoices', section: PERMISSION_SECTIONS.payments },
   // د23: «دليل الموظف» لكل مستخدم مسجّل.
   { prefix: '/home/guide', section: null },
   // Legacy URL — page redirects into marketing content tab; keep gate for deep links.
@@ -354,7 +354,7 @@ export const SIDEBAR_NAV = [
       { label: 'طلبات تغيير المؤجر', href: '/home/lessor-change', section: PERMISSION_SECTIONS.lessor_change },
       { label: 'دليل الموظف', href: '/home/guide', section: null, alwaysVisible: true, skipLanding: true },
       { label: 'السلة', href: '/home/trash', section: [PERMISSION_SECTIONS.all_requests, PERMISSION_SECTIONS.lessor_change], action: 'delete' },
-      { label: 'الفواتير', href: '/home/invoices', section: null },
+      { label: 'الفواتير', href: '/home/invoices', section: PERMISSION_SECTIONS.payments },
     ],
   },
 ];

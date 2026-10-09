@@ -69,6 +69,7 @@ export default function ArticlesView() {
               key={c.key}
               type="button"
               onClick={() => setCategory(c.key)}
+              aria-pressed={category === c.key}
               className={cn("mkt-catb", category === c.key && "on")}
             >
               {c.label_ar}

@@ -156,7 +156,8 @@ export function PeriodFilterBar({ periods }) {
             key={opt.key}
             type="button"
             onClick={() => setPeriod(opt.key)}
-            className={cn("mkt-catb", period === opt.key && "on")}
+            aria-pressed={period === opt.key}
+              className={cn("mkt-catb", period === opt.key && "on")}
           >
             {opt.label_ar || opt.label || opt.key}
           </button>

@@ -65,7 +65,7 @@ function LegacyUserDetailsPage({ userId, from }) {
         title={userName}
         isMain={false}
         first="الرئيــسية"
-        firstURL="/"
+        firstURL="/home"
         second="المستخدمين"
         secondURL={backUrl}
         third="تفاصيل المستخدم"

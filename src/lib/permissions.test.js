@@ -82,7 +82,11 @@ describe("permissions — pages match what the server allows", () => {
   });
 
   it("hidden features stay closed even for the system admin", () => {
-    expect(canAccessRoute("/home/invoices", admin.permissions, admin)).toBe(false);
+    expect(canAccessRoute("/home/leads", admin.permissions, admin)).toBe(false);
+    // د8: «الفواتير» مفعّلة ببيانات حقيقية لمن يملك payments.view.
+    expect(canAccessRoute("/home/invoices", admin.permissions, admin)).toBe(true);
+    expect(canAccessRoute("/home/invoices", ["payments.view"], { is_system_admin: false })).toBe(true);
+    expect(canAccessRoute("/home/invoices", ["all_requests.view"], { is_system_admin: false })).toBe(false);
   });
 
   it("«المرتجعات» is open again (Moyasar refunds) for payments.view or returned_request.view", () => {

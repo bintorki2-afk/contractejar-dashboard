@@ -45,7 +45,7 @@ export default function EmployeeDetailsPage(props) {
         title={isProfileView ? "الملف الشخصي" : "الموظفين"}
         isMain={false}
         first="الرئيــسية"
-        firstURL="/"
+        firstURL="/home"
         second={isProfileView ? "الملف الشخصي" : 'الموظفين والأدوار'}
         secondURL={isProfileView ? `/home/roles-and-employees/employees/${id}?view=profile` : "/home/roles-and-employees?tab=employees"}
         third={isProfileView ? undefined : 'تفاصيل الموظف'}

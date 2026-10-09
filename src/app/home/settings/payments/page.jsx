@@ -55,6 +55,7 @@ function FilterGroup({ label, options, value, onChange }) {
             key={option.value || "all"}
             type="button"
             onClick={() => onChange(option.value)}
+            aria-pressed={value === option.value}
             className={cn(
               "px-4 py-2 rounded-xl text-13 font-bold transition-colors border",
               value === option.value

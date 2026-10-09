@@ -71,7 +71,7 @@ export default function ContractSettingsPage(props) {
         title="إعدادات العقود"
         isMain={false}
         first="الرئيــسية"
-        firstURL="/"
+        firstURL="/home"
         second="إعدادات العقود"
         secondURL="/home/contract-settings"
       />
