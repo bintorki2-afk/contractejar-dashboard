@@ -10,7 +10,8 @@ import greenRial from "@/public/images/greenRial.svg";
 import { cn } from "@/lib/utils";
 import { RT } from "@/components/realtime-orders/theme";
 import OrderActionsMenu from "@/components/realtime-orders/order-actions-menu";
-import { DelayBadge, StatusPill } from "./status-pill";
+import { normalizePaymentState } from "@/src/lib/payment-state";
+import { AwaitingChargeBadge, AwaitingCustomerBadge, DelayBadge, StatusPill } from "./status-pill";
 import { formatSaudiMobileDisplay } from "@/src/lib/format-phone";
 
 function formatRelativeShort(dateString) {
@@ -100,6 +101,8 @@ export function buildAllOrderColumns({
         <div className="flex items-center gap-1.5 flex-wrap">
           <StatusPill order={row} />
           <DelayBadge order={row} compact />
+          <AwaitingCustomerBadge order={row} compact />
+          <AwaitingChargeBadge order={row} compact />
         </div>
       ),
     },
@@ -125,34 +128,24 @@ export function buildAllOrderColumns({
       label: "الدفع",
       hideable: true,
       cell: (row) => {
-        const paid = row?.is_paid === true || row?.is_paid === 1;
-        const amount = row?.amount_payment;
-        const showAmount = paid && amount != null && amount !== "";
+        // دفعة هـ: payment_state من الخادم (غير مدفوع / مدفوع Moyasar / مدفوع حوالة / جزئياً / مسترجع).
+        const state = normalizePaymentState(row);
+        const paid = state.status !== "unpaid";
+        const showAmount = paid && state.paid_total > 0;
+        const tone = state.tone === "success" ? { bg: RT.successBg, fg: RT.success } : state.tone === "danger" ? { bg: RT.dangerBg, fg: RT.danger } : state.tone === "warning" ? { bg: "#FFF3E0", fg: "#9A6100" } : { bg: "#EEF2F0", fg: "#4B5753" };
         return (
-          <div className="flex items-center gap-1.5 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap" title={state.label}>
             {showAmount ? (
               <span className="inline-flex items-center gap-1 font-bold text-xs tabular-nums text-[#007C13]">
-                {amount}
+                {state.paid_total.toLocaleString("en-US")}
                 <Image src={greenRial} alt="rial" width={11} height={11} />
               </span>
             ) : null}
-            {paid ? (
-              <span
-                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-11 font-bold whitespace-nowrap"
-                style={{ backgroundColor: RT.successBg, color: RT.success }}
-              >
-                <Check className="size-3" strokeWidth={2.75} />
-                مدفوع
-              </span>
-            ) : (
-              <span
-                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-11 font-bold whitespace-nowrap"
-                style={{ backgroundColor: RT.dangerBg, color: RT.danger }}
-              >
-                <X className="size-3" strokeWidth={2.75} />
-                غير مدفوع
-              </span>
-            )}
+            <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-11 font-bold whitespace-nowrap" style={{ backgroundColor: tone.bg, color: tone.fg }}>
+              {paid ? <Check className="size-3" strokeWidth={2.75} /> : <X className="size-3" strokeWidth={2.75} />}
+              {state.status_label}
+              {paid && state.method_label && state.method !== "moyasar" ? ` · ${state.method_label}` : ""}
+            </span>
           </div>
         );
       },

@@ -21,6 +21,7 @@ import RefundDialog from "./refund-dialog";
 import BankTransferDialog from "./bank-transfer-dialog";
 import { UnpaidBanner, UnpaidDialog, markUnpaidPopupSeen, unpaidPopupSeen } from "./unpaid-notice";
 import { normalizePaymentState } from "@/src/lib/payment-state";
+import DataRequestBadge from "./data-request-badge";
 import { InlineEditProvider } from "./inline-edit";
 import ShortcutsHelp from "@/components/orders/shortcuts-help";
 import { ORDER_DETAIL_SHORTCUTS, useOrderDetailShortcuts } from "@/src/hooks/use-orders-shortcuts";
@@ -174,8 +175,9 @@ function OrderDetailsBody() {
         onPayLink={dialogs.handlePayLink}
         onBankTransfer={() => openBankTransfer(null)}
         onRefund={() => (canRefundPayments ? setRefundOpen(true) : dialogs.openReturn(orderData))}
+        badges={<DataRequestBadge orderData={orderData} canEdit={canEditOrder} />}
         onPropertyUpdate={() => dialogs.setPropertyUpdateOpen(true)}
-        onRequestData={() => dialogs.setCorrectionRequestOpen(true)}
+        onRequestData={(section) => dialogs.openDataRequest(section)}
         onEjarDocumentation={() => dialogs.setEjarDocumentationOpen(true)}
         onSendSectionError={dialogs.setSectionErrorContext}
         onViewExpanded={() => setExpandedViewOpen(true)}
@@ -194,7 +196,7 @@ function OrderDetailsBody() {
             {isLeaseRenewal ? (
               <LeaseRenewalOrderView orderData={orderData} />
             ) : (
-              <OrderDataPanel orderData={orderData} canEdit={canEditOrder} onRequestData={() => dialogs.setCorrectionRequestOpen(true)} onOpenAttachment={openAttachment} />
+              <OrderDataPanel orderData={orderData} canEdit={canEditOrder} onRequestData={(section) => dialogs.openDataRequest(section)} onOpenAttachment={openAttachment} />
             )}
           </InlineEditProvider>
         </div>

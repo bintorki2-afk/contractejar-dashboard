@@ -49,6 +49,19 @@ export const PAYMENT_FILTERS = [
   { id: "unpaid", label: "غير مدفوع" },
 ];
 
+/** دفعة هـ: فلاتر الانتباه (?attention=) — بانتظار العميل (مرفق ناقص) / بانتظار دفع فرق. */
+export const ATTENTION_FILTERS = [
+  { id: "all", label: "الكل" },
+  { id: "awaiting_customer", label: "بانتظار العميل" },
+  { id: "charge_pending", label: "بانتظار دفع فرق" },
+];
+
+function readInitialAttention() {
+  if (typeof window === "undefined") return "all";
+  const value = new URLSearchParams(window.location.search).get("attention");
+  return ATTENTION_FILTERS.some((f) => f.id === value) ? value : "all";
+}
+
 const VALID_TABS_RE = /^[a-z_]+$/;
 
 function readInitialTab(lockedFilter) {
@@ -100,6 +113,17 @@ export function useAllOrdersWrapper({
   // دفعة د (D1): الافتراضي = جميع الحالات. التبويب يُحفظ في الرابط (?tab=) ليُشارك ويُستعاد.
   const [tab, setTabState] = useState(() => readInitialTab(lockedFilter));
   const [paymentFilter, setPaymentFilter] = useState("all");
+  const [attentionFilter, setAttentionFilterState] = useState(() => readInitialAttention());
+  const setAttentionFilter = (next) => {
+    const value = next || "all";
+    setAttentionFilterState(value);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (value === "all") url.searchParams.delete("attention");
+      else url.searchParams.set("attention", value);
+      window.history.replaceState(window.history.state, "", url.toString());
+    }
+  };
   const [contractType, setContractType] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -132,6 +156,7 @@ export function useAllOrdersWrapper({
     debouncedSearch,
     tab,
     paymentFilter,
+    attentionFilter,
     contractType,
     perPage,
   ]);
@@ -161,8 +186,9 @@ export function useAllOrdersWrapper({
       statusKey: tabParams.status_key,
       tab: tabParams.tab,
       contractType: contractType || undefined,
+      attention: attentionFilter !== "all" ? attentionFilter : undefined,
     });
-  }, [contractType, currentPage, debouncedSearch, paymentFilter, perPage, tab]);
+  }, [attentionFilter, contractType, currentPage, debouncedSearch, paymentFilter, perPage, tab]);
 
   const {
     items: tableItems,
@@ -284,6 +310,8 @@ export function useAllOrdersWrapper({
     setTab,
     paymentFilter,
     setPaymentFilter,
+    attentionFilter,
+    setAttentionFilter,
     statusTabs,
     statusTabsLoading: statusCounts.isLoading,
     refetchStatusCounts: statusCounts.refetch,

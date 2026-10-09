@@ -47,7 +47,10 @@ export function useOrderDetailsDialogs({
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const [returnOrder, setReturnOrder] = useState(null);
   const [propertyUpdateOpen, setPropertyUpdateOpen] = useState(false);
-  const [correctionRequestOpen, setCorrectionRequestOpen] = useState(false);
+  // دفعة هـ (E4): حوار «مرفق ناقص» لكل قسم — section = lessor|property|tenant|null.
+  const [dataRequest, setDataRequest] = useState({ open: false, section: null });
+  const openDataRequest = (section = null) => setDataRequest({ open: true, section: section ?? null });
+  const setCorrectionRequestOpen = (open) => setDataRequest((prev) => ({ ...prev, open: Boolean(open) }));
   const [ejarDocumentationOpen, setEjarDocumentationOpen] = useState(false);
   const [statusFieldsOpen, setStatusFieldsOpen] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] = useState(null);
@@ -152,7 +155,8 @@ export function useOrderDetailsDialogs({
     returnOrder,
     propertyUpdateOpen,
     setPropertyUpdateOpen,
-    correctionRequestOpen,
+    dataRequest,
+    openDataRequest,
     setCorrectionRequestOpen,
     ejarDocumentationOpen,
     setEjarDocumentationOpen,

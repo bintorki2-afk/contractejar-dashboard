@@ -26,14 +26,14 @@ import { useOrdersShortcuts } from "@/src/hooks/use-orders-shortcuts";
 import { toSaudiMobileDialDigits } from "@/src/lib/format-phone";
 import { toast } from "sonner";
 import { Keyboard } from "lucide-react";
-import { PAYMENT_FILTERS } from "@/src/hooks/use-all-orders-wrapper";
+import { ATTENTION_FILTERS, PAYMENT_FILTERS } from "@/src/hooks/use-all-orders-wrapper";
 
-function PaymentFilterChips({ value = "all", onChange }) {
+function PaymentFilterChips({ value = "all", onChange, filters = PAYMENT_FILTERS, label = "الدفع:" }) {
   return (
     <div className="flex items-center gap-2 text-[12px] font-bold" dir="rtl">
-      <span className="text-[#6B7570] dark:text-white/50">الدفع:</span>
+      <span className="text-[#6B7570] dark:text-white/50">{label}</span>
       <div className="inline-flex rounded-full border border-brand-line bg-white p-0.5 dark:bg-white/[0.04] dark:border-white/10">
-        {PAYMENT_FILTERS.map((f) => (
+        {filters.map((f) => (
           <button
             key={f.id}
             type="button"
@@ -180,6 +180,7 @@ export default function AllOrdersWrapper() {
         />
         <div className="flex flex-wrap items-center justify-between gap-2">
           <PaymentFilterChips value={vm.paymentFilter} onChange={vm.setPaymentFilter} />
+          <PaymentFilterChips value={vm.attentionFilter} onChange={vm.setAttentionFilter} filters={ATTENTION_FILTERS} label="الانتباه:" />
           <button
             type="button"
             onClick={() => shortcuts.setHelpOpen(true)}
