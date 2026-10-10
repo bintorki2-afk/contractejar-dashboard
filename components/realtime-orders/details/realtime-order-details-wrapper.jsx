@@ -108,7 +108,7 @@ function OrderDetailsBody() {
       if (!digits) toast.error("لا يوجد رقم جوال للعميل");
       else window.open(orderData?.creator_mobile?.whatsapp_url || `https://wa.me/${digits}`, "_blank", "noopener,noreferrer");
     },
-    onDataRequest: () => dialogs.openDataRequest(null),
+    onDataRequest: canEditOrder ? () => dialogs.openDataRequest(null) : undefined,
     onAddFee: canAddFee ? () => setAddFeeOpen(true) : undefined,
     onBankTransfer: canRecordTransfer ? () => openBankTransfer(null) : undefined,
   });
@@ -175,6 +175,7 @@ function OrderDetailsBody() {
         canEdit={canEditOrder}
         isAdmin={isAdmin}
         canRefund={canRefundPayments}
+        canReturn={canReturn}
         canRecordTransfer={canRecordTransfer}
         canAddFee={canAddFee}
         statuses={statuses}
@@ -219,7 +220,7 @@ function OrderDetailsBody() {
               orderData={orderData}
               canEdit={canEditOrder}
               isLeaseRenewal={isLeaseRenewal}
-              onRequestData={(section) => dialogs.openDataRequest(section)}
+              onRequestData={canEditOrder ? (section) => dialogs.openDataRequest(section) : undefined}
               onOpenAttachment={openAttachment}
             />
           </InlineEditProvider>

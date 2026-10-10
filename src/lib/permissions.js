@@ -316,6 +316,11 @@ export function getSectionForPath(pathname = '') {
 export function getRouteActionRequirement(pathname = '') {
   const path = pathname.split('?')[0];
 
+  // QA DASH-17: «السلة» تتطلب صلاحية الحذف (كرابطها في القائمة والخادم: orders/trash ← all_requests.delete).
+  if (path === '/home/trash' || path.startsWith('/home/trash/')) {
+    return { section: [PERMISSION_SECTIONS.all_requests, PERMISSION_SECTIONS.lessor_change], action: 'delete' };
+  }
+
   if (path === '/home/roles-and-employees/roles/add') {
     return { section: PERMISSION_SECTIONS.roles, action: 'create' };
   }

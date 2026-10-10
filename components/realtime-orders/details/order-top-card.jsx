@@ -95,6 +95,7 @@ export default function OrderTopCard({
   canEdit = true,
   isAdmin = false,
   canRefund = false,
+  canReturn = false,
   canRecordTransfer = false,
   canAddFee = false,
   statuses = [],
@@ -232,12 +233,17 @@ export default function OrderTopCard({
                 </DropdownMenuItem>
               ) : null}
               <DropdownMenuSeparator className="my-1 bg-[#EEF1F0] dark:bg-white/10" />
-              <DropdownMenuItem onSelect={() => onRequestData?.(null)} className={item}>
-                <Paperclip className="size-4 text-[#B25E00]" /> طلب مرفق ناقص من العميل
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => onPropertyUpdate?.()} className={item}>
-                <Upload className="size-4 text-[#2563EB]" /> رفع تحديث العقار
-              </DropdownMenuItem>
+              {/* QA DASH-18: لا نعرض ما يرفضه الخادم لهذا الدور (data-requests / تحديث العقار ← all_requests.edit). */}
+              {canEdit ? (
+                <DropdownMenuItem onSelect={() => onRequestData?.(null)} className={item}>
+                  <Paperclip className="size-4 text-[#B25E00]" /> طلب مرفق ناقص من العميل
+                </DropdownMenuItem>
+              ) : null}
+              {canEdit ? (
+                <DropdownMenuItem onSelect={() => onPropertyUpdate?.()} className={item}>
+                  <Upload className="size-4 text-[#2563EB]" /> رفع تحديث العقار
+                </DropdownMenuItem>
+              ) : null}
               <DropdownMenuItem onSelect={() => onOpenNotes?.()} className={item}>
                 <MessageSquarePlus className="size-4 text-[#6B7570]" /> إضافة ملاحظة
               </DropdownMenuItem>
@@ -321,10 +327,12 @@ export default function OrderTopCard({
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
               ) : null}
-              <DropdownMenuSeparator className="my-1 bg-[#EEF1F0] dark:bg-white/10" />
-              <DropdownMenuItem onSelect={() => onRefund?.()} className={cn(item, "text-[#B42318] dark:text-red-300")}>
-                <Undo2 className="size-4" /> {canRefund ? "استرجاع المبلغ" : "رفع طلب استرجاع"}
-              </DropdownMenuItem>
+              {canRefund || canReturn || (canChangeStatus && cancelStatus) ? <DropdownMenuSeparator className="my-1 bg-[#EEF1F0] dark:bg-white/10" /> : null}
+              {canRefund || canReturn ? (
+                <DropdownMenuItem onSelect={() => onRefund?.()} className={cn(item, "text-[#B42318] dark:text-red-300")}>
+                  <Undo2 className="size-4" /> {canRefund ? "استرجاع المبلغ" : "رفع طلب استرجاع"}
+                </DropdownMenuItem>
+              ) : null}
               {canChangeStatus && cancelStatus ? (
                 <DropdownMenuItem onSelect={() => setPendingStatus(cancelStatus)} disabled={isStatusPending || view?.status_key === "cancelled"} className={cn(item, "text-[#B42318] dark:text-red-300")}>
                   <XCircle className="size-4" /> إلغاء الطلب

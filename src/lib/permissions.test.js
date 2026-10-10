@@ -115,6 +115,13 @@ describe("«السلة» (د12)", () => {
     expect(visibleSidebar(employee(["all_requests.view"]))).not.toContain("/home/trash");
     expect(canAccessRoute("/home/trash", deleter.permissions, deleter)).toBe(true);
   });
+
+  it("QA DASH-17: direct link to the trash is blocked without a delete permission", () => {
+    const viewer = employee(["all_requests.view"]);
+    expect(canAccessRoute("/home/trash", viewer.permissions, viewer)).toBe(false);
+    const lessorDeleter = employee(["lessor_change.view", "lessor_change.delete"]);
+    expect(canAccessRoute("/home/trash", lessorDeleter.permissions, lessorDeleter)).toBe(true);
+  });
 });
 
 describe("«دليل الموظف» (د23)", () => {

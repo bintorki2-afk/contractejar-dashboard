@@ -59,7 +59,8 @@ export function mapRealtimeTableOrder(row = {}) {
       row?.track ||
       null,
     employee_name: row?.employee_name || row?.employee?.name,
-    received_at: row?.received_at || row?.updated_at || row?.created_at,
+    // QA DASH-3: «مستلم منذ» فقط لما استُلم فعلاً — لا نستبدله بعمر الطلب.
+    received_at: row?.received_at || row?.received_contract?.created_at || null,
     status_id: row?.status?.id ?? row?.contract_status_id ?? row?.status_id,
     status_name:
       row?.status?.name ||

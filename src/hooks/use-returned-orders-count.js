@@ -3,6 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "@/src/utils/axios";
 import { REFUNDS_CONTRACTS_API } from "@/components/analysis/returned/refund-contract-utils";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import { PERMISSION_SECTIONS } from "@/src/lib/permissions";
 
 const POLL_INTERVAL = 60_000;
 
@@ -21,12 +23,16 @@ const fetchReturnedOrdersTotal = async () => {
 
 // Polls the total number of refund requests for the sidebar badge.
 export function useReturnedOrdersCount() {
+  // QA DASH-20: المسار يتطلب analytics.view في الخادم — لا نستطلعه لدور لا يملكها (403 كل دقيقة).
+  const { can, isAdmin, isReady } = usePermissions();
+  const allowed = isReady && (isAdmin || can(PERMISSION_SECTIONS.analytics, "view"));
   const { data: total } = useQuery({
     queryKey: ["returnedOrdersTotal"],
     queryFn: fetchReturnedOrdersTotal,
     refetchInterval: POLL_INTERVAL,
     refetchIntervalInBackground: true,
     staleTime: 30_000,
+    enabled: allowed,
   });
 
   return total ?? 0;
