@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 export default function ReportSectionCard({ title, children, className, action }) {
   return (
     <div
+      data-section-title={typeof title === "string" ? title : undefined}
       className={cn(
         "rounded-xl border border-surface-border-soft bg-white p-5 flex flex-col gap-4 min-w-0 dark:border-white/10 dark:bg-card",
         className
@@ -27,12 +28,13 @@ export default function ReportSectionCard({ title, children, className, action }
 
 export function ReportLineList({ items }) {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col" data-export-table>
       {items.map((item, index) => (
         <div key={item.label}>
           {item.separator && index > 0 && <div className="border-t border-surface-border-soft my-2 dark:border-white/10" />}
-          <div className="flex items-center justify-between gap-4 py-1.5">
+          <div className="flex items-center justify-between gap-4 py-1.5" data-export-row>
             <span
+              data-export-cell
               className={cn(
                 "text-13",
                 item.bold ? "font-bold" : "font-medium",
@@ -46,6 +48,7 @@ export function ReportLineList({ items }) {
               {item.label}
             </span>
             <span
+              data-export-cell
               className={cn(
                 "text-13 tabular-nums shrink-0",
                 item.bold ? "font-bold" : "font-semibold",

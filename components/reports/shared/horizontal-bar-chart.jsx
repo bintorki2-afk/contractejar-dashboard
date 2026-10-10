@@ -18,18 +18,24 @@ export default function HorizontalBarChart({ items, className, showValue = true,
   const peak = maxValue ?? Math.max(...items.map((item) => Math.abs(Number(item.value)) || 0), 1);
 
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
+    <div className={cn("flex flex-col gap-4", className)} data-export-table>
       {items.map((item) => {
         const val = Number(item.value) || 0;
         const magnitude = Math.abs(val);
         const width = peak > 0 ? Math.max((magnitude / peak) * 100, magnitude > 0 ? 4 : 0) : 0;
 
         return (
-          <div key={item.label} className="flex flex-col gap-1.5 min-w-0">
+          <div key={item.label} className="flex flex-col gap-1.5 min-w-0" data-export-row>
+            {!showValue ? (
+              <>
+                <span data-export-cell hidden>{item.label}</span>
+                <span data-export-cell hidden>{formatDisplay(item.value, item.suffix)}</span>
+              </>
+            ) : null}
             {showValue && (
               <div className="flex items-center justify-between gap-2">
-                <span className="text-13 text-gray-500 truncate dark:text-white/70">{item.label}</span>
-                <span className="text-13 font-bold text-gray-900 tabular-nums shrink-0 dark:text-white">
+                <span data-export-cell className="text-13 text-gray-500 truncate dark:text-white/70">{item.label}</span>
+                <span data-export-cell className="text-13 font-bold text-gray-900 tabular-nums shrink-0 dark:text-white">
                   {formatDisplay(item.value, item.suffix)}
                   {item.detail ? (
                     <span className="text-11 font-semibold text-gray-400 ms-1 dark:text-white/45">
