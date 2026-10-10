@@ -100,6 +100,9 @@ function looksLikeRefundedName(status) {
 /** هل الحالة تلقائية فقط (لا تُختار يدوياً)؟ */
 export function isAutoOnlyStatus(status) {
   if (!status) return false;
+  // الخادم (D2) يرسل manual_selectable=false لـ refunded — هو المصدر الأول.
+  if (status.manual_selectable === false || status.manual_selectable === 0) return true;
+  if (status.manual_selectable === true || status.manual_selectable === 1) return false;
   const key = statusRowKey(status);
   if (key) return AUTO_ONLY_STATUS_KEYS.includes(key);
   return looksLikeRefundedName(status);
@@ -113,7 +116,9 @@ export function manualStatusOptions(statuses = []) {
   const list = Array.isArray(statuses) ? statuses : [];
   return list
     .filter((s) => s && !LEGACY_STATUS_KEYS.includes(statusRowKey(s)))
-    .map((s) => (isAutoOnlyStatus(s) ? { ...s, manualDisabled: true, manualHint: REFUNDED_MANUAL_HINT } : s));
+    .map((s) =>
+      isAutoOnlyStatus(s) ? { ...s, manualDisabled: true, manualHint: s.manual_hint || REFUNDED_MANUAL_HINT } : s
+    );
 }
 
 /** يبحث عن صف الحالة بالمفتاح (`status_key`) في قائمة الحالات. */

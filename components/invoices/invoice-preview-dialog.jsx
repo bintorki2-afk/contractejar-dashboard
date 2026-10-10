@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Printer, ReceiptText, X } from "lucide-react";
+import { Download, Pencil, Printer, ReceiptText, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
@@ -199,6 +199,17 @@ export default function InvoicePreviewDialog({ open, onOpenChange, invoice }) {
             >
               إغلاق
             </button>
+            {invoice?.invoicePdfUrl ? (
+              <a
+                href={invoice.invoicePdfUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="h-11 px-5 rounded-xl border border-brand-dark text-brand-dark text-13 font-bold inline-flex items-center justify-center gap-2 hover:bg-brand-mint transition-colors dark:border-emerald-400 dark:text-emerald-300"
+              >
+                <Download className="size-4" />
+                تنزيل PDF
+              </a>
+            ) : null}
             <button
               type="button"
               onClick={handlePrint}

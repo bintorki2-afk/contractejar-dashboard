@@ -70,6 +70,8 @@ export function mapPaymentToInvoiceRow(payment = {}) {
     contractId: payment.contract_id ?? null,
     reference: payment.reference ?? null,
     receiptUrl: payment.receipt_url ?? null,
+    // D4: رابط PDF الحقيقي (موقّع) من الخادم إن أُرسل — وإلا تبقى الطباعة من المتصفح.
+    invoicePdfUrl: payment.invoice_pdf_url ?? payment.pdf_url ?? payment.contract?.invoice_pdf_url ?? null,
     status: payment.status || "unknown",
     date: formatPaymentDate(payment.payment_date),
     referenceNo: payment.contract_uuid || String(payment.id),

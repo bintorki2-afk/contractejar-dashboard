@@ -44,6 +44,8 @@ export const PERMISSION_SECTIONS = {
   sms: 'sms',
   seo_crawl: 'seo_crawl',
   website_images: 'website_images',
+  // دفعة و (D7): «تقييمات العملاء» — شاشة تحت «التسويق والمحتوى».
+  customer_reviews: 'customer_reviews',
 };
 
 // refund / record_transfer / add_fee: قسم «المدفوعات» فقط (د9 + دفعة هـ).
@@ -243,6 +245,14 @@ const MARKETING_SECTIONS = [
   PERMISSION_SECTIONS.app_content,
   PERMISSION_SECTIONS.website_images,
   PERMISSION_SECTIONS.faqs,
+  PERMISSION_SECTIONS.customer_reviews,
+];
+
+/** «السلة»: الطلبات + تغيير المؤجر + (D6) العقارات والوحدات — كلٌّ بصلاحية الحذف في قسمه. */
+const TRASH_SECTIONS = [
+  PERMISSION_SECTIONS.all_requests,
+  PERMISSION_SECTIONS.lessor_change,
+  PERMISSION_SECTIONS.real_estates,
 ];
 
 /** Former `/home/content` panels now live under marketing `?tab=content&view=`. */
@@ -281,7 +291,7 @@ export const ROUTE_SECTION_RULES = [
   { prefix: '/home/return-orders', section: [PERMISSION_SECTIONS.payments, PERMISSION_SECTIONS.returned_request] },
   { prefix: '/home/lessor-change', section: PERMISSION_SECTIONS.lessor_change },
   // د12: «السلة» — الطلبات وطلبات تغيير المؤجر المحذوفة (الاستعادة تتطلب صلاحية الحذف في الخادم).
-  { prefix: '/home/trash', section: [PERMISSION_SECTIONS.all_requests, PERMISSION_SECTIONS.lessor_change] },
+  { prefix: '/home/trash', section: TRASH_SECTIONS },
   { prefix: '/home/orders', section: ORDERS_SECTIONS },
   { prefix: '/home/reports', section: PERMISSION_SECTIONS.analytics },
   { prefix: '/home/users', section: PERMISSION_SECTIONS.users },
@@ -318,7 +328,7 @@ export function getRouteActionRequirement(pathname = '') {
 
   // QA DASH-17: «السلة» تتطلب صلاحية الحذف (كرابطها في القائمة والخادم: orders/trash ← all_requests.delete).
   if (path === '/home/trash' || path.startsWith('/home/trash/')) {
-    return { section: [PERMISSION_SECTIONS.all_requests, PERMISSION_SECTIONS.lessor_change], action: 'delete' };
+    return { section: TRASH_SECTIONS, action: 'delete' };
   }
 
   if (path === '/home/roles-and-employees/roles/add') {
@@ -371,7 +381,7 @@ export const SIDEBAR_NAV = [
       { label: 'جميع الطلبات', href: '/home/orders', section: ORDERS_SECTIONS },
       { label: 'طلبات تغيير المؤجر', href: '/home/lessor-change', section: PERMISSION_SECTIONS.lessor_change },
       { label: 'دليل الموظف', href: '/home/guide', section: null, alwaysVisible: true, skipLanding: true },
-      { label: 'السلة', href: '/home/trash', section: [PERMISSION_SECTIONS.all_requests, PERMISSION_SECTIONS.lessor_change], action: 'delete' },
+      { label: 'السلة', href: '/home/trash', section: TRASH_SECTIONS, action: 'delete' },
       { label: 'الفواتير', href: '/home/invoices', section: PERMISSION_SECTIONS.payments },
     ],
   },

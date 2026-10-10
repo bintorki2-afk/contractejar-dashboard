@@ -124,6 +124,22 @@ describe("«السلة» (د12)", () => {
   });
 });
 
+describe("دفعة و — D6/D7", () => {
+  it("D6: real-estate deleters reach the trash (properties & units)", () => {
+    const reDeleter = employee(["real_estates.view", "real_estates.delete"]);
+    expect(canAccessRoute("/home/trash", reDeleter.permissions, reDeleter)).toBe(true);
+    expect(visibleSidebar(reDeleter)).toContain("/home/trash");
+    const reViewer = employee(["real_estates.view"]);
+    expect(canAccessRoute("/home/trash", reViewer.permissions, reViewer)).toBe(false);
+  });
+
+  it("D7: customer_reviews alone opens «التسويق والمحتوى»", () => {
+    const reviewer = employee(["customer_reviews.view"]);
+    expect(canAccessRoute("/home/marketing-and-content", reviewer.permissions, reviewer)).toBe(true);
+    expect(visibleSidebar(reviewer)).toEqual(["/home/marketing-and-content"]);
+  });
+});
+
 describe("«دليل الموظف» (د23)", () => {
   it("is visible to every signed-in user but never the landing page", () => {
     const nobody = employee([]);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink, FileText, ImageOff, Loader2 } from "lucide-react";
+import { Download, ExternalLink, FileText, ImageOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -258,6 +258,23 @@ export default function LessorChangeDetailsDialog({ requestId, statuses, open, o
                 <Field label="الجوال" value={formatSaudiMobileDisplay(request.mobile) || request.mobile} dir="ltr" />
                 <Field label="الرسوم" value={formatFee(request.fee)} />
                 <Field label="الدفع" value={request.is_paid ? "مدفوع" : "غير مدفوع"} />
+                {/* D4: فاتورة PDF حقيقية من الخادم — تظهر بعد الدفع فقط (null قبله). */}
+                {request.is_paid && request.invoice_pdf_url ? (
+                  <Field
+                    label="الفاتورة"
+                    value={
+                      <a
+                        href={request.invoice_pdf_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-brand-dark hover:underline dark:text-emerald-300"
+                      >
+                        <Download className="size-3.5" />
+                        تنزيل PDF
+                      </a>
+                    }
+                  />
+                ) : null}
                 <Field label="تاريخ الدفع" value={request.paid_at} dir="ltr" />
                 <Field label="المنصة" value={platformLabel(request.platform)} />
                 <Field label="تاريخ الإنشاء" value={request.created_at} dir="ltr" />

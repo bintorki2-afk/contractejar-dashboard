@@ -59,6 +59,10 @@ describe("order status keys", () => {
     expect(opts.find((s) => s.id === 11).manualHint).toContain("ميسر");
     expect(opts.find((s) => s.id === 7).manualDisabled).toBeUndefined();
     expect(isAutoOnlyStatus({ name: "مسترجع" })).toBe(true);
+    // الخادم هو المصدر: manual_selectable + manual_hint.
+    const fromServer = manualStatusOptions([{ id: 20, name: "حالة خاصة", status_key: "x", manual_selectable: false, manual_hint: "تلميح الخادم" }]);
+    expect(fromServer[0]).toMatchObject({ manualDisabled: true, manualHint: "تلميح الخادم" });
+    expect(isAutoOnlyStatus({ name: "مسترجع", status_key: "refunded", manual_selectable: true })).toBe(false);
     expect(isAutoOnlyStatus({ name: "قيد المراجعة", status_key: "under_review" })).toBe(false);
   });
 });
