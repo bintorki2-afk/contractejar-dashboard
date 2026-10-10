@@ -2,7 +2,6 @@
 
 import { toast } from "sonner";
 import { Check, Copy, Wallet, X } from "lucide-react";
-import LeaseRenewalDraftTransfer from "./lease-renewal-draft-transfer";
 import { ContractStepEditor } from "../contract-edit/contract-step-editor";
 import {
   LEASE_RENEWAL_CONTRACT_DATE_FIELDS,
@@ -162,16 +161,6 @@ export default function LeaseRenewalFinancialTab({ orderData }) {
         </ContractStepEditor>
       </div>
 
-      <div className="bg-[#F4F4F4] rounded-20 p-4 flex flex-col h-fit min-w-0 overflow-hidden sm:col-span-2 xl:col-span-1">
-        <ContractStepEditor title="تحويل الطلب" step="step4" fields={[]} showEdit={false}>
-          <LeaseRenewalDraftTransfer
-            orderId={orderData?.id}
-            orderData={orderData}
-            layout="column"
-            showTransferLabel={false}
-          />
-        </ContractStepEditor>
-      </div>
     </div>
   );
 }

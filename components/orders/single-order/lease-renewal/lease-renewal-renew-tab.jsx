@@ -11,7 +11,6 @@ import {
   Hand,
   ImageIcon,
 } from "lucide-react";
-import LeaseRenewalDraftTransfer from "./lease-renewal-draft-transfer";
 import { ContractStepEditor } from "../contract-edit/contract-step-editor";
 import {
   LEASE_RENEWAL_NOTES_FIELDS,
@@ -227,13 +226,6 @@ export default function LeaseRenewalRenewTab({ orderData }) {
             </ContractStepEditor>
           </div>
 
-          <div className="bg-[#F4F4F4] rounded-20 p-5 min-w-0 overflow-hidden">
-            <LeaseRenewalDraftTransfer
-              orderId={orderData?.id}
-              orderData={orderData}
-              layout="stacked"
-            />
-          </div>
         </div>
 
         <ContractStepEditor
