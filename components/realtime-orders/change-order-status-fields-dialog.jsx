@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DRAFT_RULE_HINT, statusRequiresDraftFirst } from "@/src/lib/draft-rule";
 
 function fieldLabel(field) {
   return field?.label_ar || field?.label_en || field?.name || "";
@@ -117,11 +116,6 @@ export default function ChangeOrderStatusFieldsDialog({
         </div>
 
         <div className="flex flex-col gap-5">
-          {statusRequiresDraftFirst(status) ? (
-            <p className="rounded-xl bg-[#FBF3E0] text-[#92400E] text-[12.5px] font-bold px-4 py-2.5 text-right">
-              {DRAFT_RULE_HINT} — لا يمكن التوثيق قبل إرسال مسودة العقد للعميل عبر واتساب.
-            </p>
-          ) : null}
           {fields.map((field) => {
             if (!isFieldVisible(field, values)) return null;
             const required = isFieldRequired(field, values);

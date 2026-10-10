@@ -2,6 +2,7 @@
 
 import React from "react";
 import NotifictionCard from "./notification-card";
+import EmployeeNotificationList from "./employee-notification-list";
 import { Bell, Loader2 } from "lucide-react";
 import { attentionItemToOrderRow, useOrdersAttention } from "@/src/hooks/use-orders-attention";
 import { cn } from "@/lib/utils";
@@ -12,16 +13,17 @@ export default function NotificationList() {
   const unreceivedOrders = (data?.awaiting_receive ?? []).map(attentionItemToOrderRow);
   const totalCount = data?.counts?.awaiting_receive ?? unreceivedOrders.length;
 
-  if (isLoading) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <Loader2 className="animate-spin h-12 w-12 text-brand-accent" />
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-4">
+      {/* دفعة هـ (D-1): إشعارات الموظف من الخادم (ردّ العميل / دفع رسوم) فوق قائمة «طلبات جديدة». */}
+      <EmployeeNotificationList />
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="animate-spin h-10 w-10 text-brand-accent" />
+        </div>
+      ) : (
+      <>
       <div
         className={cn(
           "rounded-2xl border p-4 flex items-center justify-between gap-3",
@@ -78,7 +80,8 @@ export default function NotificationList() {
           ))}
         </div>
       )}
-
+      </>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlarmClock } from "lucide-react";
+import { AlarmClock, Coins, Paperclip } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   resolveOrderStatusKey,
@@ -46,6 +46,54 @@ export function DelayBadge({ order, labels, className, compact = false }) {
     >
       <AlarmClock className={compact ? "size-3" : "size-3.5"} />
       {compact ? "متأخر" : list[0] || "متأخر"}
+    </span>
+  );
+}
+
+/** شارة «بانتظار العميل · …» في القوائم (دفعة هـ — E4) من `data_request_pending`. */
+export function AwaitingCustomerBadge({ order, className, compact = false }) {
+  const pending = order?.data_request_pending;
+  if (!pending) return null;
+  const items = (Array.isArray(pending.items) ? pending.items : []).map((i) => (typeof i === "string" ? i : i?.label)).filter(Boolean);
+  const hours = Number(pending.hours ?? pending.hours_waiting ?? 0);
+  const late = hours >= 24;
+  const title = `${pending.label ?? "بانتظار العميل"}${items.length ? ` · ${items.join(" · ")}` : ""}${hours ? ` · منذ ${Math.floor(hours)} ساعة` : ""}`;
+  return (
+    <span
+      title={title}
+      data-awaiting-customer
+      className={cn(
+        "inline-flex max-w-[220px] items-center gap-1 rounded-full font-extrabold whitespace-nowrap",
+        late ? "bg-[#FDECEC] text-[#B42318] dark:bg-red-500/15 dark:text-red-300" : "bg-[#FFF7E6] text-[#7A4B00] dark:bg-amber-500/15 dark:text-amber-300",
+        compact ? "h-5 px-1.5 text-[10.5px]" : "h-6 px-2 text-[11px]",
+        className
+      )}
+    >
+      <Paperclip className={compact ? "size-3" : "size-3.5"} />
+      <span className="truncate">{compact ? "بانتظار العميل" : `بانتظار العميل${items[0] ? ` · ${items[0]}` : ""}${items.length > 1 ? ` +${items.length - 1}` : ""}`}</span>
+    </span>
+  );
+}
+
+/** شارة «بانتظار دفع فرق · 75 ر.س» في القوائم (دفعة هـ — E5) من `awaiting_charge` / `payment_state`. */
+export function AwaitingChargeBadge({ order, className, compact = false }) {
+  const state = order?.payment_state ?? {};
+  const awaiting = order?.awaiting_charge ?? state.awaiting_charge ?? (Number(state.pending_charges_count ?? 0) > 0);
+  if (!awaiting) return null;
+  const total = Number(order?.pending_charges_total ?? state.pending_charges_total ?? 0);
+  const label = state.awaiting_charge_label ?? `بانتظار دفع فرق${total ? ` · ${total.toLocaleString("en-US")} ر.س` : ""}`;
+  return (
+    <span
+      title={label}
+      data-awaiting-charge
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full bg-[#FFF3E0] font-extrabold whitespace-nowrap text-[#9A6100] dark:bg-amber-500/15 dark:text-amber-300",
+        compact ? "h-5 px-1.5 text-[10.5px]" : "h-6 px-2 text-[11px]",
+        className
+      )}
+    >
+      <Coins className={compact ? "size-3" : "size-3.5"} />
+      {compact ? "فرق بانتظار الدفع" : label}
     </span>
   );
 }

@@ -26,7 +26,6 @@ import { axiosInstance } from "@/src/utils/axios";
 import { printOrderContract } from "@/components/orders/single-order/print-contract";
 import { useConfirm } from "@/components/shared/confirm-provider";
 import { statusRequiresExtraFields } from "@/components/realtime-orders/change-order-status-fields-dialog";
-import { DRAFT_RULE_HINT, statusRequiresDraftFirst } from "@/src/lib/draft-rule";
 import { openDialogAfterMenuClose } from "@/src/lib/open-dialog-after-menu-close";
 
 export default function OrderActionsMenu({
@@ -52,9 +51,7 @@ export default function OrderActionsMenu({
     openDialogAfterMenuClose(async () => {
       const ok = await confirm({
         title: "تغيير حالة الطلب",
-        description: `تغيير حالة الطلب #${order?.uuid ?? ""} إلى «${label}»؟${
-          statusRequiresDraftFirst(status) ? ` (${DRAFT_RULE_HINT})` : ""
-        } سيُشعَر العميل بالتغيير.`,
+        description: `تغيير حالة الطلب #${order?.uuid ?? ""} إلى «${label}»؟ سيُشعَر العميل بالتغيير.`,
         confirmLabel: "تغيير الحالة",
       });
       if (ok) onStatusChange?.(order, status);

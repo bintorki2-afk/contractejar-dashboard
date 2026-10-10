@@ -41,6 +41,34 @@ const STAT_CARDS = [
     format: (stats) => stats.collected.toLocaleString("en-US"),
     showRiyal: true,
   },
+  // دفعة هـ (E5): نفس أرقام الخادم — رسوم إضافية · فروقات السعر · حوالات بنكية (من العمليات الناجحة في القائمة).
+  {
+    key: "extra",
+    label: "رسوم إضافية",
+    className: "bg-[#FFF8E1] border-[#FCD34D] dark:bg-amber-500/15 dark:border-amber-400/35",
+    valueClass: "text-[#B45309] dark:text-amber-300",
+    labelClass: "text-gray-500 dark:text-amber-300/80",
+    format: (stats) => (stats.extra ?? 0).toLocaleString("en-US"),
+    showRiyal: true,
+  },
+  {
+    key: "differences",
+    label: "فروقات السعر",
+    className: "bg-[#FFF8E1] border-[#FCD34D] dark:bg-amber-500/15 dark:border-amber-400/35",
+    valueClass: "text-[#B45309] dark:text-amber-300",
+    labelClass: "text-gray-500 dark:text-amber-300/80",
+    format: (stats) => (stats.differences ?? 0).toLocaleString("en-US"),
+    showRiyal: true,
+  },
+  {
+    key: "transfers",
+    label: "حوالات بنكية",
+    className: "bg-[#EEF4FF] border-[#BFD3FF] dark:bg-blue-500/15 dark:border-blue-400/35",
+    valueClass: "text-[#1D4ED8] dark:text-blue-300",
+    labelClass: "text-gray-500 dark:text-blue-300/80",
+    format: (stats) => (stats.transfers ?? 0).toLocaleString("en-US"),
+    showRiyal: true,
+  },
 ];
 
 function StatCard({ label, value, className, valueClass, labelClass, showRiyal }) {
@@ -73,7 +101,7 @@ function StatCard({ label, value, className, valueClass, labelClass, showRiyal }
 
 export default function InvoiceStatCards({ stats }) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+    <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-2.5">
       {STAT_CARDS.map((card) => (
         <StatCard
           key={card.key}

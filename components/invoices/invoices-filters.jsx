@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { INVOICE_STATUSES, INVOICE_TYPES } from "./mock-data";
+import { INVOICE_KINDS, INVOICE_STATUSES, INVOICE_TYPES } from "./mock-data";
 
 export default function InvoicesFilters({
   searchQuery,
@@ -18,6 +18,8 @@ export default function InvoicesFilters({
   onStatusFilterChange,
   typeFilter,
   onTypeFilterChange,
+  kindFilter = "all",
+  onKindFilterChange,
   onExport,
 }) {
   return (
@@ -58,6 +60,19 @@ export default function InvoicesFilters({
         </SelectTrigger>
         <SelectContent dir="rtl">
           {INVOICE_TYPES.map((opt) => (
+            <SelectItem key={opt.id} value={opt.id}>
+              {opt.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select value={kindFilter} onValueChange={onKindFilterChange}>
+        <SelectTrigger aria-label="نوع العملية" className="h-[42px] w-[160px] rounded-xl border-[#E5E7EB] bg-white text-13 font-semibold dark:bg-card dark:border-white/10 dark:text-white">
+          <SelectValue placeholder="كل العمليات" />
+        </SelectTrigger>
+        <SelectContent dir="rtl">
+          {INVOICE_KINDS.map((opt) => (
             <SelectItem key={opt.id} value={opt.id}>
               {opt.label}
             </SelectItem>

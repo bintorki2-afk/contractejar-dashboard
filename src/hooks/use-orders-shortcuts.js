@@ -14,7 +14,7 @@ export const ORDER_SHORTCUTS = [
   { keys: ["K"], label: "الطلب السابق" },
   { keys: ["Enter"], label: "فتح الطلب المحدد" },
   { keys: ["W"], label: "واتساب العميل" },
-  { keys: ["S"], label: "نافذة المرحلة التالية (استلمت / أرسلت المسودة / وثّقت)" },
+  { keys: ["S"], label: "نافذة المرحلة التالية (استلمت / وثّقت)" },
   { keys: ["/"], label: "البحث" },
   { keys: ["?"], label: "عرض هذه المساعدة" },
 ];
@@ -25,7 +25,7 @@ export function isTypingTarget(target) {
   return tag === "input" || tag === "textarea" || tag === "select" || target.isContentEditable === true;
 }
 
-/** المفتاح المنطقي من حدث لوحة المفاتيح (يدعم لوحة عربية: ت=J ن=K ص=W س=S). */
+/** المفتاح المنطقي من حدث لوحة المفاتيح (يدعم لوحة عربية: ت=J ن=K ص=W س=S ة=M ب=F لا=B). */
 export function shortcutFromEvent(e) {
   if (!e || e.ctrlKey || e.metaKey || e.altKey) return null;
   const code = e.code || "";
@@ -33,6 +33,10 @@ export function shortcutFromEvent(e) {
   if (code === "KeyK") return "prev";
   if (code === "KeyW") return "whatsapp";
   if (code === "KeyS") return "stage";
+  // دفعة هـ — صفحة الطلب فقط: M مرفق ناقص · F إضافة رسوم · B حوالة بنكية.
+  if (code === "KeyM") return "data_request";
+  if (code === "KeyF") return "add_fee";
+  if (code === "KeyB") return "bank_transfer";
   if (e.key === "Enter") return "open";
   if (e.key === "/" || code === "Slash") return e.shiftKey ? "help" : "search";
   if (e.key === "?" || e.key === "؟") return "help";
@@ -63,6 +67,7 @@ export function useOrdersShortcuts({ rows = [], enabled = true, onOpen, onWhatsA
         setHelpOpen((v) => !v);
         return;
       }
+      if (action === "data_request" || action === "add_fee" || action === "bank_transfer") return; // صفحة الطلب فقط
       if (document.querySelector('[role="dialog"], [role="alertdialog"]')) return;
       if (action === "search") {
         e.preventDefault();
@@ -95,13 +100,16 @@ export function useOrdersShortcuts({ rows = [], enabled = true, onOpen, onWhatsA
 }
 
 export const ORDER_DETAIL_SHORTCUTS = [
-  { keys: ["S"], label: "تنفيذ المرحلة التالية (يفتح التأكيد)" },
+  { keys: ["S"], label: "تنفيذ المرحلة التالية (استلمت / وثّقت — يفتح التأكيد)" },
   { keys: ["W"], label: "واتساب العميل" },
+  { keys: ["M"], label: "طلب مرفق ناقص / تصحيح بيانات" },
+  { keys: ["F"], label: "إضافة رسوم (لمن لديه الصلاحية)" },
+  { keys: ["B"], label: "تسجيل حوالة بنكية (لمن لديه الصلاحية)" },
   { keys: ["?"], label: "عرض هذه المساعدة" },
 ];
 
-/** اختصارات صفحة تفاصيل الطلب: S المرحلة التالية، W واتساب، ? المساعدة. */
-export function useOrderDetailShortcuts({ enabled = true, onStage, onWhatsApp } = {}) {
+/** اختصارات صفحة تفاصيل الطلب: S المرحلة التالية، W واتساب، M مرفق ناقص، F رسوم، B حوالة، ? المساعدة. */
+export function useOrderDetailShortcuts({ enabled = true, onStage, onWhatsApp, onDataRequest, onAddFee, onBankTransfer } = {}) {
   const [helpOpen, setHelpOpen] = useState(false);
   useEffect(() => {
     if (!enabled) return undefined;
@@ -121,10 +129,19 @@ export function useOrderDetailShortcuts({ enabled = true, onStage, onWhatsApp } 
       } else if (action === "whatsapp") {
         e.preventDefault();
         onWhatsApp?.();
+      } else if (action === "data_request" && onDataRequest) {
+        e.preventDefault();
+        onDataRequest();
+      } else if (action === "add_fee" && onAddFee) {
+        e.preventDefault();
+        onAddFee();
+      } else if (action === "bank_transfer" && onBankTransfer) {
+        e.preventDefault();
+        onBankTransfer();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [enabled, onStage, onWhatsApp]);
+  }, [enabled, onStage, onWhatsApp, onDataRequest, onAddFee, onBankTransfer]);
   return { helpOpen, setHelpOpen };
 }

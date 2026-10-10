@@ -11,9 +11,9 @@ describe("server error messages shown in toasts", () => {
   });
 
   it("keeps business messages of 4xx responses (validation, permission)", () => {
-    const error = { response: { status: 422, data: { message: "لا يمكن توثيق العقد قبل إرسال المسودة للعميل عبر واتساب" } } };
+    const error = { response: { status: 422, data: { message: "لا يمكن توثيق العقد وهو غير مدفوع" } } };
     sanitizeServerErrorMessage(error);
-    expect(error.response.data.message).toBe("لا يمكن توثيق العقد قبل إرسال المسودة للعميل عبر واتساب");
+    expect(error.response.data.message).toBe("لا يمكن توثيق العقد وهو غير مدفوع");
   });
 
   it("ignores network errors without a response", () => {

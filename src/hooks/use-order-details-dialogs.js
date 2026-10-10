@@ -15,12 +15,7 @@ import {
 import { openDialogAfterMenuClose } from "@/src/lib/open-dialog-after-menu-close";
 import { statusRequiresExtraFields } from "@/components/realtime-orders/change-order-status-fields-dialog";
 import { useChangeOrderStatus } from "@/src/hooks/use-change-order-status";
-import {
-  buildDraftWhatsAppUrl,
-  findNotarizeStatus,
-  findSendDraftStatus,
-  isSendDraftStatus,
-} from "@/src/lib/draft-rule";
+import { findNotarizeStatus } from "@/src/lib/notarize-status";
 
 const EMPTY_PAYMENT_LINK = {
   paymentUrl: "",
@@ -40,31 +35,6 @@ function toMenuStatus(status) {
   };
 }
 
-/** يفتح واتساب العميل برسالة المسودة؛ إن منع المتصفح النافذة نعرض زراً في التنبيه. */
-function openDraftWhatsApp(orderData, extraValues) {
-  const url = buildDraftWhatsAppUrl(orderData, extraValues);
-  if (!url) {
-    toast.error("لا يوجد رقم جوال للعميل لفتح واتساب");
-    return;
-  }
-  const win = typeof window !== "undefined" ? window.open(url, "_blank") : null;
-  if (win) {
-    try {
-      win.opener = null;
-    } catch {
-      // ignore
-    }
-  } else {
-    toast("افتح واتساب لإرسال المسودة للعميل", {
-      action: {
-        label: "فتح واتساب",
-        onClick: () => window.open(url, "_blank", "noopener,noreferrer"),
-      },
-      duration: 15000,
-    });
-  }
-}
-
 export function useOrderDetailsDialogs({
   orderData,
   id,
@@ -77,8 +47,10 @@ export function useOrderDetailsDialogs({
   const [returnDialogOpen, setReturnDialogOpen] = useState(false);
   const [returnOrder, setReturnOrder] = useState(null);
   const [propertyUpdateOpen, setPropertyUpdateOpen] = useState(false);
-  const [sendDraftOpen, setSendDraftOpen] = useState(false);
-  const [correctionRequestOpen, setCorrectionRequestOpen] = useState(false);
+  // دفعة هـ (E4): حوار «مرفق ناقص» لكل قسم — section = lessor|property|tenant|null.
+  const [dataRequest, setDataRequest] = useState({ open: false, section: null });
+  const openDataRequest = (section = null) => setDataRequest({ open: true, section: section ?? null });
+  const setCorrectionRequestOpen = (open) => setDataRequest((prev) => ({ ...prev, open: Boolean(open) }));
   const [ejarDocumentationOpen, setEjarDocumentationOpen] = useState(false);
   const [statusFieldsOpen, setStatusFieldsOpen] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] = useState(null);
@@ -87,8 +59,7 @@ export function useOrderDetailsDialogs({
 
   const { mutate: changeStatus, isPending: isChangingStatus } = useChangeOrderStatus({
     queryKey: ["single-order", id],
-    onSuccess: (_res, vars) => {
-      if (vars?.openWhatsApp) openDraftWhatsApp(orderData, vars.extraValues);
+    onSuccess: () => {
       setStatusFieldsOpen(false);
       setPendingStatusChange(null);
       refetch();
@@ -131,11 +102,10 @@ export function useOrderDetailsDialogs({
     changeStatus({ orderId: orderData.id, statusId: status.id });
   };
 
-  /** إجراء سريع: يفتح نموذج تغيير الحالة معبّأً بالحالة المطلوبة (الحقول الإلزامية تبقى). */
-  const openQuickStatus = (kind) => {
+  /** إجراء سريع: يفتح نموذج تغيير الحالة معبّأً بحالة التوثيق (الحقول الإلزامية تبقى). */
+  const openQuickStatus = () => {
     if (!orderData?.id) return;
-    const status =
-      kind === "send_draft" ? findSendDraftStatus(statuses) : findNotarizeStatus(statuses);
+    const status = findNotarizeStatus(statuses);
     if (!status) {
       toast.error("الحالة غير متوفرة في قائمة الحالات النشطة");
       return;
@@ -146,11 +116,7 @@ export function useOrderDetailsDialogs({
       setStatusFieldsOpen(true);
       return;
     }
-    changeStatus({
-      orderId: orderData.id,
-      statusId: status.id,
-      openWhatsApp: isSendDraftStatus(menuStatus),
-    });
+    changeStatus({ orderId: orderData.id, statusId: status.id });
   };
 
   const handlePayLink = async () => {
@@ -189,9 +155,8 @@ export function useOrderDetailsDialogs({
     returnOrder,
     propertyUpdateOpen,
     setPropertyUpdateOpen,
-    sendDraftOpen,
-    setSendDraftOpen,
-    correctionRequestOpen,
+    dataRequest,
+    openDataRequest,
     setCorrectionRequestOpen,
     ejarDocumentationOpen,
     setEjarDocumentationOpen,

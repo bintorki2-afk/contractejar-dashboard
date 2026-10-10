@@ -12,7 +12,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { pickRefundablePayment, refundableAmount, refundErrorMessage, useRefundPayment } from "@/src/hooks/use-refunds";
+import { refundErrorMessage, useRefundPayment } from "@/src/hooks/use-refunds";
+import { isSuccessfulPayment, paymentKind, paymentKindLabel, paymentOptionLabel, pickRefundPayment, refundableAmount } from "@/src/lib/refund-payment";
 
 function sar(n) {
   return `${Number(n ?? 0).toLocaleString("en-US", { maximumFractionDigits: 2 })} ر.س`;
@@ -28,10 +29,12 @@ function toAsciiNumber(value) {
 /**
  * استرجاع عبر Moyasar (د9): كلي/جزئي + سبب ← POST /admin/payments/{payment}/refund.
  * يُعرض فقط لمن يملك payments.refund (مدير النظام ضمنياً).
+ * دفعة هـ (D-2): prefill.purpose = "refund_due" ← الدفعة الافتراضية هي دفعة الفرق/الرسوم (لا الأصلية)،
+ * وقائمة الدفعات تعرض نوع كل دفعة.
  */
-export default function RefundDialog({ open, onOpenChange, orderData }) {
-  const payments = (orderData?.payments ?? []).filter((p) => p?.status === "success" || p?.status === "paid");
-  const defaultPayment = pickRefundablePayment(payments);
+export default function RefundDialog({ open, onOpenChange, orderData, prefill = null }) {
+  const payments = (orderData?.payments ?? []).filter(isSuccessfulPayment);
+  const defaultPayment = pickRefundPayment(payments, { purpose: prefill?.purpose ?? "manual", amount: prefill?.amount ?? null });
   const [paymentId, setPaymentId] = useState(defaultPayment?.id ?? null);
   const [mode, setMode] = useState("full");
   const [amount, setAmount] = useState("");
@@ -41,9 +44,10 @@ export default function RefundDialog({ open, onOpenChange, orderData }) {
   if (open && !seeded) {
     setSeeded(true);
     setPaymentId(defaultPayment?.id ?? null);
-    setMode("full");
-    setAmount("");
-    setReason("");
+    // دفعة هـ (E5): refund_due ← استرجاع جزئي معبّأ بالفرق وسببه.
+    setMode(prefill?.amount ? "partial" : "full");
+    setAmount(prefill?.amount ? String(prefill.amount) : "");
+    setReason(prefill?.reason ?? "");
     setError(null);
   }
   if (!open && seeded) setSeeded(false);
@@ -111,18 +115,26 @@ export default function RefundDialog({ open, onOpenChange, orderData }) {
                 <select
                   value={payment.id}
                   onChange={(e) => setPaymentId(Number(e.target.value))}
+                  data-refund-payment-select
                   className="h-10 rounded-lg border border-brand-line bg-white px-3 text-[13px] dark:bg-white/[0.04] dark:border-white/10"
                 >
                   {payments.map((p) => (
                     <option key={p.id} value={p.id} disabled={refundableAmount(p) <= 0}>
-                      {sar(p.amount)} · {p.brand || p.method || "دفعة"} · المتبقي {sar(refundableAmount(p))}
+                      {paymentOptionLabel(p, sar)}
                     </option>
                   ))}
                 </select>
+                {prefill?.purpose === "refund_due" && paymentKind(payment) !== "original" ? (
+                  <span className="text-[11px] font-semibold text-[#0B7A4C] dark:text-emerald-300">
+                    اختيرت دفعة «{paymentKindLabel(payment)}» لأن المستحق للعميل نتج عن فرق سعر مدفوع — يمكنك تغييرها.
+                  </span>
+                ) : null}
               </label>
             ) : (
               <div className="flex items-center justify-between rounded-xl bg-[#F5F7F6] px-3 py-2.5 text-[13px] dark:bg-white/[0.04]">
-                <span className="text-[#6B7570] dark:text-white/50">المدفوع · {payment.brand || payment.method || "Moyasar"}</span>
+                <span className="text-[#6B7570] dark:text-white/50">
+                  {paymentKindLabel(payment)} · {paymentKind(payment) === "bank_transfer" ? "حوالة" : payment.brand || payment.method || "Moyasar"}
+                </span>
                 <span className="font-extrabold tabular-nums">{sar(payment.amount)}</span>
               </div>
             )}

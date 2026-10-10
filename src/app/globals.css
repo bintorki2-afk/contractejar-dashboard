@@ -212,3 +212,8 @@ a {
   }
 }
 
+
+/* دفعة هـ: احترام تفضيل تقليل الحركة للنبض */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-ring { animation: none; }
+}

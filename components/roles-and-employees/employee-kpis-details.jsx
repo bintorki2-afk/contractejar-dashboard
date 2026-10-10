@@ -100,6 +100,14 @@ export default function EmployeeKpisDetails() {
   const late = data ? findCard(data, "late_over_24h") : null;
   const isLateDanger = late?.tone === "danger" && (late?.value ?? 0) > 0;
   const hasExtraMetrics = data && (data.avg_receive || data.avg_process || data.revenue || data.receive_sla);
+  // دفعة هـ (2.7): رسوم أضافها · فروقات سعر · طلبات مرفق ناقص · حوالات سجّلها.
+  const feesCard = data ? findCard(data, "fees_added_count") : null;
+  const diffCard = data ? findCard(data, "price_difference_count") : null;
+  const dataReqCard = data ? findCard(data, "data_requests_count") : null;
+  const transfersCard = data ? findCard(data, "bank_transfers_recorded") : null;
+  const hasMoneyMetrics = Boolean(data && (feesCard || diffCard || dataReqCard || transfersCard || data.fees_added_count != null));
+  const moneyLabel = (count, amount) =>
+    `${Number(count ?? 0).toLocaleString("en-US")}${Number(amount) > 0 ? ` · ${Number(amount).toLocaleString("en-US")} ر.س` : ""}`;
 
   const receivedOrders = useMemo(() => data?.received_orders?.items ?? [], [data]);
   const activityItems = useMemo(() => data?.activity?.items ?? [], [data]);
@@ -228,6 +236,15 @@ export default function EmployeeKpisDetails() {
                       value={data.receive_sla.percent != null ? `${data.receive_sla.percent}%` : "—"}
                     />
                   ) : null}
+                </div>
+              ) : null}
+
+              {hasMoneyMetrics ? (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-dashed border-[#E5E7EB] dark:border-white/10" data-kpi-money>
+                  <MiniMetric label={feesCard?.label_ar ?? "رسوم أضافها"} value={moneyLabel(feesCard?.value ?? data.fees_added_count, feesCard?.amount ?? data.fees_added_amount)} />
+                  <MiniMetric label={diffCard?.label_ar ?? "فروقات سعر"} value={moneyLabel(diffCard?.value ?? data.price_difference_count)} />
+                  <MiniMetric label={dataReqCard?.label_ar ?? "طلبات مرفق ناقص"} value={moneyLabel(dataReqCard?.value ?? data.data_requests_count)} />
+                  <MiniMetric label={transfersCard?.label_ar ?? "حوالات سجّلها"} value={moneyLabel(transfersCard?.value ?? data.bank_transfers_recorded, transfersCard?.amount ?? data.bank_transfers_amount)} />
                 </div>
               ) : null}
             </div>

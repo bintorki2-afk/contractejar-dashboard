@@ -1,44 +1,44 @@
 /**
- * رحلة الطلب في تفاصيل الطلب (دفعة د — د10).
- * تُبنى من بيانات الخادم فقط: `status_key` + `status_timeline[]` + `activities[]` + `payments[]`.
+ * رحلة الطلب في تفاصيل الطلب (دفعة هـ — 3 خطوات فقط):
+ *   قيد المراجعة → مستلم من الموظف → تم التوثيق
+ * حالات جانبية تُعرض بدل الرحلة: ملغي / مسترجع (ومعلق / بانتظار المشرف كبيانات قديمة).
+ *
+ * المصدر الأول: `journey[]` + `journey_side_state` من الخادم (GET /admin/orders/{id} أو /stages).
+ * عند غيابهما (بيانات قديمة) تُبنى الخطوات من `status_key` + `status_timeline[]` + `activities[]`.
  * كل خطوة: { key, label, done, current, at, who, note }.
  */
 
 export const JOURNEY_STEPS = [
-  { key: "paid", label: "الدفع" },
   { key: "under_review", label: "قيد المراجعة" },
-  { key: "received", label: "الاستلام" },
-  { key: "draft_sent", label: "إرسال المسودة" },
-  { key: "notarized", label: "التوثيق في إيجار" },
-  { key: "completed", label: "مكتمل" },
+  { key: "received_by_employee", label: "مستلم من الموظف" },
+  { key: "ejar_authenticated", label: "تم التوثيق" },
 ];
 
 /** ترتيب مفاتيح الحالات على الرحلة (لمعرفة ما اكتمل ضمنياً). */
 const STATUS_RANK = {
   new: 0,
   paid: 1,
-  under_review: 2,
-  received: 3,
-  received_by_employee: 3,
-  whatsapp_draft: 4,
-  ejar_authenticated: 5,
-  completed: 6,
-};
-
-const STEP_RANK = {
-  paid: 1,
-  under_review: 2,
-  received: 3,
-  draft_sent: 4,
-  notarized: 5,
-  completed: 6,
+  under_review: 1,
+  received: 2,
+  received_by_employee: 2,
+  whatsapp_draft: 2, // مفتاح قديم — يُعامل كمستلم
+  ejar_authenticated: 3,
+  completed: 3,
 };
 
 export const SIDE_STATE_LABELS = {
-  cancelled: "ملغى",
+  cancelled: "ملغي",
   on_hold: "معلق",
   refunded: "مسترجع",
   waiting_supervisor: "بانتظار المشرف",
+};
+
+/** لون الحالة الجانبية: الإلغاء أحمر، الاسترجاع رمادي/بنفسجي، غير ذلك كهرماني. */
+export const SIDE_STATE_TONES = {
+  cancelled: "danger",
+  refunded: "neutral",
+  on_hold: "warning",
+  waiting_supervisor: "warning",
 };
 
 function list(value) {
@@ -55,7 +55,6 @@ function firstAt(items) {
 
 function findActivity(activities, actions) {
   const wanted = Array.isArray(actions) ? actions : [actions];
-  // أحدث نشاط مطابق (السجل قد يحوي تكراراً بعد تراجع).
   const matches = activities.filter((a) => wanted.includes(a?.action));
   return matches.length ? matches[matches.length - 1] : null;
 }
@@ -81,79 +80,106 @@ function who(activity, fallback = null) {
   return activity.actor_name || fallback;
 }
 
+function finish(steps, sideState, sideStateLabel, sideStateAt = null) {
+  const currentKey = sideState ? null : (steps.find((s) => !s.done)?.key ?? null);
+  steps.forEach((s) => {
+    s.current = s.key === currentKey;
+  });
+  const doneCount = steps.filter((s) => s.done).length;
+  return {
+    steps,
+    currentKey,
+    sideState,
+    sideStateLabel,
+    sideStateTone: sideState ? SIDE_STATE_TONES[sideState] ?? "warning" : null,
+    sideStateAt,
+    progress: Math.round((doneCount / steps.length) * 100),
+    allDone: doneCount === steps.length,
+  };
+}
+
+/** الخطوات من `journey[]` الخادم (3 خطوات {key,label,done,current,at,by}). */
+function fromServer(order) {
+  const serverSteps = list(order.journey).filter((s) => s && s.key);
+  if (!serverSteps.length) return null;
+  const steps = JOURNEY_STEPS.map((def) => {
+    const s = serverSteps.find((x) => x.key === def.key) ?? {};
+    return {
+      key: def.key,
+      label: s.label || def.label,
+      description: s.description ?? null,
+      done: Boolean(s.done),
+      at: s.at ?? null,
+      who: s.by ?? null,
+      note: null,
+    };
+  });
+  // الخطوة الأولى تتم بالدفع — لا تحمل منفّذاً؛ نعرض «بعد الدفع» بدل الاسم.
+  if (steps[0].done && !steps[0].who) steps[0].who = "بعد الدفع";
+  if (steps[2].done && order.deed_number) steps[2].note = `رقم الصك ${order.deed_number}`;
+  const side = order.journey_side_state;
+  const sideKey = side?.key ?? (SIDE_STATE_LABELS[order.status_key] ? order.status_key : null);
+  const sideLabel = side?.label ?? (sideKey ? SIDE_STATE_LABELS[sideKey] : null);
+  return finish(steps, sideKey, sideLabel, side?.at ?? null);
+}
+
 /**
  * يبني خطوات الرحلة. `order` = بيانات `GET /admin/orders/{id}` الخام.
  */
 export function buildOrderJourney(order = {}) {
+  const server = fromServer(order);
+  if (server) return server;
+
   const activities = list(order.activities)
     .slice()
     .sort((a, b) => String(a?.at ?? "").localeCompare(String(b?.at ?? "")));
   const timeline = list(order.status_timeline);
   const payments = list(order.payments).filter((p) => p?.status === "success" || p?.status === "paid");
   const statusKey = order.status_key ?? null;
-  const isPaid = Boolean(order.is_paid || order.is_completed === true || order.is_completed === 1 || payments.length);
+  const isPaid = Boolean(
+    order.payment_state?.is_paid ||
+      order.is_paid ||
+      order.is_completed === true ||
+      order.is_completed === 1 ||
+      payments.length
+  );
   const isReceived = Boolean(order.is_received || order.received_contract);
   const rank = STATUS_RANK[statusKey] ?? (isPaid ? 1 : 0);
 
-  const paymentActivity = findActivity(activities, "payment");
+  const paymentActivity = findActivity(activities, ["payment", "bank_transfer_recorded"]);
   const paidTimeline = timelineEntry(timeline, "paid");
   const reviewTimeline = timelineEntry(timeline, "under_review");
   const receivedActivity =
     findActivity(activities, ["stage_received", "received", "assigned"]) ??
     statusActivity(activities, ["received_by_employee", "received"]);
   const receivedTimeline = timelineEntry(timeline, ["received_by_employee", "received"]);
-  const draftActivity =
-    findActivity(activities, "stage_draft_sent") ?? statusActivity(activities, "whatsapp_draft");
-  const draftTimeline = timelineEntry(timeline, "whatsapp_draft");
   const notarizedActivity =
-    findActivity(activities, "stage_notarized") ?? statusActivity(activities, "ejar_authenticated");
-  const notarizedTimeline = timelineEntry(timeline, "ejar_authenticated");
-  const completedActivity = statusActivity(activities, "completed");
-  const completedTimeline = timelineEntry(timeline, "completed");
+    findActivity(activities, "stage_notarized") ?? statusActivity(activities, ["ejar_authenticated", "completed"]);
+  const notarizedTimeline = timelineEntry(timeline, ["ejar_authenticated", "completed"]);
 
   const raw = {
-    paid: {
-      done: isPaid,
-      at: paymentActivity?.at ?? firstAt(payments) ?? paidTimeline?.created_at ?? null,
-      who: isPaid ? "العميل" : null,
-    },
-    // «قيد المراجعة» خطوة آلية بعد الدفع مباشرة (الخادم ينقل الطلب إليها) — تُعدّ منجزة متى دُفع الطلب.
     under_review: {
-      done: Boolean(reviewTimeline) || rank >= 2 || isPaid,
-      at: reviewTimeline?.created_at ?? (isPaid ? paymentActivity?.at ?? firstAt(payments) ?? paidTimeline?.created_at ?? null : null),
-      who: reviewTimeline || isPaid ? "النظام" : null,
+      done: isPaid || rank >= 1,
+      at: reviewTimeline?.created_at ?? paymentActivity?.at ?? firstAt(payments) ?? paidTimeline?.created_at ?? null,
+      who: isPaid || rank >= 1 ? "بعد الدفع" : null,
     },
-    received: {
-      done: isReceived || rank >= 3,
+    received_by_employee: {
+      done: isReceived || rank >= 2,
       at: receivedActivity?.at ?? receivedTimeline?.created_at ?? order.received_at ?? null,
       who: who(receivedActivity, order.received_contract?.employee?.name ?? order.employee_name ?? null),
     },
-    draft_sent: {
-      done: rank >= 4 || Boolean(draftActivity),
-      at: draftActivity?.at ?? draftTimeline?.created_at ?? null,
-      who: who(draftActivity),
-      note: order.ejar_contract_draft_number ? `رقم المسودة ${order.ejar_contract_draft_number}` : null,
-    },
-    notarized: {
-      done: rank >= 5 || Boolean(notarizedActivity),
+    ejar_authenticated: {
+      done: rank >= 3 || Boolean(notarizedActivity),
       at: notarizedActivity?.at ?? notarizedTimeline?.created_at ?? null,
       who: who(notarizedActivity),
       note: order.deed_number ? `رقم الصك ${order.deed_number}` : null,
     },
-    completed: {
-      done: rank >= 6,
-      at: completedActivity?.at ?? completedTimeline?.created_at ?? null,
-      who: who(completedActivity),
-    },
   };
 
-  // التوثيق يُغلق الرحلة عملياً: «مكتمل» تُعدّ منجزة ضمنياً بعد التوثيق إن لم تُستخدم.
-  let currentKey = null;
   const steps = JOURNEY_STEPS.map((step) => {
     const info = raw[step.key];
     return { ...step, done: Boolean(info.done), at: info.at, who: info.who, note: info.note ?? null };
   });
-  // أي خطوة منجزة تعني أن ما قبلها منجز (بيانات قديمة بلا سجل).
   for (let i = steps.length - 1; i >= 0; i -= 1) {
     if (steps[i].done) {
       for (let j = 0; j < i; j += 1) steps[j].done = true;
@@ -161,31 +187,25 @@ export function buildOrderJourney(order = {}) {
     }
   }
   const sideState = SIDE_STATE_LABELS[statusKey] ? statusKey : null;
-  if (!sideState) {
-    const next = steps.find((s) => !s.done);
-    currentKey = next?.key ?? null;
-  }
-  steps.forEach((s) => {
-    s.current = s.key === currentKey;
-  });
-  const doneCount = steps.filter((s) => s.done).length;
-
-  return {
-    steps,
-    currentKey,
-    sideState,
-    sideStateLabel: sideState ? SIDE_STATE_LABELS[sideState] : null,
-    progress: Math.round((doneCount / steps.length) * 100),
-    rankOf: (key) => STEP_RANK[key] ?? 0,
-  };
+  return finish(steps, sideState, sideState ? SIDE_STATE_LABELS[sideState] : null);
 }
 
-/** وقت مختصر «09/10 · 13:05» بأرقام لاتينية (dir=ltr عند العرض). */
+/** وقت مختصر «09/10/2026 · 13:05» بأرقام لاتينية (dir=ltr عند العرض). */
 export function formatJourneyTime(value) {
   if (!value) return null;
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return null;
   const date = d.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
+  const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+  return `${date} · ${time}`;
+}
+
+/** تاريخ ووقت منفصلان للعرض تحت كل خطوة: «09/10 · 10:05». */
+export function formatJourneyShort(value) {
+  if (!value) return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  const date = d.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit" });
   const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
   return `${date} · ${time}`;
 }

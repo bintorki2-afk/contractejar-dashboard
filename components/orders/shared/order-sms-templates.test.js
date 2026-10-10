@@ -13,10 +13,9 @@ describe("order links sent to the customer", () => {
     expect(all).toContain("https://contractejar.com/r/201425");
   });
 
-  it("draft template follows the rule: draft via WhatsApp, notarize only after the customer reviews it", () => {
-    const draft = getOrderSmsTemplates("201425").find((t) => t.id === "draft_ready");
-    expect(draft.body).toContain("واتساب");
-    expect(draft.body).toContain("لن نوثّق العقد في إيجار إلا بعد اطلاعكم على المسودة");
-    expect(draft.body).not.toContain("إتمام الدفع");
+  it("has no draft-stage template (دفعة هـ: مرحلة المسودة أُلغيت)", () => {
+    const all = getOrderSmsTemplates("201425");
+    expect(all.find((t) => t.id === "draft_ready")).toBeUndefined();
+    expect(all.map((t) => t.body).join("\n")).not.toContain("المسودة");
   });
 });

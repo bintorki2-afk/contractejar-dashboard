@@ -34,8 +34,7 @@ describe("order status keys", () => {
 
   it("next stage for a list row", () => {
     expect(nextStageForRow({ status_key: "under_review", is_paid: true, is_received: false })).toBe("received");
-    expect(nextStageForRow({ status_key: "received_by_employee", is_paid: true, is_received: true })).toBe("draft_sent");
-    expect(nextStageForRow({ status_key: "whatsapp_draft", is_paid: true, is_received: true })).toBe("notarized");
+    expect(nextStageForRow({ status_key: "received_by_employee", is_paid: true, is_received: true })).toBe("notarized");
     expect(nextStageForRow({ status_key: "new", is_paid: false })).toBe(null);
     expect(nextStageForRow({ status_key: "completed", is_paid: true })).toBe(null);
   });

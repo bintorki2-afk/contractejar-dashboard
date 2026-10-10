@@ -8,6 +8,9 @@ function runNotificationSideEffects(parsed, { queryClient, sidebarStore, router 
 
   const { isComment, isOrderNotification, orderId } = parsed;
 
+  // دفعة هـ (D-1): أي دفعة Push للموظف (charge_paid / data_request_resolved…) تُحدّث عدّاد الجرس فوراً بدل انتظار الاستطلاع.
+  queryClient.invalidateQueries({ queryKey: ["employee-notifications"] });
+
   if (isComment) {
     if (orderId) {
       sidebarStore.setOrderId(String(orderId));

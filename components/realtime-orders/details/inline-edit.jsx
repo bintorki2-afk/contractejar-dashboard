@@ -3,6 +3,7 @@
 import { createContext, useContext, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { describePriceDifference } from "@/src/lib/charges";
 import { Check, Loader2, Pencil, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { axiosInstance } from "@/src/utils/axios";
@@ -47,6 +48,9 @@ export function InlineEditProvider({ orderData, canEdit, children }) {
       } else {
         toast.message(res?.message || "لا توجد تغييرات.");
       }
+      // دفعة هـ (E5): تغيّر السعر بعد التعديل ← فرق معلّق أو مستحق استرجاع.
+      const pd = describePriceDifference(res?.data);
+      if (pd) toast.warning(pd.title, { description: pd.description, duration: 8000 });
       invalidateOrdersCaches(queryClient, { orderId });
     },
   });

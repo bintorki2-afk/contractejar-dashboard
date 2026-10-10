@@ -10,12 +10,15 @@ import {
   CheckCircle2,
   Hand,
   Loader2,
+  MessageCircle,
+  Paperclip,
   RefreshCw,
-  Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useOrdersAttention } from "@/src/hooks/use-orders-attention";
 import { useRunOrderStage } from "@/src/hooks/use-order-stage";
+import { useRemindDataRequest } from "@/src/hooks/use-data-requests";
+import { hoursWaitingLabel } from "@/src/lib/data-requests";
 import { useConfirm } from "@/components/shared/confirm-provider";
 import { formatSaudiMobileDisplay } from "@/src/lib/format-phone";
 import { formatDurationMinutes } from "@/src/lib/format-duration";
@@ -36,20 +39,22 @@ const LANES = [
     viewAll: "/home/realtime-orders",
   },
   {
-    key: "awaiting_draft",
-    title: "بانتظار المسودة",
-    hint: "مستلمة — أرسل مسودة إيجار للعميل",
-    icon: Send,
-    tone: "info",
+    key: "awaiting_notarize",
+    title: "بانتظار التوثيق",
+    hint: "مستلمة — وثّق في إيجار",
+    icon: BadgeCheck,
+    tone: "violet",
     viewAll: "/home/orders?tab=received_by_employee",
   },
   {
-    key: "awaiting_notarize",
-    title: "بانتظار التوثيق",
-    hint: "أُرسلت المسودة — وثّق في إيجار",
-    icon: BadgeCheck,
-    tone: "violet",
-    viewAll: "/home/orders?tab=whatsapp_draft",
+    key: "awaiting_customer",
+    title: "لم يردوا على طلب مرفق",
+    hint: "مرّت 24 ساعة — ذكّرهم بالواتساب",
+    icon: Paperclip,
+    tone: "warning",
+    action: "remind",
+    actionLabel: "تذكير واتساب",
+    viewAll: "/home/orders?attention=awaiting_customer",
   },
   {
     key: "delayed",
@@ -66,6 +71,7 @@ const TONES = {
   info: { chip: "bg-[#E8F0FE] text-[#1D4ED8] dark:bg-blue-500/15 dark:text-blue-300", ring: "border-brand-line" },
   violet: { chip: "bg-[#EFEAFD] text-[#5B35C9] dark:bg-violet-500/15 dark:text-violet-300", ring: "border-brand-line" },
   danger: { chip: "bg-[#FDECEC] text-[#B42318] dark:bg-red-500/15 dark:text-red-300", ring: "border-[#F5C9C6] dark:border-red-500/30" },
+  warning: { chip: "bg-[#FFF7E6] text-[#B25E00] dark:bg-amber-500/15 dark:text-amber-300", ring: "border-[#F1D59A] dark:border-amber-500/30" },
 };
 
 const LIST_LIMIT = 10;
@@ -81,6 +87,7 @@ function AttentionItem({ item, lane, onAction, pendingId }) {
   const open = () => router.push(`/home/orders/${item.id}?from=${encodeURIComponent("/home")}`);
   const busy = pendingId === item.id;
   const canReceive = lane.action === "received" || (lane.key === "delayed" && item.bucket === "awaiting_receive");
+  const isDataRequest = lane.action === "remind" || item.bucket === "awaiting_customer";
   const name = item.customer_name?.trim();
   return (
     <li
@@ -116,12 +123,37 @@ function AttentionItem({ item, lane, onAction, pendingId }) {
               <span className="text-[#8A958F] dark:text-white/40"> · {item.employee_name}</span>
             ) : null}
           </p>
+          {isDataRequest ? (
+            <p className="mt-0.5 truncate text-[11.5px] font-bold text-[#7A4B00] dark:text-amber-300" title={(item.items || []).join(" · ")}>
+              {item.section_label ? `${item.section_label}: ` : ""}
+              {(item.items || []).join(" · ") || "مرفق ناقص"}
+            </p>
+          ) : null}
           <p className="mt-0.5 text-[11px] font-semibold text-[#8A958F] dark:text-white/40">
-            منذ {formatDurationMinutes(item.age_minutes)}
+            {isDataRequest ? (
+              <>
+                {hoursWaitingLabel(item.hours_waiting)}
+                {item.reminded_at ? " · ذُكِّر سابقاً" : ""}
+              </>
+            ) : (
+              <>منذ {formatDurationMinutes(item.age_minutes)}</>
+            )}
             {item.delay_labels?.length ? <span className="text-[#B42318] dark:text-red-300"> · {item.delay_labels[0]}</span> : null}
           </p>
         </button>
-        {canReceive ? (
+        {isDataRequest && item.request_id ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => onAction(item, { ...lane, action: "remind" })}
+            className="shrink-0 inline-flex items-center gap-1 h-8 px-3 rounded-lg bg-[#128C7E] text-white text-[12px] font-bold hover:bg-[#0F7A6D] disabled:opacity-60"
+            title="يرسل تذكيراً بالواتساب ويعيد الإشعار للعميل"
+          >
+            {busy ? <Loader2 className="size-3.5 animate-spin" /> : <MessageCircle className="size-3.5" />}
+            تذكير واتساب
+          </button>
+        ) : null}
+        {isDataRequest && item.request_id ? null : canReceive ? (
           <button
             type="button"
             disabled={busy}
@@ -159,16 +191,24 @@ export default function AttentionBoard() {
     },
     onError: () => setPendingId(null),
   });
+  // دفعة هـ (E4): تذكير العميل بالواتساب من البطاقة مباشرة (يسجّل reminded_at ويعيد الإشعار).
+  const remind = useRemindDataRequest({ onSuccess: () => setPendingId(null), onError: () => setPendingId(null) });
 
-  const total = (counts.awaiting_receive ?? 0) + (counts.awaiting_draft ?? 0) + (counts.awaiting_notarize ?? 0);
-  // الافتراضي: أول قسم فيه طلبات (بالترتيب: استلام ← مسودة ← توثيق ← متأخرة).
+  const total = (counts.awaiting_receive ?? 0) + (counts.awaiting_notarize ?? 0) + (counts.awaiting_customer ?? 0);
+  // الافتراضي: أول قسم فيه طلبات (بالترتيب: استلام ← توثيق ← متأخرة).
   const firstNonEmpty = LANES.find((l) => (counts?.[l.key] ?? 0) > 0)?.key ?? "awaiting_receive";
   const activeKey = selected ?? firstNonEmpty;
   const activeLane = LANES.find((l) => l.key === activeKey) ?? LANES[0];
-  const activeItems = data?.[activeLane.key] ?? [];
+  const activeItems = activeLane.key === "awaiting_customer" ? (data?.awaiting_customer?.items ?? []) : (data?.[activeLane.key] ?? []);
   const activeCount = counts?.[activeLane.key] ?? activeItems.length;
 
   const handleAction = async (item, lane) => {
+    if (lane.action === "remind") {
+      if (!item.request_id) return;
+      setPendingId(item.id);
+      remind.mutate({ orderId: item.id, requestId: item.request_id });
+      return;
+    }
     const canReceive = lane.action === "received" || (lane.key === "delayed" && item.bucket === "awaiting_receive");
     if (!canReceive) return;
     const ok = await confirm({
@@ -222,7 +262,7 @@ export default function AttentionBoard() {
               const tone = TONES[lane.tone];
               const count = counts?.[lane.key] ?? 0;
               const active = lane.key === activeKey;
-              const danger = lane.key === "delayed" && count > 0;
+              const danger = (lane.key === "delayed" || lane.key === "awaiting_customer") && count > 0;
               return (
                 <button
                   key={lane.key}

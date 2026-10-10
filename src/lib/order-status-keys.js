@@ -3,7 +3,8 @@
  * (`GET /admin/contract-statuses` و `GET /admin/orders/status-counts`).
  * لا تعتمد على أرقام الحالات (id) — قد تختلف بين قواعد البيانات.
  *
- * المسار: جديد → تم الدفع → قيد المراجعة → مستلم من الموظف → مسودة واتساب → موثّق في إيجار → مكتمل
+ * المسار: جديد → تم الدفع → قيد المراجعة → مستلم من الموظف → موثّق في إيجار → مكتمل
+ * (دفعة هـ: أُلغيت مرحلة «إرسال المسودة»؛ المفتاح القديم whatsapp_draft بيانات تاريخية فقط.)
  * حالات جانبية: ملغى، معلق، مسترجع.
  */
 
@@ -12,7 +13,6 @@ export const ORDER_FLOW_KEYS = [
   "paid",
   "under_review",
   "received_by_employee",
-  "whatsapp_draft",
   "ejar_authenticated",
   "completed",
 ];
@@ -26,7 +26,6 @@ export const STATUS_KEY_LABELS = {
   under_review: "قيد المراجعة",
   received: "مستلم",
   received_by_employee: "مستلم من الموظف",
-  whatsapp_draft: "أُرسلت المسودة",
   ejar_authenticated: "موثّق في إيجار",
   completed: "مكتمل",
   cancelled: "ملغى",
@@ -47,7 +46,6 @@ export const STATUS_KEY_TONES = {
   under_review: "warning",
   received: "violet",
   received_by_employee: "violet",
-  whatsapp_draft: "brand",
   ejar_authenticated: "success",
   completed: "success",
   cancelled: "danger",
@@ -122,7 +120,6 @@ const TAB_ORDER = [
   "under_review",
   "received",
   "received_by_employee",
-  "whatsapp_draft",
   "ejar_authenticated",
   "completed",
   "on_hold",
@@ -151,7 +148,6 @@ export function nextStageForRow(row = {}) {
   const received = Boolean(row?.is_received || row?.received_contract_exists);
   if (!paid) return null;
   if (["new", "paid", "under_review"].includes(key) && !received) return "received";
-  if (["new", "paid", "under_review", "received", "received_by_employee"].includes(key)) return "draft_sent";
-  if (key === "whatsapp_draft") return "notarized";
+  if (["new", "paid", "under_review", "received", "received_by_employee"].includes(key)) return "notarized";
   return null;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { describePriceDifference } from "@/src/lib/charges";
 import { axiosInstance } from "@/src/utils/axios";
 import { toast } from "sonner";
 import { mapApiValidationErrors } from "@/src/lib/contract-update";
@@ -87,6 +88,9 @@ export function useSingleOrder(contractId) {
     },
     onSuccess: (res) => {
       toast.success(res?.message || "تم تحديث بيانات العقد بنجاح");
+      // دفعة هـ (E5): تغيّر السعر بعد التعديل ← فرق معلّق أو مستحق استرجاع.
+      const pd = describePriceDifference(res?.data ?? res);
+      if (pd) toast.warning(pd.title, { description: pd.description, duration: 8000 });
       invalidateOrderAndUnits(res);
     },
     onError: handleMutationError,

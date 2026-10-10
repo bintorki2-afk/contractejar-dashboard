@@ -120,6 +120,16 @@ export function mapOrderToExportRow(order, { showStatusColumn = true } = {}) {
 
   row.الاستلام = order?.employee_name ?? "";
 
+  // دفعة هـ (E5): أعمدة المال من الخادم عندما تكون موجودة في صف القائمة.
+  if (order?.payment_state || order?.paid_original != null) {
+    row["حالة الدفع"] = order?.payment_state?.label ?? order?.payment_state?.status_label ?? "";
+    row["المدفوع الأصلي"] = order?.paid_original ?? "";
+    row["إضافي"] = order?.paid_extra ?? "";
+    row["مسترجع"] = order?.refunded_total ?? "";
+    row["الصافي"] = order?.net_total ?? "";
+    row["طريقة الدفع"] = order?.payment_method_label ?? order?.payment_method ?? "";
+  }
+
   return row;
 }
 

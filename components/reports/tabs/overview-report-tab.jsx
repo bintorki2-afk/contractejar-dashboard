@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { BadgeCheck, CalendarDays, Clock, Gauge, Megaphone, Wallet } from "lucide-react";
+import { BadgeCheck, CalendarDays, Clock, Gauge, Megaphone, PlusCircle, Scale, Undo2, Wallet } from "lucide-react";
 import { axiosInstance } from "@/src/utils/axios";
 import { cn } from "@/lib/utils";
 import Loader from "@/components/home/loader";
@@ -13,6 +13,10 @@ const CARD_ICONS = {
   orders_today: CalendarDays,
   orders_week: CalendarDays,
   revenue: Wallet,
+  extra_fees: PlusCircle,
+  price_differences: Scale,
+  refunds: Undo2,
+  net_revenue: Wallet,
   avg_notarization_hours: Clock,
   completion_rate: BadgeCheck,
   top_source: Megaphone,
@@ -25,6 +29,10 @@ export function formatOverviewCard(card) {
   if (v == null || v === "") return "—";
   switch (card.key) {
     case "revenue":
+    case "extra_fees":
+    case "price_differences":
+    case "refunds":
+    case "net_revenue":
       return `${Number(v).toLocaleString("en-US", { maximumFractionDigits: 0 })} ر.س`;
     case "avg_notarization_hours":
       return formatDurationHours(v);
@@ -41,6 +49,10 @@ function cardHint(card, definitions = {}) {
   if (card.key === "revenue" && card.refunded) {
     return `الإجمالي ${Number(card.gross ?? 0).toLocaleString("en-US", { maximumFractionDigits: 0 })} − المسترجع ${Number(card.refunded).toLocaleString("en-US", { maximumFractionDigits: 0 })} ر.س`;
   }
+  if ((card.key === "extra_fees" || card.key === "price_differences") && card.count != null) {
+    return `${card.count} ${card.key === "extra_fees" ? "رسم إضافي" : "فرق سعر"} في الفترة`;
+  }
+  if (card.key === "net_revenue") return "الأصلي + الإضافي + الفروقات − المسترجع";
   if (card.key === "top_source" && card.value && typeof card.value === "object") {
     return `${card.value.orders ?? 0} طلب`;
   }
@@ -112,6 +124,17 @@ export default function OverviewReportTab() {
           );
         })}
       </div>
+
+      {data?.pending_charges || data?.open_data_requests != null ? (
+        <div className="flex flex-wrap gap-2 text-[12.5px] font-bold" data-overview-pending>
+          <span className="rounded-full bg-[#FFF7E6] px-3 py-1 text-[#7A4B00] dark:bg-amber-500/10 dark:text-amber-300">
+            رسوم بانتظار الدفع: {data?.pending_charges?.count ?? 0} ({Number(data?.pending_charges?.amount ?? 0).toLocaleString("en-US")} ر.س)
+          </span>
+          <span className="rounded-full bg-[#FFF7E6] px-3 py-1 text-[#7A4B00] dark:bg-amber-500/10 dark:text-amber-300">
+            طلبات مرفق ناقص مفتوحة: {data?.open_data_requests ?? 0}
+          </span>
+        </div>
+      ) : null}
 
       {data?.definitions?.scope ? (
         <p className="text-[11.5px] text-[#8A958F] dark:text-white/40">

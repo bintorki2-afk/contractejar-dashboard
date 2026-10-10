@@ -10,8 +10,8 @@ describe("StatusPill / DelayBadge (د26)", () => {
     expect(screen.getByText("تم الدفع")).toBeInTheDocument();
   });
   it("keeps the server name in the title when it differs", () => {
-    render(<StatusPill order={{ status_key: "whatsapp_draft", status_name: "إرسال مسودة العقد لكم عبر واتساب" }} />);
-    expect(screen.getByTitle("إرسال مسودة العقد لكم عبر واتساب")).toHaveTextContent("أُرسلت المسودة");
+    render(<StatusPill order={{ status_key: "ejar_authenticated", status_name: "توثيق العقد في إيجار" }} />);
+    expect(screen.getByTitle("توثيق العقد في إيجار")).toHaveTextContent("موثّق في إيجار");
   });
   it("delay badge only when flagged", () => {
     const { container, rerender } = render(<DelayBadge order={{ delay_flags: [] }} />);

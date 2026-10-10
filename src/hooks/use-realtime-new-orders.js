@@ -41,6 +41,7 @@ export function buildAdminOrdersParams({
   userId,
   statusKey,
   tab,
+  attention,
 } = {}) {
   const params = { page, per_page: perPage };
   const resolvedStatusId =
@@ -67,6 +68,8 @@ export function buildAdminOrdersParams({
   // دفعة د: فلترة بمفتاح الحالة الثابت (status_key) أو تبويب «غير مكتمل».
   if (statusKey) params.status_key = statusKey;
   if (tab) params.tab = tab;
+  // دفعة هـ: ?attention=awaiting_customer | charge_pending | unpaid
+  if (attention) params.attention = attention;
 
   return params;
 }

@@ -36,6 +36,12 @@ import {
   validatePricingForm,
   buildAutoAssignPayload,
   extractAutoAssignSettings,
+  BANK_TRANSFER_FIELDS,
+  buildBankTransferPayload,
+  emptyBankTransferForm,
+  extractBankTransferSettings,
+  formatIbanDisplay,
+  validateBankTransferForm,
 } from "@/src/lib/site-settings";
 import { Switch } from "@/components/ui/switch";
 import { useConfirm } from "@/components/shared/confirm-provider";
@@ -615,6 +621,109 @@ export function AutoAssignCard({ data, canEdit }) {
   );
 }
 
+/** الحوالة البنكية (دفعة هـ — E2): بنك + آيبان + اسم الحساب — للموظف فقط (قالب «تعليمات الحوالة البنكية»). */
+export function BankTransferSettingsCard({ data, canEdit }) {
+  const [form, setForm] = useState(emptyBankTransferForm);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [syncedData, setSyncedData] = useState(null);
+
+  const bank = extractBankTransferSettings(data);
+  if (data && data !== syncedData) {
+    setSyncedData(data);
+    setForm(bank.form);
+    setFieldErrors({});
+  }
+
+  const mutation = useSaveSiteSettings({
+    successMessage: "تم حفظ بيانات الحوالة البنكية",
+    errorFallback: "تعذر حفظ بيانات الحوالة البنكية",
+    onValidationError: setFieldErrors,
+  });
+
+  const dirty = isDirty(form, bank.form);
+
+  const handleSave = () => {
+    const errors = validateBankTransferForm(form);
+    if (Object.keys(errors).length) {
+      setFieldErrors(errors);
+      toast.error(Object.values(errors)[0]);
+      return;
+    }
+    mutation.mutate(buildBankTransferPayload(form));
+  };
+
+  return (
+    <CardShell
+      title="الحوالة البنكية"
+      description={
+        bank.note ||
+        "تُستخدم في قالب «تعليمات الحوالة البنكية» الذي يرسله الموظف للعميل عند تسجيل حوالة — لا تظهر في الموقع أو التطبيق."
+      }
+      badge={
+        <div className="flex items-center gap-2">
+          <span
+            data-bank-configured={bank.isConfigured ? "1" : "0"}
+            className={cn(
+              "rounded-full px-2.5 py-1 text-[11px] font-bold",
+              bank.isConfigured
+                ? "bg-[#dcf5e8] text-[#0B7A4C] dark:bg-emerald-500/15 dark:text-emerald-300"
+                : "bg-amber-100 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300"
+            )}
+          >
+            {bank.isConfigured ? "مضبوطة" : "غير مضبوطة"}
+          </span>
+          <SaveButton
+            onClick={handleSave}
+            disabled={!canEdit || mutation.isPending || !dirty}
+            pending={mutation.isPending}
+            label="حفظ بيانات الحوالة"
+          />
+        </div>
+      }
+    >
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {BANK_TRANSFER_FIELDS.map((field) => (
+          <div key={field.key} className="space-y-1.5 text-right">
+            <label htmlFor={`bank-${field.key}`} className="text-xs font-bold text-gray-700 dark:text-white/80">
+              {field.label}
+            </label>
+            <Input
+              id={`bank-${field.key}`}
+              type="text"
+              dir={field.dir}
+              autoComplete="off"
+              value={form[field.key] ?? ""}
+              disabled={!canEdit}
+              onChange={(e) => {
+                const next = e.target.value;
+                setForm((current) => ({ ...current, [field.key]: next }));
+                setFieldErrors((current) => {
+                  if (!current[field.key]) return current;
+                  const copy = { ...current };
+                  delete copy[field.key];
+                  return copy;
+                });
+              }}
+              placeholder={field.placeholder}
+              className={cn(
+                INPUT_CLASS,
+                field.dir === "ltr" ? "text-left font-mono tracking-wide" : "text-right",
+                fieldErrors[field.key] && "border-red-400"
+              )}
+            />
+            {field.key === "bank_iban" && form.bank_iban ? (
+              <HelperText>
+                <span dir="ltr" className="font-mono tabular-nums">{formatIbanDisplay(form.bank_iban)}</span>
+              </HelperText>
+            ) : null}
+            <FieldError message={fieldErrors[field.key]} />
+          </div>
+        ))}
+      </div>
+    </CardShell>
+  );
+}
+
 export default function SiteSettingsCards() {
   const { can, isReady } = usePermissions();
   const canEdit = isReady && can(PERMISSION_SECTIONS.settings, "edit");
@@ -644,6 +753,7 @@ export default function SiteSettingsCards() {
       <PricingSettingsCard data={data} canEdit={canEdit} />
       <AutoAssignCard data={data} canEdit={canEdit} />
       <SupportNumberCard data={data} canEdit={canEdit} />
+      <BankTransferSettingsCard data={data} canEdit={canEdit} />
       <SocialSettingsCard data={data} canEdit={canEdit} />
       <AppVersionCard data={data} canEdit={canEdit} />
     </div>

@@ -34,16 +34,18 @@ const CHANNEL_META = {
 
 const KEY_LABELS = {
   stage_received: "مرحلة: استلمت",
-  stage_draft_sent: "مرحلة: أرسلت المسودة",
   stage_notarized: "مرحلة: وثّقت",
   data_missing: "بيانات ناقصة",
+  data_request: "طلب مرفق ناقص / تصحيح",
+  data_request_reminder: "تذكير بطلب المرفق الناقص",
+  charge_payment_request: "طلب دفع فرق / رسوم إضافية",
+  bank_transfer_instructions: "تعليمات الحوالة البنكية",
   refund: "استرجاع المبلغ",
   payment_reminder: "تذكير بالدفع",
   status_under_review: "الحالة: قيد المراجعة",
   status_received_by_employee: "الحالة: مستلم من الموظف",
   status_on_hold: "الحالة: معلق",
   status_cancelled: "الحالة: ملغى",
-  draft_sent: "إرسال المسودة",
   notarized: "التوثيق",
 };
 

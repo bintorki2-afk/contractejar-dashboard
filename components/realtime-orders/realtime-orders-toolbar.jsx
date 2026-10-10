@@ -16,6 +16,9 @@ import {
 import { cn } from "@/lib/utils";
 import { TableSettingsPopover } from "@/components/shared/controllable-table";
 import { useSidebarStore } from "@/src/stores/sidebar-store";
+import { useUserStore } from "@/src/stores/user-store";
+import { useEmployeeNotifications } from "@/src/hooks/use-employee-notifications";
+import { unreadBadgeText } from "@/src/lib/employee-notifications";
 import { SECTION_NOTE, STATUS_FILTER_PILLS } from "./mock-data";
 import MoreFiltersPopover from "./more-filters-popover";
 import { RT } from "./theme";
@@ -184,6 +187,10 @@ export default function RealtimeOrdersToolbar({
   } = useSidebarStore();
 
   const useInlineFilters = typeof onToggleFilters === "function";
+  // دفعة هـ (D-1): عدّاد إشعارات الموظف على جرس الطلبات مباشر (نفس استعلام الهيدر).
+  const isAuthenticated = useUserStore((s) => s.isAuthenticated);
+  const { unreadCount: employeeUnread } = useEmployeeNotifications({ enabled: Boolean(isAuthenticated) });
+  const employeeBadge = unreadBadgeText(employeeUnread);
 
   const openNotifications = () => {
     if (displayedPart === "notification") {
@@ -346,7 +353,7 @@ export default function RealtimeOrdersToolbar({
       <button
         type="button"
         onClick={openNotifications}
-        aria-label="الإشعارات"
+        aria-label={employeeBadge ? `الإشعارات (${employeeUnread} غير مقروء)` : "الإشعارات"}
         title="الإشعارات"
         className={cn(
           roundBtn,
@@ -355,6 +362,14 @@ export default function RealtimeOrdersToolbar({
         )}
       >
         <Bell className="size-[16px]" />
+        {employeeBadge ? (
+          <span
+            className="absolute -top-1.5 -left-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#E5484D] text-white text-[10px] font-black leading-[18px] text-center tabular-nums ring-2 ring-white dark:ring-[#0B1411]"
+            aria-hidden
+          >
+            {employeeBadge}
+          </span>
+        ) : null}
       </button>
 
       {/* أزرار الدفع (إشعارات الدفع + رابط دفع واتساب) مخفية — بوابة الدفع غير مفعّلة لعقد إيجار.

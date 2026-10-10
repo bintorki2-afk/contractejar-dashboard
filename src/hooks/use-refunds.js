@@ -23,18 +23,8 @@ export function refundErrorMessage(error) {
   return data?.message || "تعذّر تنفيذ الاسترجاع";
 }
 
-/** المبلغ القابل للاسترجاع في دفعة (من الخادم). */
-export function refundableAmount(payment) {
-  const n = Number(payment?.refundable_amount ?? (Number(payment?.amount ?? 0) - Number(payment?.refunded_amount ?? 0)));
-  return Number.isFinite(n) ? Math.max(0, Math.round(n * 100) / 100) : 0;
-}
-
-/** أول دفعة ناجحة قابلة للاسترجاع. */
-export function pickRefundablePayment(payments = []) {
-  return (Array.isArray(payments) ? payments : []).find(
-    (p) => (p?.status === "success" || p?.status === "paid") && refundableAmount(p) > 0
-  ) ?? null;
-}
+// دفعة هـ (D-2): منطق اختيار الدفعة في src/lib/refund-payment.js (قابل للاختبار بلا axios).
+export { pickRefundablePayment, pickRefundPayment, refundableAmount } from "@/src/lib/refund-payment";
 
 /**
  * POST /admin/payments/{payment}/refund — { amount? (ر.س، بدون = كامل المتبقي), reason }.

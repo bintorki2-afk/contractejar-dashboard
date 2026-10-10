@@ -1,15 +1,16 @@
 "use client";
 
-import { BadgeCheck, ChevronLeft, Hand, Send } from "lucide-react";
+import { BadgeCheck, ChevronLeft, Hand } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import OrderActionsMenu from "@/components/realtime-orders/order-actions-menu";
 import { nextStageForRow } from "@/src/lib/order-status-keys";
 import { formatSaudiMobileDisplay, toSaudiMobileDialDigits } from "@/src/lib/format-phone";
-import { DelayBadge, StatusPill } from "./status-pill";
+import { normalizePaymentState } from "@/src/lib/payment-state";
+import { AwaitingChargeBadge, AwaitingCustomerBadge, DelayBadge, StatusPill } from "./status-pill";
 
-const STAGE_LABELS = { received: "استلمت", draft_sent: "أرسلت المسودة", notarized: "وثّقت" };
-const STAGE_ICONS = { received: Hand, draft_sent: Send, notarized: BadgeCheck };
+const STAGE_LABELS = { received: "استلمت", notarized: "وثّقت" };
+const STAGE_ICONS = { received: Hand, notarized: BadgeCheck };
 
 /**
  * «جميع الطلبات» على الجوال (د14): بطاقات مكدّسة بدل الجدول — الحالة والتأخير والعميل والدفع،
@@ -47,7 +48,8 @@ export default function OrdersCardList({
       {rows.map((row) => {
         const stage = canStage ? nextStageForRow(row) : null;
         const StageIcon = STAGE_ICONS[stage];
-        const paid = row?.is_paid === true || row?.is_paid === 1;
+        const payState = normalizePaymentState(row);
+        const paid = payState.status !== "unpaid";
         const wa = toSaudiMobileDialDigits(row?.user_mobile ?? "");
         return (
           <li
@@ -70,12 +72,14 @@ export default function OrdersCardList({
                 <div className="flex shrink-0 flex-col items-end gap-1">
                   <StatusPill order={row} />
                   <DelayBadge order={row} compact />
+                  <AwaitingCustomerBadge order={row} compact />
+                  <AwaitingChargeBadge order={row} compact />
                 </div>
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11.5px] font-bold">
                 <span className="rounded-full bg-[#F0F4F2] px-2 h-6 inline-flex items-center text-[#4B5753] dark:bg-white/10 dark:text-white/70">{row.contract_type || "—"}</span>
                 <span className={cn("rounded-full px-2 h-6 inline-flex items-center", paid ? "bg-[#E3F4EA] text-[#0B7A4C]" : "bg-[#FDECEC] text-[#B42318]")}>
-                  {paid ? "مدفوع" : "غير مدفوع"}
+                  {payState.status_label}{paid && payState.method_label && payState.method !== "moyasar" ? ` · ${payState.method_label}` : ""}
                 </span>
                 {row.employee_name && row.employee_name !== "لم يتم الاستلام" ? (
                   <span className="rounded-full bg-[#EFEAFD] px-2 h-6 inline-flex items-center text-[#5B35C9]">{row.employee_name}</span>

@@ -4,13 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "@/src/utils/axios";
 
 export const ORDERS_ATTENTION_QUERY_KEY = "orders-attention";
-export const ATTENTION_BUCKETS = ["awaiting_receive", "awaiting_draft", "awaiting_notarize", "delayed"];
+export const ATTENTION_BUCKETS = ["awaiting_receive", "awaiting_notarize", "awaiting_customer", "delayed"];
 
 const EMPTY = {
-  counts: { awaiting_receive: 0, awaiting_draft: 0, awaiting_notarize: 0, delayed: 0 },
+  counts: { awaiting_receive: 0, awaiting_notarize: 0, awaiting_customer: 0, delayed: 0 },
   awaiting_receive: [],
-  awaiting_draft: [],
   awaiting_notarize: [],
+  awaiting_customer: { count: 0, items: [] },
   delayed: [],
   rules: [],
   generated_at: null,
@@ -24,7 +24,7 @@ export async function fetchOrdersAttention(limit = 50) {
 
 /**
  * لوحة «عليك الحين» — GET /admin/orders/attention (تُحسب حيّاً في الخادم):
- * بانتظار الاستلام (مدفوع) / بانتظار المسودة / بانتظار التوثيق / متأخرة. القوائم مرتبة الأقدم أولاً.
+ * بانتظار الاستلام (مدفوع) / بانتظار التوثيق / لم يردوا على طلب مرفق (≥24 ساعة) / متأخرة. القوائم مرتبة الأقدم أولاً.
  */
 export function useOrdersAttention({ enabled = true, limit = 50, refetchInterval = 30_000 } = {}) {
   const query = useQuery({

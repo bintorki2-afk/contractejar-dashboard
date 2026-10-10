@@ -141,11 +141,17 @@ module.exports = {
 					to: {
 						height: '0'
 					}
+				},
+				// دفعة هـ: نبض حول الشارات/التبويبات التي تحتاج انتباه الموظف (نوع العقد، الوحدات الأخرى)
+				'pulse-ring': {
+					'0%, 100%': { boxShadow: '0 0 0 0 rgba(11,90,60,.45)' },
+					'50%': { boxShadow: '0 0 0 8px rgba(11,90,60,0)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-ring': 'pulse-ring 1.6s ease-in-out infinite'
 			}
 		}
 	},

@@ -23,6 +23,7 @@ import {
   extractStandardOrderPage,
 } from "@/components/orders/shared/orders-export";
 import { usePaginatedExport } from "@/components/orders/shared/use-paginated-export";
+import { useServerOrdersExport } from "@/src/hooks/use-orders-export";
 import { useIsDark } from "@/src/hooks/use-theme-mode";
 import { useContractStatuses } from "@/src/hooks/use-contract-statuses";
 import { usePermissions } from "@/src/hooks/use-permissions";
@@ -310,7 +311,9 @@ export function useRealtimeOrdersWrapper() {
     return params;
   }, [listParams]);
 
-  const { handleExport, isExporting } = usePaginatedExport({
+  // دفعة هـ (2.7): التصدير من الخادم (GET /admin/orders/export?format=xlsx) بنفس فلاتر القائمة؛
+  // التصدير المحلي القديم يبقى احتياطاً فقط إن لم يتوفر المسار.
+  const { handleExport: handleLegacyExport } = usePaginatedExport({
     buildUrl: (page) => buildAdminOrdersUrl({ ...exportParams, page }),
     extractPage: extractStandardOrderPage,
     onExport: (rows) =>
@@ -318,6 +321,11 @@ export function useRealtimeOrdersWrapper() {
         filename: "الطلبات-مباشر",
         showStatusColumn: true,
       }),
+  });
+  const { handleExport, isExporting } = useServerOrdersExport({
+    params: exportParams,
+    filename: "الطلبات-مباشر",
+    fallback: handleLegacyExport,
   });
 
   return {

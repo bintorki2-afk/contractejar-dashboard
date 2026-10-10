@@ -6,11 +6,10 @@ import { axiosInstance } from "@/src/utils/axios";
 import { invalidateOrdersCaches } from "@/src/lib/invalidate-orders-caches";
 
 export const ORDER_STAGES_QUERY_KEY = "order-stages";
-export const STAGE_KEYS = ["received", "draft_sent", "notarized"];
+export const STAGE_KEYS = ["received", "notarized"];
 
 export const STAGE_LABELS = {
   received: "استلمت",
-  draft_sent: "أرسلت المسودة",
   notarized: "وثّقت",
 };
 
@@ -59,7 +58,7 @@ export function openStageWhatsApp(whatsapp) {
 }
 
 /**
- * POST /admin/orders/{id}/stage/{received|draft_sent|notarized}
+ * POST /admin/orders/{id}/stage/{received|notarized}
  * يرجع { stage, next_stage, next_stage_label, whatsapp:{url,message}, contract, notifications_sent }.
  * variables: { orderId, stage, body?, openWhatsApp? (افتراضي true) }
  */

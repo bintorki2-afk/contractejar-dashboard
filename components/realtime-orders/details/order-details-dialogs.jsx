@@ -11,12 +11,10 @@ import ChangeOrderStatusFieldsDialog, {
   getStatusCaseFields,
 } from "../change-order-status-fields-dialog";
 import PropertyUpdateDialog from "../property-update-dialog";
-import SendDraftDialog from "../send-draft-dialog";
-import CorrectionRequestDialog from "../correction-request-dialog";
+import DataRequestDialog from "./data-request-dialog";
 import EjarDocumentationDialog from "../ejar-documentation-dialog";
 import SectionEditorDialog from "./section-editor-dialog";
 import OrderSectionErrorDialog from "@/components/orders/messages/order-section-error-dialog";
-import { isSendDraftStatus } from "@/src/lib/draft-rule";
 
 export default function OrderDetailsDialogs({ id, orderData, view, dialogs }) {
   const {
@@ -29,9 +27,7 @@ export default function OrderDetailsDialogs({ id, orderData, view, dialogs }) {
     returnOrder,
     propertyUpdateOpen,
     setPropertyUpdateOpen,
-    sendDraftOpen,
-    setSendDraftOpen,
-    correctionRequestOpen,
+    dataRequest,
     setCorrectionRequestOpen,
     ejarDocumentationOpen,
     setEjarDocumentationOpen,
@@ -90,17 +86,11 @@ export default function OrderDetailsDialogs({ id, orderData, view, dialogs }) {
         queryKey={queryKey}
       />
 
-      <SendDraftDialog
-        open={sendDraftOpen}
-        onOpenChange={setSendDraftOpen}
-        orderData={orderData}
-        queryKey={queryKey}
-      />
-
-      <CorrectionRequestDialog
-        open={correctionRequestOpen}
+      <DataRequestDialog
+        open={dataRequest.open}
         onOpenChange={setCorrectionRequestOpen}
-        order={view}
+        orderData={orderData}
+        section={dataRequest.section}
       />
 
       <EjarDocumentationDialog
@@ -125,8 +115,6 @@ export default function OrderDetailsDialogs({ id, orderData, view, dialogs }) {
             statusId: pendingStatusChange.status.id,
             extraValues,
             fields: getStatusCaseFields(pendingStatusChange.status),
-            // بعد نجاح «إرسال المسودة» نفتح واتساب العميل برسالة جاهزة.
-            openWhatsApp: isSendDraftStatus(pendingStatusChange.status),
           });
         }}
       />
