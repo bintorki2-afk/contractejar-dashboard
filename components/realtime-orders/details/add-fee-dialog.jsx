@@ -16,6 +16,21 @@ function toAsciiNumber(value) {
     .replace(/[^\d.]/g, "");
 }
 
+/**
+ * QA DASH-14: تحقّق مبلغ الرسوم — السالب لا يُحوَّل صامتاً إلى موجب.
+ * يرجع { value } أو { error }.
+ */
+export function parseFeeAmount(raw) {
+  const text = String(raw ?? "").trim();
+  if (!text) return { error: "أدخل مبلغ الرسوم" };
+  if (/^[\s]*[-−‐–—]/.test(text) || /[-−]/.test(text)) return { error: "المبلغ يجب أن يكون موجباً — لا تُقبل القيم السالبة" };
+  const ascii = toAsciiNumber(text);
+  if (!ascii || (ascii.match(/\./g) || []).length > 1) return { error: "أدخل مبلغاً صحيحاً بالأرقام" };
+  const value = Number(ascii);
+  if (!Number.isFinite(value) || value <= 0) return { error: "المبلغ يجب أن يكون أكبر من صفر" };
+  return { value: Math.round(value * 100) / 100 };
+}
+
 const field = "w-full rounded-lg border border-brand-line bg-white px-3 text-[13.5px] font-semibold text-[#14231D] focus:outline-none focus:ring-2 focus:ring-brand-green/30 dark:border-white/10 dark:bg-white/[0.04] dark:text-white";
 const label = "text-[12px] font-bold text-[#33403B] dark:text-white/70";
 
@@ -28,6 +43,7 @@ export default function AddFeeDialog({ open, onOpenChange, orderData, onCreated 
   const [message, setMessage] = useState("");
   const [internalReason, setInternalReason] = useState("");
   const [error, setError] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [seeded, setSeeded] = useState(false);
   if (open && !seeded) {
     setSeeded(true);
@@ -35,6 +51,7 @@ export default function AddFeeDialog({ open, onOpenChange, orderData, onCreated 
     setMessage("");
     setInternalReason("");
     setError(null);
+    setFieldErrors({});
   }
   if (!open && seeded) setSeeded(false);
 
@@ -44,15 +61,31 @@ export default function AddFeeDialog({ open, onOpenChange, orderData, onCreated 
       onCreated?.(data?.charge ?? null, data);
       onOpenChange?.(false);
     },
-    onError: (err) => setError(err?.response?.data?.message || null),
+    onError: (err) => {
+      const data = err?.response?.data;
+      const fe = data?.errors && typeof data.errors === "object" ? data.errors : null;
+      if (fe) {
+        const first = (v) => (Array.isArray(v) ? v[0] : v ? String(v) : undefined);
+        setFieldErrors({ amount: first(fe.amount), message: first(fe.message) });
+      }
+      setError(data?.message || "تعذّرت إضافة الرسوم — حاول مرة أخرى");
+    },
   });
 
   const submit = () => {
     setError(null);
-    const value = Number(toAsciiNumber(amount));
-    if (!Number.isFinite(value) || value <= 0) return setError("أدخل مبلغ الرسوم");
-    if (message.trim().length < 3) return setError("اكتب رسالة واضحة للعميل (سبب الرسوم)");
-    add.mutate({ orderId: orderData?.id, amount: value, message: message.trim(), internal_reason: internalReason.trim() || undefined });
+    // QA DASH-15: الأخطاء تحت كل حقل + تمييزه + التركيز عليه (لا فشل صامت).
+    const errs = {};
+    const parsed = parseFeeAmount(amount);
+    if (parsed.error) errs.amount = parsed.error;
+    if (message.trim().length < 3) errs.message = "اكتب رسالة واضحة للعميل (سبب الرسوم) — 3 أحرف على الأقل";
+    setFieldErrors(errs);
+    if (Object.keys(errs).length) {
+      const first = errs.amount ? "fee-amount" : "fee-message";
+      if (typeof document !== "undefined") document.querySelector(`[data-testid="${first}"]`)?.focus();
+      return;
+    }
+    add.mutate({ orderId: orderData?.id, amount: parsed.value, message: message.trim(), internal_reason: internalReason.trim() || undefined });
   };
 
   return (
@@ -72,7 +105,24 @@ export default function AddFeeDialog({ open, onOpenChange, orderData, onCreated 
           <span className={label}>
             المبلغ (ر.س) <span className="text-[#B42318]">*</span>
           </span>
-          <input dir="ltr" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} className={cn(field, "h-11 text-right text-[16px] tabular-nums")} data-testid="fee-amount" />
+          <input
+            dir="ltr"
+            inputMode="decimal"
+            value={amount}
+            onChange={(e) => {
+              setAmount(e.target.value);
+              if (fieldErrors.amount) setFieldErrors((prev) => ({ ...prev, amount: undefined }));
+            }}
+            aria-invalid={fieldErrors.amount ? true : undefined}
+            aria-describedby={fieldErrors.amount ? "fee-amount-error" : undefined}
+            className={cn(field, "h-11 text-right text-[16px] tabular-nums", fieldErrors.amount && "border-[#B42318] ring-1 ring-[#B42318]/30")}
+            data-testid="fee-amount"
+          />
+          {fieldErrors.amount ? (
+            <span id="fee-amount-error" role="alert" className="text-[11.5px] font-semibold text-[#B42318] dark:text-red-300">
+              {fieldErrors.amount}
+            </span>
+          ) : null}
         </label>
 
         <div className="flex flex-col gap-1.5">
@@ -85,12 +135,21 @@ export default function AddFeeDialog({ open, onOpenChange, orderData, onCreated 
             </span>
             <textarea
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={(e) => {
+                setMessage(e.target.value);
+                if (fieldErrors.message) setFieldErrors((prev) => ({ ...prev, message: undefined }));
+              }}
               rows={3}
               placeholder="مثال: رسوم إضافة وحدة ثانية في إيجار"
-              className={cn(field, "resize-y py-2")}
+              aria-invalid={fieldErrors.message ? true : undefined}
+              className={cn(field, "resize-y py-2", fieldErrors.message && "border-[#B42318] ring-1 ring-[#B42318]/30")}
               data-testid="fee-message"
             />
+            {fieldErrors.message ? (
+              <span role="alert" className="text-[11.5px] font-semibold text-[#B42318] dark:text-red-300">
+                {fieldErrors.message}
+              </span>
+            ) : null}
           </label>
         </div>
 

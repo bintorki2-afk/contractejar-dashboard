@@ -127,6 +127,26 @@ function fromServer(order) {
  * يبني خطوات الرحلة. `order` = بيانات `GET /admin/orders/{id}` الخام.
  */
 export function buildOrderJourney(order = {}) {
+  return markAwaitingPayment(buildJourneyCore(order), order);
+}
+
+/**
+ * QA ORDERS-RES-13: طلب جديد غير مدفوع — الخطوة الحالية الأولى تُسمّى «بانتظار الدفع» بدل «قيد المراجعة»
+ * (حالة الطلب «جديد» وشارة الدفع «غير مدفوع»؛ «قيد المراجعة» تعني بعد الدفع).
+ */
+function markAwaitingPayment(journey, order = {}) {
+  const first = journey.steps[0];
+  if (!first || first.done || !first.current || journey.sideState) return journey;
+  const payStatus = order.payment_state?.status;
+  const unpaid = payStatus ? payStatus === "unpaid" : order.status_key === "new" || order.status_key == null;
+  if (!unpaid) return journey;
+  first.label = "بانتظار الدفع";
+  first.description = "الطلب جديد ولم يُسجَّل الدفع بعد — يصبح «قيد المراجعة» بعد الدفع.";
+  first.awaitingPayment = true;
+  return journey;
+}
+
+function buildJourneyCore(order = {}) {
   const server = fromServer(order);
   if (server) return server;
 

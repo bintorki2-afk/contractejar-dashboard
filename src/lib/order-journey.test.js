@@ -70,3 +70,15 @@ describe("buildOrderJourney (دفعة هـ — 3 خطوات)", () => {
     expect(j.allDone).toBe(true);
   });
 });
+
+describe("QA ORDERS-RES-13 — طلب غير مدفوع", () => {
+  it("الخطوة الحالية تُسمّى «بانتظار الدفع» لطلب جديد غير مدفوع", () => {
+    const j = buildOrderJourney({ status_key: "new", payment_state: { status: "unpaid" } });
+    expect(j.steps[0].current).toBe(true);
+    expect(j.steps[0].label).toBe("بانتظار الدفع");
+  });
+  it("لا تتغيّر لطلب مدفوع", () => {
+    const j = buildOrderJourney({ status_key: "under_review", payment_state: { status: "paid", is_paid: true }, is_paid: true });
+    expect(j.steps[0].label).toBe("قيد المراجعة");
+  });
+});
