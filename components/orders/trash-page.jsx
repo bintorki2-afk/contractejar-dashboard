@@ -28,7 +28,162 @@ const SOURCES = {
     restore: (id) => `/admin/lessor-change/${id}/restore`,
     section: PERMISSION_SECTIONS.lessor_change,
   },
+  // دفعة و (D6): العقارات والوحدات المحذوفة من العميل — GET /admin/real-estates/trash (real_estates.delete).
+  real_estates: {
+    label: "العقارات والوحدات",
+    queryKey: "real-estates-trash",
+    list: "/admin/real-estates/trash",
+    section: PERMISSION_SECTIONS.real_estates,
+    custom: true,
+  },
 };
+
+const RE_TRASH_KINDS = {
+  real_estate: { restore: (id) => `/admin/real-estates/${id}/restore`, done: "تمت استعادة العقار ووحداته" },
+  unit: { restore: (id) => `/admin/real-estates/units/${id}/restore`, done: "تمت استعادة الوحدة" },
+};
+
+/** يطبّع رد سلة العقارات: `{ real_estates: [...], units: [...] }` (قد يكون داخل data). */
+export function extractRealEstatesTrash(data) {
+  const body = data?.real_estates || data?.units ? data : data?.data ?? data ?? {};
+  return {
+    realEstates: Array.isArray(body?.real_estates) ? body.real_estates : [],
+    units: Array.isArray(body?.units) ? body.units : [],
+    retention: body?.retention_days ?? 30,
+  };
+}
+
+function DaysLeftPill({ left }) {
+  if (left == null) return "—";
+  return (
+    <span className={cn("inline-flex h-6 items-center rounded-full px-2.5 text-[11.5px] font-bold tabular-nums", left <= 5 ? "bg-[#FDECEC] text-[#B42318]" : "bg-[#F0F4F2] text-[#4B5753]")}>
+      {left} يوم
+    </span>
+  );
+}
+
+function RealEstatesTrash() {
+  const queryClient = useQueryClient();
+  const [search, setSearch] = useState("");
+  const query = useQuery({
+    queryKey: ["real-estates-trash"],
+    queryFn: async () => (await axiosInstance.get("/admin/real-estates/trash"))?.data?.data ?? {},
+    retry: (count, err) => err?.response?.status !== 403 && count < 1,
+  });
+  const { realEstates, units, retention } = extractRealEstatesTrash(query.data);
+
+  const restore = useMutation({
+    mutationFn: ({ kind, id }) => axiosInstance.post(RE_TRASH_KINDS[kind].restore(id)),
+    onSuccess: (res, { kind }) => {
+      toast.success(res?.data?.message || RE_TRASH_KINDS[kind].done);
+      queryClient.invalidateQueries({ queryKey: ["real-estates-trash"] });
+      queryClient.invalidateQueries({ queryKey: ["real-estate"] });
+    },
+    onError: (err) => toast.error(err?.response?.data?.message || "تعذرت الاستعادة"),
+  });
+
+  if (query.isError && query.error?.response?.status === 403) {
+    return <p className="rounded-2xl border border-brand-line bg-white p-8 text-center text-[13px] text-[#6B7570]">ليست لديك صلاحية حذف/استعادة العقارات.</p>;
+  }
+
+  const term = search.trim();
+  const match = (...vals) => !term || vals.some((v) => String(v ?? "").includes(term));
+  const rows = [
+    ...realEstates
+      .filter((r) => match(r.name_real_estate, r.user?.name, r.user?.mobile, r.id))
+      .map((r) => ({
+        kind: "real_estate",
+        id: r.id,
+        title: r.name_real_estate || `عقار #${r.id}`,
+        sub: r.units_count ? `${r.units_count} وحدة تُستعاد معه` : null,
+        user: r.user,
+        trashed_at: r.trashed_at,
+        left: daysLeft(r, retention),
+        restorable: r.restorable,
+      })),
+    ...units
+      .filter((u) => match(u.unit_number, u.real_estate_name, u.user?.name, u.user?.mobile, u.id))
+      .map((u) => ({
+        kind: "unit",
+        id: u.id,
+        title: `وحدة ${u.unit_number ?? `#${u.id}`}`,
+        sub: u.real_estate_name ? `في «${u.real_estate_name}»` : null,
+        user: u.user,
+        trashed_at: u.trashed_at,
+        left: daysLeft(u, retention),
+        restorable: u.restorable,
+      })),
+  ];
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="relative max-w-sm">
+        <Search className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-[#8A958F]" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="بحث باسم العقار / رقم الوحدة / العميل"
+          className="h-10 w-full rounded-xl border border-brand-line bg-white pr-9 pl-3 text-[13px] dark:bg-white/[0.04] dark:border-white/10"
+        />
+      </div>
+      <div className="overflow-x-auto rounded-2xl border border-brand-line bg-white dark:bg-[#0F1C16] dark:border-white/10">
+        <table className="w-full min-w-[720px] text-right">
+          <thead>
+            <tr className="bg-[#FAFCFB] text-[12px] font-bold text-[#6B7570] dark:bg-white/[0.03] dark:text-white/50">
+              {["العنصر", "النوع", "العميل", "تاريخ الحذف", "المتبقي للاستعادة", ""].map((h, i) => (
+                <th key={i} className="px-4 py-3 border-b border-brand-line dark:border-white/10">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {query.isLoading ? (
+              <tr><td colSpan={6} className="px-4 py-10 text-center text-[13px] text-[#8A958F]">جاري التحميل…</td></tr>
+            ) : rows.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-12 text-center">
+                  <Trash2 className="mx-auto mb-2 size-6 text-[#B5C0BB]" />
+                  <p className="text-[13px] font-bold text-[#6B7570]">{term ? "لا نتائج مطابقة" : "لا توجد عقارات أو وحدات محذوفة"}</p>
+                  <p className="text-[12px] text-[#8A958F]">ما يحذفه العميل يبقى هنا {retention} يوماً ثم يُحذف نهائياً.</p>
+                </td>
+              </tr>
+            ) : (
+              rows.map((row) => {
+                const restorable = row.restorable !== false && (row.left == null || row.left > 0);
+                const pending = restore.isPending && restore.variables?.kind === row.kind && restore.variables?.id === row.id;
+                return (
+                  <tr key={`${row.kind}-${row.id}`} className="border-b border-brand-line/70 last:border-0 text-[13px] dark:border-white/5">
+                    <td className="px-4 py-3 font-extrabold text-brand-deep dark:text-emerald-300">
+                      {row.title}
+                      {row.sub ? <span className="block text-[11.5px] font-semibold text-[#6B7570]">{row.sub}</span> : null}
+                    </td>
+                    <td className="px-4 py-3 text-[#33403B] dark:text-white/70">{row.kind === "unit" ? "وحدة" : "عقار"}</td>
+                    <td className="px-4 py-3 text-[#33403B] dark:text-white/70">
+                      {row.user?.name || "—"}
+                      {row.user?.mobile ? <span className="block text-[11.5px] text-[#6B7570] tabular-nums" dir="ltr">{row.user.mobile}</span> : null}
+                    </td>
+                    <td className="px-4 py-3 text-[12px] text-[#6B7570] tabular-nums" dir="ltr">{formatJourneyTime(row.trashed_at) ?? "—"}</td>
+                    <td className="px-4 py-3"><DaysLeftPill left={row.left} /></td>
+                    <td className="px-4 py-3 text-left">
+                      <button
+                        type="button"
+                        disabled={!restorable || restore.isPending}
+                        onClick={() => restore.mutate({ kind: row.kind, id: row.id })}
+                        className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-brand-deep px-3 text-[12px] font-bold text-white disabled:opacity-50"
+                      >
+                        {pending ? <Loader2 className="size-3.5 animate-spin" /> : <RotateCcw className="size-3.5" />}
+                        استعادة
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
 function extract(data) {
   const items = data?.items ?? [];
@@ -166,11 +321,12 @@ function TrashTable({ sourceKey }) {
   );
 }
 
-/** «السلة» (د12): الطلبات وطلبات تغيير المؤجر المحذوفة — استعادة خلال 30 يوماً. */
+/** «السلة» (د12 + D6): الطلبات وطلبات تغيير المؤجر والعقارات/الوحدات المحذوفة — استعادة خلال 30 يوماً. */
 export default function TrashPage() {
   const { can, isAdmin } = usePermissions();
   const tabs = Object.entries(SOURCES)
-    .filter(([, src]) => isAdmin || can(src.section, "delete") || can(src.section, "view"))
+    // D6: تبويب العقارات بصلاحية الحذف فقط (عرض العقارات شائع ولا يكفي للسلة في الخادم).
+    .filter(([, src]) => isAdmin || can(src.section, "delete") || (!src.custom && can(src.section, "view")))
     .map(([key, src]) => ({ key, label: src.label }));
   const [tab, setTab] = useState(null);
   const active = tab ?? tabs[0]?.key;
@@ -180,7 +336,7 @@ export default function TrashPage() {
       <div>
         <h1 className="text-[20px] font-extrabold text-[#0E1F18] dark:text-white">السلة</h1>
         <p className="mt-1 text-[12.5px] text-[#6B7570] dark:text-white/50">
-          الطلبات المحذوفة تبقى هنا 30 يوماً ويمكن استعادتها، ثم تُحذف نهائياً تلقائياً.
+          الطلبات والعقارات والوحدات المحذوفة تبقى هنا 30 يوماً ويمكن استعادتها، ثم تُحذف نهائياً تلقائياً.
         </p>
       </div>
       {tabs.length > 1 ? (
@@ -199,7 +355,9 @@ export default function TrashPage() {
           ))}
         </div>
       ) : null}
-      {active ? <TrashTable key={active} sourceKey={active} /> : null}
+      {active ? (
+        SOURCES[active]?.custom ? <RealEstatesTrash key={active} /> : <TrashTable key={active} sourceKey={active} />
+      ) : null}
     </div>
   );
 }
