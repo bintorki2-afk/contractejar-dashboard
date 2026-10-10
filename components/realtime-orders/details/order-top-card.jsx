@@ -11,6 +11,7 @@ import {
   ChevronRight,
   ClipboardCopy,
   Copy,
+  Download,
   FileText,
   Link2,
   Loader2,
@@ -49,6 +50,7 @@ import { getSendErrorTitle } from "@/components/orders/messages/order-send-error
 import { DelayBadge, StatusPill } from "@/components/orders/status-pill";
 import { formatSaudiMobileDisplay, toSaudiMobileDialDigits } from "@/src/lib/format-phone";
 import { paymentBreakdown, sar } from "@/src/lib/payment-state";
+import { manualStatusOptions } from "@/src/lib/order-status-keys";
 import OrderJourney from "./order-journey";
 import PaymentChip, { openInvoice } from "./payment-chip";
 import PreviousOrdersChip from "./previous-orders-chip";
@@ -141,6 +143,8 @@ export default function OrderTopCard({
       setIsPrinting(false);
     }
   };
+  const invoicePdfUrl = breakdown.invoice_pdf_url;
+  const hasInvoice = breakdown.has_invoice;
   const handleInvoice = () => {
     if (breakdown.invoice_url) openInvoice(breakdown.invoice_url);
     else handlePrint();
@@ -224,9 +228,24 @@ export default function OrderTopCard({
               <DropdownMenuItem onSelect={() => onViewExpanded?.()} className={item}>
                 <ZoomIn className="size-4 text-[#6B7570]" /> عرض مكبّر للطلب
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={handleInvoice} className={item}>
-                <Receipt className="size-4 text-[#6B7570]" /> الفاتورة{breakdown.state.paid_total > 0 ? ` (${sar(breakdown.state.paid_total)})` : ""}
-              </DropdownMenuItem>
+              {/* B16 + D4: لا فاتورة قبل الدفع؛ «الفاتورة» (PDF) + صفحة الطباعة. */}
+              {hasInvoice ? (
+                <>
+                  {invoicePdfUrl ? (
+                    <DropdownMenuItem onSelect={() => openInvoice(invoicePdfUrl)} className={item}>
+                      <Download className="size-4 text-[#6B7570]" /> تنزيل الفاتورة (PDF){breakdown.state.paid_total > 0 ? ` (${sar(breakdown.state.paid_total)})` : ""}
+                    </DropdownMenuItem>
+                  ) : null}
+                  <DropdownMenuItem onSelect={handleInvoice} className={item}>
+                    <Receipt className="size-4 text-[#6B7570]" /> {invoicePdfUrl ? "طباعة الفاتورة" : "الفاتورة"}{!invoicePdfUrl && breakdown.state.paid_total > 0 ? ` (${sar(breakdown.state.paid_total)})` : ""}
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <DropdownMenuItem disabled title="تصدر الفاتورة بعد الدفع" className={cn(item, "flex-col items-start gap-0.5")}>
+                  <span className="inline-flex items-center gap-2"><Receipt className="size-4 text-[#6B7570]" /> الفاتورة</span>
+                  <span className="text-[10.5px] font-medium leading-4 text-[#8A958F]">تصدر الفاتورة بعد الدفع</span>
+                </DropdownMenuItem>
+              )}
               {onShowHistory ? (
                 <DropdownMenuItem onSelect={() => onShowHistory()} className={item}>
                   <FileText className="size-4 text-[#6B7570]" /> سجل الطلب (نشاط · إشعارات · مدفوعات)
@@ -315,9 +334,18 @@ export default function OrderTopCard({
                     <StatusPill statusKey={view?.status_key} label={view?.status_name} className="ms-auto" />
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent className={cn(sub, "max-h-[320px] overflow-y-auto")}>
-                    {statuses.map((status) => {
+                    {manualStatusOptions(statuses).map((status) => {
                       const label = status.name ?? status.label;
                       const active = String(status.id) === String(view?.status_id) || label === view?.status_name;
+                      // D2: «مسترجع» تلقائي فقط — يظهر معطّلاً مع تلميح.
+                      if (status.manualDisabled) {
+                        return (
+                          <DropdownMenuItem key={status.id} disabled title={status.manualHint} className={cn(item, "flex-col items-start gap-0.5")}>
+                            <span>{label}</span>
+                            <span className="text-[10.5px] font-medium leading-4 text-[#8A958F]">{status.manualHint}</span>
+                          </DropdownMenuItem>
+                        );
+                      }
                       return (
                         <DropdownMenuItem key={status.id} disabled={isStatusPending || active} onSelect={() => setPendingStatus(status)} className={cn(item, active && "bg-brand-mint text-brand-deep")}>
                           {label}

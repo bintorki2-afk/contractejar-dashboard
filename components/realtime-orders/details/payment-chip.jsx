@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ExternalLink, Printer, Receipt } from "lucide-react";
+import { ChevronDown, Download, ExternalLink, Printer, Receipt } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { TONE_CLASSES } from "@/src/lib/order-status-keys";
@@ -56,18 +56,32 @@ export default function PaymentChip({ orderData, appliedDiscount = null, classNa
       >
         <div className="mb-2 flex items-center justify-between gap-2">
           <div className="text-[14px] font-bold text-[#14231D] dark:text-white">تفاصيل ما دفعه العميل</div>
-          {b.invoice_url ? (
-            <a
-              href={b.invoice_url}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="طباعة / حفظ الفاتورة"
-              className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand-deep hover:underline dark:text-emerald-300"
-            >
-              <Printer className="size-4" />
-              طباعة / حفظ
-            </a>
-          ) : null}
+          <div className="flex items-center gap-3">
+            {b.invoice_pdf_url ? (
+              <a
+                href={b.invoice_pdf_url}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="تنزيل الفاتورة PDF"
+                className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand-deep hover:underline dark:text-emerald-300"
+              >
+                <Download className="size-4" />
+                PDF
+              </a>
+            ) : null}
+            {b.invoice_url ? (
+              <a
+                href={b.invoice_url}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="طباعة / حفظ الفاتورة"
+                className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-brand-deep hover:underline dark:text-emerald-300"
+              >
+                <Printer className="size-4" />
+                طباعة / حفظ
+              </a>
+            ) : null}
+          </div>
         </div>
 
         <div className="flex flex-col gap-1.5 text-[13px]">

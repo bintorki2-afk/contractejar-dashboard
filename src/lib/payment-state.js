@@ -99,6 +99,16 @@ export function buildLabel(status, method, paidTotal, dueTotal, refundedTotal) {
   }
 }
 
+function hasInvoiceFlag(order = {}, details = {}, state = {}) {
+  const flag = order?.has_invoice ?? details?.has_invoice;
+  if (flag === true || flag === 1 || flag === "1") return true;
+  if (flag === false || flag === 0 || flag === "0") return false;
+  return Boolean(
+    details?.invoice_url || details?.invoice_pdf_url || order?.invoice_pdf_url || order?.invoice ||
+    state?.is_paid || Number(state?.paid_total) > 0
+  );
+}
+
 /** صفوف العرض في قائمة الشارة المنسدلة: بنود الفاتورة + الإجمالي + سطر تعريفي للعملية الأصلية. */
 export function paymentBreakdown(order = {}) {
   const details = order?.payment_details ?? {};
@@ -121,6 +131,10 @@ export function paymentBreakdown(order = {}) {
     },
     invoice_number: details.invoice_number ?? order?.invoice?.invoice_number ?? null,
     invoice_url: details.invoice_url ?? null,
+    // D4: رابط PDF الحقيقي من الخادم (إضافي) — قد يأتي في payment_details أو في جذر الطلب/الفاتورة.
+    invoice_pdf_url: details.invoice_pdf_url ?? order?.invoice_pdf_url ?? order?.invoice?.invoice_pdf_url ?? order?.invoice?.pdf_url ?? null,
+    // B16: لا فاتورة قبل الدفع — يفضّل has_invoice من الخادم، وإلا وجود رابط/فاتورة.
+    has_invoice: hasInvoiceFlag(order, details, state),
     original,
     state,
     hasCharges: Boolean(details.charges?.length || order?.charges?.length),

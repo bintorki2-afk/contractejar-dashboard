@@ -24,7 +24,8 @@ export const STATUS_KEY_LABELS = {
   new: "جديد",
   paid: "تم الدفع",
   under_review: "قيد المراجعة",
-  received: "مستلم",
+  // دفعة و (D1): «مستلم» دُمجت مع «مستلم من الموظف» — المفتاح القديم يُعرض بنفس التسمية.
+  received: "مستلم من الموظف",
   received_by_employee: "مستلم من الموظف",
   ejar_authenticated: "موثّق في إيجار",
   completed: "مكتمل",
@@ -78,6 +79,43 @@ export function statusToneClass(key) {
   return TONE_CLASSES[statusKeyTone(key)];
 }
 
+/** مفاتيح تاريخية لا تُختار ولا تُعرض كتبويب (D1 + E3). */
+export const LEGACY_STATUS_KEYS = ["received", "whatsapp_draft"];
+
+/** حالات لا تُوضع يدوياً من اللوحة — «مسترجع» يتحوّل تلقائياً بعد الاسترجاع الكامل من ميسر (D2). */
+export const AUTO_ONLY_STATUS_KEYS = ["refunded"];
+
+export const REFUNDED_MANUAL_HINT =
+  "يتحوّل الطلب إلى «مسترجع» تلقائياً بعد تنفيذ الاسترجاع الكامل من ميسر";
+
+function statusRowKey(status) {
+  return status?.status_key ?? status?.key ?? null;
+}
+
+function looksLikeRefundedName(status) {
+  const name = String(status?.name ?? status?.label ?? "").trim();
+  return name === "مسترجع" || name === "استرجاع";
+}
+
+/** هل الحالة تلقائية فقط (لا تُختار يدوياً)؟ */
+export function isAutoOnlyStatus(status) {
+  if (!status) return false;
+  const key = statusRowKey(status);
+  if (key) return AUTO_ONLY_STATUS_KEYS.includes(key);
+  return looksLikeRefundedName(status);
+}
+
+/**
+ * قائمة الحالات المعروضة في «تغيير الحالة»: تُستبعد المفاتيح التاريخية (received/whatsapp_draft)
+ * ويُعلَّم «مسترجع» بـ `manualDisabled` + تلميح بدل إخفائه بصمت.
+ */
+export function manualStatusOptions(statuses = []) {
+  const list = Array.isArray(statuses) ? statuses : [];
+  return list
+    .filter((s) => s && !LEGACY_STATUS_KEYS.includes(statusRowKey(s)))
+    .map((s) => (isAutoOnlyStatus(s) ? { ...s, manualDisabled: true, manualHint: REFUNDED_MANUAL_HINT } : s));
+}
+
 /** يبحث عن صف الحالة بالمفتاح (`status_key`) في قائمة الحالات. */
 export function findStatusByKey(statuses = [], key) {
   if (!key) return null;
@@ -118,7 +156,6 @@ const TAB_ORDER = [
   "new",
   "paid",
   "under_review",
-  "received",
   "received_by_employee",
   "ejar_authenticated",
   "completed",
@@ -130,7 +167,8 @@ const TAB_ORDER = [
 ];
 
 export function sortStatusTabs(tabs = []) {
-  const list = Array.isArray(tabs) ? [...tabs] : [];
+  // D1: تبويبات المفاتيح التاريخية (received/whatsapp_draft) لا تُعرض — طلباتها نُقلت إلى «مستلم من الموظف».
+  const list = Array.isArray(tabs) ? tabs.filter((t) => !LEGACY_STATUS_KEYS.includes(t?.key)) : [];
   const rank = (key) => {
     const i = TAB_ORDER.indexOf(key);
     return i === -1 ? TAB_ORDER.length - 1 : i;

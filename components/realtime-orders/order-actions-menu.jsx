@@ -27,6 +27,7 @@ import { printOrderContract } from "@/components/orders/single-order/print-contr
 import { useConfirm } from "@/components/shared/confirm-provider";
 import { statusRequiresExtraFields } from "@/components/realtime-orders/change-order-status-fields-dialog";
 import { openDialogAfterMenuClose } from "@/src/lib/open-dialog-after-menu-close";
+import { manualStatusOptions } from "@/src/lib/order-status-keys";
 
 export default function OrderActionsMenu({
   order,
@@ -58,8 +59,9 @@ export default function OrderActionsMenu({
     });
   };
   // حالات قابلة للتغيير من القائمة، مع استبعاد حالات الاسترجاع (معطّلة لعقدي).
-  const changeableStatuses = (statuses || []).filter(
-    (status) => status && !isReturnContractStatus(status)
+  // D1/D2: تُستبعد المفاتيح التاريخية، و«مسترجع» يظهر معطّلاً مع تلميح (يتحوّل تلقائياً بعد استرجاع ميسر).
+  const changeableStatuses = manualStatusOptions(statuses || []).filter(
+    (status) => status.manualDisabled || !isReturnContractStatus(status)
   );
 
   const copyUuid = () => {
@@ -170,8 +172,9 @@ export default function OrderActionsMenu({
               {changeableStatuses.map((status) => (
                 <DropdownMenuItem
                   key={status.id}
-                  disabled={isStatusPending}
-                  onSelect={() => requestStatusChange(status)}
+                  disabled={isStatusPending || status.manualDisabled}
+                  title={status.manualHint}
+                  onSelect={() => !status.manualDisabled && requestStatusChange(status)}
                   className="rounded-xl px-3 py-2.5 cursor-pointer gap-2.5 focus:bg-[#F3F9F6] dark:focus:bg-white/[0.06]"
                 >
                   <span
@@ -180,6 +183,11 @@ export default function OrderActionsMenu({
                   />
                   <span className="flex-1 text-13 font-bold text-gray-900 dark:text-white/90 text-right">
                     {status.name ?? status.label}
+                    {status.manualDisabled ? (
+                      <span className="block text-10 font-medium leading-4 text-status-neutral dark:text-white/50">
+                        {status.manualHint}
+                      </span>
+                    ) : null}
                   </span>
                 </DropdownMenuItem>
               ))}

@@ -31,6 +31,7 @@ import ChangeOrderStatusFieldsDialog, {
   statusRequiresExtraFields,
 } from "@/components/realtime-orders/change-order-status-fields-dialog"
 import { postOrderStatus } from "@/src/lib/order-status-api"
+import { manualStatusOptions } from "@/src/lib/order-status-keys"
 import { usePermissions } from "@/src/hooks/use-permissions"
 import { PERMISSION_SECTIONS } from "@/src/lib/permissions"
 
@@ -63,7 +64,8 @@ export default function ChangeStatusDialog({ orderId, order, queryKey }) {
   })
 
   const statusItems = useMemo(() => {
-    const items = extractContractStatusItems(statusData)
+    // D1/D2: بلا المفاتيح التاريخية، و«مسترجع» معطّل مع تلميح.
+    const items = manualStatusOptions(extractContractStatusItems(statusData))
     const currentId = currentStatus?.id
 
     if (currentId == null || currentId === "") return items
@@ -168,12 +170,19 @@ export default function ChangeStatusDialog({ orderId, order, queryKey }) {
           <div key={item?.id}>
             <DropdownMenuItem
               onSelect={() => {
+                if (item?.manualDisabled) return
                 handleStatusClick(item)
               }}
-              disabled={changeStatusPending}
+              disabled={changeStatusPending || item?.manualDisabled}
+              title={item?.manualHint}
               className="cursor-pointer hover:bg-surface-input rounded-lg p-2"
             >
-              <span className="font-medium text-13">{item?.name}</span>
+              <span className="font-medium text-13">
+                {item?.name}
+                {item?.manualDisabled ? (
+                  <span className="block text-10 font-normal leading-4 text-ink-placeholder">{item.manualHint}</span>
+                ) : null}
+              </span>
               {changeStatusPending ? (
                 <Loader2 className="animate-spin mr-auto size-4" />
               ) : (
