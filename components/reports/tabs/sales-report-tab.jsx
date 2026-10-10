@@ -61,6 +61,10 @@ export default function SalesReportTab({ period, dateFrom, dateTo, contractType,
             { label: `رسوم إضافية (${data?.kpis?.extra_fees_count ?? 0})`, value: money(data?.summary?.extra_fees ?? data?.kpis?.extra_fees), tone: "gold" },
             { label: `فروقات السعر (${data?.kpis?.price_differences_count ?? 0})`, value: money(data?.summary?.price_differences ?? data?.kpis?.price_differences), tone: "gold" },
             { label: `حوالات بنكية (${data?.kpis?.bank_transfers_count ?? 0})`, value: money(data?.kpis?.bank_transfers) },
+            // PROPS-24: مبيعات «تغيير المؤجر» ضمن إجمالي المبيعات — تُعرض كبند مستقل.
+            ...(data?.kpis?.lessor_change_count != null
+              ? [{ label: `منها تغيير المؤجر (${data.kpis.lessor_change_count})`, value: money(data.kpis.lessor_change_sales), tone: "muted" }]
+              : []),
             { label: "المبالغ المسترجعة", value: money(data?.summary?.refunds_total ?? data?.summary?.refunds) },
             { label: "نسبة الاسترجاع من المبيعات", value: `${data?.summary?.refund_rate_percent ?? 0}%` },
             { label: "الصافي = الأصلي + الإضافي + الفروقات − المسترجع", value: money(data?.summary?.net_revenue ?? data?.summary?.net_revenue_after_refunds), tone: "green", bold: true },

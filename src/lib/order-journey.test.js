@@ -82,3 +82,18 @@ describe("QA ORDERS-RES-13 — طلب غير مدفوع", () => {
     expect(j.steps[0].label).toBe("قيد المراجعة");
   });
 });
+
+describe("QA ORDERS-RES-13 — حقول الخادم", () => {
+  it("يعرض current_label من الخادم عند awaiting_payment", () => {
+    const j = buildOrderJourney({
+      journey: [
+        { step: 1, key: "under_review", label: "قيد المراجعة", done: false, current: true, awaiting_payment: true, current_label: "بانتظار الدفع" },
+        { step: 2, key: "received_by_employee", label: "مستلم من الموظف", done: false, current: false },
+        { step: 3, key: "ejar_authenticated", label: "تم التوثيق", done: false, current: false },
+      ],
+      payment_state: { status: "partially_paid" },
+    });
+    expect(j.steps[0].label).toBe("بانتظار الدفع");
+    expect(j.steps[0].awaitingPayment).toBe(true);
+  });
+});

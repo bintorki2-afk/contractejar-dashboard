@@ -45,7 +45,13 @@ export default function AttachmentsViewer({
 }) {
   const list = useMemo(() => (Array.isArray(attachments) ? attachments.filter((a) => a?.url) : []), [attachments]);
   const current = list.find((a) => a.key === selectedKey) ?? list[0] ?? null;
-  const pages = Array.isArray(current?.pages) && current.pages.length ? current.pages : null;
+  // صفحات الصك: الخادم يرسل `pages` كروابط نصية (و`pages_meta` بنوع كل صفحة) — نطبّعها إلى {url}.
+  const pages = useMemo(() => {
+    const raw = Array.isArray(current?.pages_meta) && current.pages_meta.length ? current.pages_meta : current?.pages;
+    if (!Array.isArray(raw) || !raw.length) return null;
+    const list = raw.map((p, i) => (typeof p === "string" ? { key: i, url: p } : p)).filter((p) => p?.url);
+    return list.length ? list : null;
+  }, [current]);
   const [pageIndex, setPageIndex] = useState(0);
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);

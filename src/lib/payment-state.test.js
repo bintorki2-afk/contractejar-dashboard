@@ -79,3 +79,15 @@ describe("paymentBreakdown (قائمة الشارة)", () => {
     expect(transactionMeta({ kind: "bank_transfer", method: "bank_transfer", brand: "bank", reference: "TRF-1", employee: { name: "أدمن" } })).toBe("حوالة · مرجع TRF-1 · سجّلها أدمن");
   });
 });
+
+describe("QA WEB-5 — refund_pending", () => {
+  it("شارة «مسترجع — بانتظار إعادة المبلغ» بدل «مدفوع»", async () => {
+    const { normalizePaymentState } = await import("./payment-state");
+    const s = normalizePaymentState({ payment_state: { status: "paid", paid_total: 1992, refund_pending: true, refund_pending_amount: 1992, refund_pending_label: "مسترجع — بانتظار إعادة المبلغ · 1992 ر.س" } });
+    expect(s.label).toBe("مسترجع — بانتظار إعادة المبلغ · 1992 ر.س");
+    expect(s.tone).toBe("warning");
+    expect(s.refund_pending).toBe(true);
+    const plain = normalizePaymentState({ payment_state: { status: "paid", paid_total: 10, label: "مدفوع · 10 ر.س" } });
+    expect(plain.label).toBe("مدفوع · 10 ر.س");
+  });
+});

@@ -40,12 +40,18 @@ export function normalizePaymentState(order = {}) {
   const ps = order?.payment_state;
   if (ps && typeof ps === "object" && ps.status) {
     const status = ps.status;
+    // QA WEB-5 / DASH-25: طلب «مسترجع» بلا استرجاع منفّذ بعد — الخادم يرسل `refund_pending` + `refund_pending_label`.
+    const refundPending = ps.refund_pending === true;
+    const pendingLabel =
+      ps.refund_pending_label ||
+      (ps.refund_pending_amount != null ? `مسترجع — بانتظار إعادة المبلغ · ${sar(ps.refund_pending_amount)}` : "مسترجع — بانتظار إعادة المبلغ");
     return {
       ...ps,
-      status_label: ps.status_label ?? PAYMENT_STATUS_LABELS[status] ?? status,
+      status_label: refundPending ? "بانتظار إعادة المبلغ" : ps.status_label ?? PAYMENT_STATUS_LABELS[status] ?? status,
       method_label: ps.method_label ?? (ps.method ? PAYMENT_METHOD_LABELS[ps.method] ?? ps.method : null),
-      label: ps.label ?? buildLabel(status, ps.method, ps.paid_total, ps.due_total, ps.refunded_total),
-      tone: PAYMENT_STATUS_TONES[status] ?? "neutral",
+      label: refundPending ? pendingLabel : ps.label ?? buildLabel(status, ps.method, ps.paid_total, ps.due_total, ps.refunded_total),
+      tone: refundPending ? "warning" : PAYMENT_STATUS_TONES[status] ?? "neutral",
+      refund_pending: refundPending,
       is_paid: ps.is_paid ?? ["paid", "partially_refunded"].includes(status),
       awaiting_charge: Boolean(ps.awaiting_charge ?? (ps.pending_charges_count > 0)),
     };

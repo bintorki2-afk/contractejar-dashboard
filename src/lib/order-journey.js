@@ -104,9 +104,12 @@ function fromServer(order) {
   if (!serverSteps.length) return null;
   const steps = JOURNEY_STEPS.map((def) => {
     const s = serverSteps.find((x) => x.key === def.key) ?? {};
+    // QA ORDERS-RES-13: الخادم يرسل `awaiting_payment` + `current_label` («بانتظار الدفع») على الخطوة ① قبل الدفع.
+    const awaiting = Boolean(s.awaiting_payment);
     return {
       key: def.key,
-      label: s.label || def.label,
+      label: awaiting && s.current_label ? s.current_label : s.label || def.label,
+      awaitingPayment: awaiting || undefined,
       description: s.description ?? null,
       done: Boolean(s.done),
       at: s.at ?? null,
