@@ -5,7 +5,6 @@ import { useParams, useSearchParams } from "next/navigation";
 import { ChevronDown, Images } from "lucide-react";
 import Loader from "@/components/home/loader";
 import { SingleOrderProvider, useSingleOrderContext } from "@/components/orders/single-order/single-order-context";
-import LeaseRenewalOrderView from "@/components/orders/single-order/lease-renewal/lease-renewal-order-view";
 import { useSidebarStore } from "@/src/stores/sidebar-store";
 import { useContractStatuses } from "@/src/hooks/use-contract-statuses";
 import { usePermissions } from "@/src/hooks/use-permissions";
@@ -126,7 +125,7 @@ function OrderDetailsBody() {
 
   const view = useMemo(() => (orderData ? mapOrderDetailView(orderData) : null), [orderData]);
   const back = resolveBackLink(searchParams.get("from"));
-  const isLeaseRenewal = orderData?.contract_summary?.instrument_type_key === "lease_renewal";
+  const isLeaseRenewal = (orderData?.contract_summary?.instrument_type_key ?? orderData?.instrument_type_key ?? orderData?.document?.type_key) === "lease_renewal";
   const attachments = Array.isArray(orderData?.attachments) ? orderData.attachments : [];
 
   const handleOpenNotes = () => {
@@ -215,11 +214,14 @@ function OrderDetailsBody() {
       <div className={cn("flex flex-col items-start gap-3 lg:flex-row", SPLIT_HEIGHT)}>
         <div className={cn("w-full min-w-0 flex-1 lg:h-full lg:overflow-y-auto lg:pe-1 [scrollbar-gutter:stable]")} data-scroll="ejar-panel">
           <InlineEditProvider orderData={orderData} canEdit={canEditOrder}>
-            {isLeaseRenewal ? (
-              <LeaseRenewalOrderView orderData={orderData} />
-            ) : (
-              <OrderDataPanel orderData={orderData} canEdit={canEditOrder} onRequestData={(section) => dialogs.openDataRequest(section)} onOpenAttachment={openAttachment} />
-            )}
+            {/* QA ORDERS-RES-3: طلب «تجديد عقد إيجار» يستخدم نفس لوحة E1 (لا تصميم قديم مستقل). */}
+            <OrderDataPanel
+              orderData={orderData}
+              canEdit={canEditOrder}
+              isLeaseRenewal={isLeaseRenewal}
+              onRequestData={(section) => dialogs.openDataRequest(section)}
+              onOpenAttachment={openAttachment}
+            />
           </InlineEditProvider>
         </div>
 
