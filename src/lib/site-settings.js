@@ -391,3 +391,38 @@ export function formatIbanDisplay(value) {
   const iban = normalizeIban(value);
   return iban ? iban.replace(/(.{4})/g, "$1 ").trim() : "";
 }
+
+/* ---------------- دفعة و — D8 ساعات العمل · D9 الدفع بعد مشاهدة المسودة ---------------- */
+
+export const WORKING_HOURS_DEFAULT_TEXT =
+  "يومياً من 12 ظهراً حتى 12 منتصف الليل، والجمعة من 3 عصراً حتى 12 منتصف الليل";
+export const WORKING_HOURS_MAX = 500;
+
+function settingsRecord(response) {
+  const data = unwrapSettings(response);
+  return data?.settings && typeof data.settings === "object" ? data.settings : {};
+}
+
+/** GET /admin/settings → settings.working_hours (الخادم يعيد الافتراضي إن كان فارغاً). */
+export function extractWorkingHoursSettings(response) {
+  const s = settingsRecord(response);
+  const text = toInputValue(s.working_hours ?? s.working_hours_text);
+  return { working_hours: text, effective: text || WORKING_HOURS_DEFAULT_TEXT };
+}
+
+export function validateWorkingHours(value) {
+  const text = String(value ?? "").trim();
+  if (!text) return "اكتب ساعات العمل كما تظهر للعملاء";
+  if (text.length > WORKING_HOURS_MAX) return `النص أطول من ${WORKING_HOURS_MAX} حرف`;
+  return null;
+}
+
+export function buildWorkingHoursPayload(value) {
+  return { working_hours: String(value ?? "").trim() };
+}
+
+/** GET /admin/settings → settings.pay_after_draft_enabled (افتراضي مُعطّل). */
+export function extractPayAfterDraftEnabled(response) {
+  const v = settingsRecord(response).pay_after_draft_enabled;
+  return v === true || v === 1 || v === "1" || v === "true";
+}

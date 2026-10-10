@@ -42,7 +42,14 @@ import {
   extractBankTransferSettings,
   formatIbanDisplay,
   validateBankTransferForm,
+  WORKING_HOURS_DEFAULT_TEXT,
+  WORKING_HOURS_MAX,
+  buildWorkingHoursPayload,
+  extractPayAfterDraftEnabled,
+  extractWorkingHoursSettings,
+  validateWorkingHours,
 } from "@/src/lib/site-settings";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useConfirm } from "@/components/shared/confirm-provider";
 
@@ -724,6 +731,151 @@ export function BankTransferSettingsCard({ data, canEdit }) {
   );
 }
 
+
+/** دفعة و (D8): ساعات العمل — نص واحد يقرؤه الموقع (الأسئلة/الدعم/الفوتر) والتطبيق من GET /settings. */
+export function WorkingHoursCard({ data, canEdit }) {
+  const [value, setValue] = useState("");
+  const [fieldError, setFieldError] = useState(null);
+  const [syncedData, setSyncedData] = useState(null);
+  const hours = extractWorkingHoursSettings(data);
+  if (data && data !== syncedData) {
+    setSyncedData(data);
+    setValue(hours.working_hours);
+    setFieldError(null);
+  }
+
+  const mutation = useSaveSiteSettings({
+    successMessage: "تم حفظ ساعات العمل — تظهر في الموقع والتطبيق خلال دقائق",
+    errorFallback: "تعذر حفظ ساعات العمل",
+    onValidationError: (errors) => setFieldError(errors?.working_hours ?? null),
+  });
+  const dirty = (value ?? "") !== (hours.working_hours ?? "");
+
+  const handleSave = () => {
+    const error = validateWorkingHours(value);
+    if (error) {
+      setFieldError(error);
+      toast.error(error);
+      return;
+    }
+    mutation.mutate(buildWorkingHoursPayload(value));
+  };
+
+  return (
+    <CardShell
+      title="ساعات العمل"
+      description="تظهر للعملاء في الموقع (الأسئلة الشائعة «متى أستلم العقد؟»، الدعم، الفوتر) وفي التطبيق (تواصل معنا)."
+      badge={
+        <SaveButton
+          onClick={handleSave}
+          disabled={!canEdit || mutation.isPending || !dirty}
+          pending={mutation.isPending}
+          label="حفظ ساعات العمل"
+        />
+      }
+    >
+      <div className="space-y-1.5 text-right">
+        <label htmlFor="working-hours-text" className="text-xs font-bold text-gray-700 dark:text-white/80">
+          نص ساعات العمل
+        </label>
+        <Textarea
+          id="working-hours-text"
+          rows={2}
+          maxLength={WORKING_HOURS_MAX}
+          value={value}
+          disabled={!canEdit}
+          onChange={(e) => {
+            setValue(e.target.value);
+            setFieldError(null);
+          }}
+          placeholder={WORKING_HOURS_DEFAULT_TEXT}
+          className={cn(INPUT_CLASS, "h-auto min-h-[64px] resize-none py-2.5 leading-6", fieldError && "border-red-400")}
+        />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <HelperText>
+            مواعيد محركات البحث (Schema) ثابتة من الخادم: السبت–الخميس 12 ظهراً–12 ليلاً، الجمعة 3 عصراً–12 ليلاً.
+          </HelperText>
+          {canEdit && value !== WORKING_HOURS_DEFAULT_TEXT ? (
+            <button
+              type="button"
+              className="mk-mini"
+              onClick={() => {
+                setValue(WORKING_HOURS_DEFAULT_TEXT);
+                setFieldError(null);
+              }}
+            >
+              استخدام النص الافتراضي
+            </button>
+          ) : null}
+        </div>
+        <FieldError message={fieldError} />
+      </div>
+    </CardShell>
+  );
+}
+
+/**
+ * دفعة و (D9): «الدفع بعد مشاهدة المسودة» — عند التفعيل يظهر للعميل زر ثانوي في شاشة الدفع
+ * «إرسال الطلب والدفع بعد مشاهدة المسودة»؛ الموظف يرفع المسودة من صفحة الطلب، و«وثّقت» يبقى مقفلاً حتى الدفع.
+ */
+export function PayAfterDraftCard({ data, canEdit }) {
+  const confirm = useConfirm();
+  const enabled = extractPayAfterDraftEnabled(data);
+  const mutation = useSaveSiteSettings({
+    successMessage: "تم حفظ الإعداد",
+    errorFallback: "تعذر حفظ الإعداد",
+  });
+
+  const toggle = async (checked) => {
+    const ok = await confirm({
+      title: checked ? "تفعيل «الدفع بعد مشاهدة المسودة»" : "تعطيل «الدفع بعد مشاهدة المسودة»",
+      description: checked
+        ? "سيظهر للعميل في شاشة الدفع زر «إرسال الطلب والدفع بعد مشاهدة المسودة». يدخل الطلب غير مدفوع، وترفع له المسودة من صفحة الطلب، ولا يُوثّق قبل الدفع."
+        : "سيختفي الزر الثانوي من شاشة الدفع. الطلبات التي أُرسلت بهذا الخيار تبقى كما هي.",
+      confirmLabel: checked ? "تفعيل" : "تعطيل",
+      destructive: !checked,
+    });
+    if (ok) mutation.mutate({ pay_after_draft_enabled: checked });
+  };
+
+  return (
+    <CardShell
+      title="الدفع بعد مشاهدة المسودة"
+      description="خيار للعميل: يرسل طلبه بدون دفع، ويراجع مسودة العقد أولاً ثم يدفع للتوثيق."
+      badge={
+        mutation.isPending ? (
+          <Loader2 className="size-4 animate-spin text-[#0B7A4C]" />
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className={cn("text-[12px] font-bold", enabled ? "text-[#0B7A4C]" : "text-[#8a978f]")}>
+              {enabled ? "مُفعّل" : "مُعطّل"}
+            </span>
+            <Switch
+              checked={enabled}
+              disabled={!canEdit}
+              onCheckedChange={toggle}
+              aria-label="الدفع بعد مشاهدة المسودة"
+              className="data-[state=checked]:bg-[#12B886]"
+            />
+          </div>
+        )
+      }
+    >
+      <ol className="grid gap-2 text-[12.5px] font-medium leading-6 text-[#4B5753] dark:text-white/60 sm:grid-cols-3">
+        <li className="rounded-xl bg-[#F3F9F6] px-3 py-2 dark:bg-white/[0.04]">
+          <b className="text-brand-dark dark:text-emerald-300">١ ·</b> العميل يختار «إرسال الطلب والدفع بعد مشاهدة المسودة».
+        </li>
+        <li className="rounded-xl bg-[#F3F9F6] px-3 py-2 dark:bg-white/[0.04]">
+          <b className="text-brand-dark dark:text-emerald-300">٢ ·</b> الموظف يرفع المسودة من صفحة الطلب ← «رفع مسودة العقد للعميل» فيصله إشعار.
+        </li>
+        <li className="rounded-xl bg-[#F3F9F6] px-3 py-2 dark:bg-white/[0.04]">
+          <b className="text-brand-dark dark:text-emerald-300">٣ ·</b> العميل يراجعها ويدفع؛ «وثّقت» مقفل حتى الدفع.
+        </li>
+      </ol>
+    </CardShell>
+  );
+}
+
 export default function SiteSettingsCards() {
   const { can, isReady } = usePermissions();
   const canEdit = isReady && can(PERMISSION_SECTIONS.settings, "edit");
@@ -753,6 +905,8 @@ export default function SiteSettingsCards() {
       <PricingSettingsCard data={data} canEdit={canEdit} />
       <AutoAssignCard data={data} canEdit={canEdit} />
       <SupportNumberCard data={data} canEdit={canEdit} />
+      <WorkingHoursCard data={data} canEdit={canEdit} />
+      <PayAfterDraftCard data={data} canEdit={canEdit} />
       <BankTransferSettingsCard data={data} canEdit={canEdit} />
       <SocialSettingsCard data={data} canEdit={canEdit} />
       <AppVersionCard data={data} canEdit={canEdit} />
