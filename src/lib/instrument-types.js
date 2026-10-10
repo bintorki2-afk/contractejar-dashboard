@@ -20,10 +20,11 @@ const INSTRUMENT_TYPE_LABELS = {
   electronic: "صك إلكتروني",
   old_handwritten: "صك ورقي صادر من وزارة العدل",
   strong_argument: "حجة إستحكام",
-  electronic_tax_register: "سجل ضريبي إلكتروني",
+  // QA ORDERS-COM-5 / WEB-29: المفتاح يُخزَّن لاختيار العميل «صك ملكية الكتروني من السجل العقاري» (ليس سجلاً ضريبياً).
+  electronic_tax_register: "صك ملكية إلكتروني من السجل العقاري",
   property_ownership_owner_are_deceased_endowment: "وقف ورثة متوفين",
-  [INSTRUMENT_TYPE_OWNER_ENDOWMENT]: "صك عقار والمالك وقف",
-  sale_agreement: "ورقة مبايعة",
+  [INSTRUMENT_TYPE_OWNER_ENDOWMENT]: "صك ملكية والمالك وقف",
+  sale_agreement: "ورقة مبايعة مختومة من مكتب عقاري",
   electronic_deed_from_the_ministry_of_justice:
     "صك إلكتروني صادر من وزارة العدل و السجل العيني",
   economic_cities_authority_suspended: "هيئة المدن الاقتصادية - معلق",
