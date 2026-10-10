@@ -13,6 +13,8 @@ import { useOrderDetailsDialogs } from "@/src/hooks/use-order-details-dialogs";
 import OrderTopCard from "./order-top-card";
 import OrderDataPanel from "./order-data-panel";
 import AttachmentsViewer from "./attachments-viewer";
+import DraftDocumentDialog from "./draft-document-dialog";
+import { withDraftAttachment } from "@/src/lib/draft-document";
 import OrderDetailsDialogs from "./order-details-dialogs";
 import ContractExpandedViewDialog from "./contract-expanded-view-dialog";
 import { mapOrderDetailView } from "./map-order-detail";
@@ -71,6 +73,7 @@ function OrderDetailsBody() {
   const [refundOpen, setRefundOpen] = useState(false);
   const [refundPrefill, setRefundPrefill] = useState(null);
   const [addFeeOpen, setAddFeeOpen] = useState(false);
+  const [draftOpen, setDraftOpen] = useState(false);
   const openRefund = (prefill = null) => {
     setRefundPrefill(prefill);
     setRefundOpen(true);
@@ -126,7 +129,8 @@ function OrderDetailsBody() {
   const view = useMemo(() => (orderData ? mapOrderDetailView(orderData) : null), [orderData]);
   const back = resolveBackLink(searchParams.get("from"));
   const isLeaseRenewal = (orderData?.contract_summary?.instrument_type_key ?? orderData?.instrument_type_key ?? orderData?.document?.type_key) === "lease_renewal";
-  const attachments = Array.isArray(orderData?.attachments) ? orderData.attachments : [];
+  // D9: مسودة العقد المرفوعة للعميل تظهر في عارض المرفقات (أولاً).
+  const attachments = withDraftAttachment(Array.isArray(orderData?.attachments) ? orderData.attachments : [], orderData);
 
   const handleOpenNotes = () => {
     setOrderId(id);
@@ -186,6 +190,7 @@ function OrderDetailsBody() {
         onPayLink={dialogs.handlePayLink}
         onBankTransfer={() => openBankTransfer(null)}
         onAddFee={() => setAddFeeOpen(true)}
+        onUploadDraft={canEditOrder ? () => setDraftOpen(true) : undefined}
         onRefund={() => (canRefundPayments ? openRefund(null) : dialogs.openReturn(orderData))}
         badges={<DataRequestBadge orderData={orderData} canEdit={canEditOrder} />}
         onPropertyUpdate={() => dialogs.setPropertyUpdateOpen(true)}
@@ -249,6 +254,7 @@ function OrderDetailsBody() {
 
       <RefundDialog open={refundOpen} onOpenChange={setRefundOpen} orderData={orderData} prefill={refundPrefill} />
       <AddFeeDialog open={addFeeOpen} onOpenChange={setAddFeeOpen} orderData={orderData} />
+      {canEditOrder ? <DraftDocumentDialog open={draftOpen} onOpenChange={setDraftOpen} orderData={orderData} /> : null}
       <BankTransferDialog
         open={bankTransfer.open}
         onOpenChange={(next) => setBankTransfer((prev) => ({ ...prev, open: next }))}

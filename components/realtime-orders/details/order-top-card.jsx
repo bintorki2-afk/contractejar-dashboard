@@ -13,6 +13,7 @@ import {
   Copy,
   Download,
   FileText,
+  FileUp,
   Link2,
   Loader2,
   MessageSquarePlus,
@@ -108,6 +109,7 @@ export default function OrderTopCard({
   onPayLink,
   onBankTransfer,
   onAddFee,
+  onUploadDraft,
   onRefund,
   onPropertyUpdate,
   onRequestData,
@@ -195,6 +197,19 @@ export default function OrderTopCard({
             </span>
           ) : null}
           <DelayBadge order={orderData} />
+          {/* D9: العميل اختار الدفع بعد مشاهدة المسودة — تنبيه للموظف ليرفعها. */}
+          {orderData?.pay_after_draft && !breakdown.state.is_paid ? (
+            <button
+              type="button"
+              onClick={() => onUploadDraft?.()}
+              disabled={!onUploadDraft}
+              title={orderData?.draft_document ? "رُفعت المسودة — بانتظار دفع العميل" : "ارفع مسودة العقد للعميل ليراجعها ثم يدفع"}
+              className="inline-flex h-7 items-center gap-1.5 rounded-full bg-[#E8F0FE] px-2.5 text-[12px] font-bold text-[#1D4ED8] disabled:cursor-default dark:bg-blue-500/15 dark:text-blue-300"
+            >
+              <FileUp className="size-3.5" />
+              {orderData?.draft_document ? "المسودة مُرسلة · بانتظار الدفع" : "يدفع بعد مشاهدة المسودة"}
+            </button>
+          ) : null}
           {badges}
         </div>
 
@@ -261,6 +276,12 @@ export default function OrderTopCard({
               {canEdit ? (
                 <DropdownMenuItem onSelect={() => onPropertyUpdate?.()} className={item}>
                   <Upload className="size-4 text-[#2563EB]" /> رفع تحديث العقار
+                </DropdownMenuItem>
+              ) : null}
+              {/* D9: «الدفع بعد مشاهدة المسودة» — قبل الدفع (أو لإدارة مسودة مرفوعة). */}
+              {onUploadDraft && (!breakdown.state.is_paid || orderData?.draft_document) ? (
+                <DropdownMenuItem onSelect={() => onUploadDraft()} className={item}>
+                  <FileUp className="size-4 text-[#0B7A4C]" /> {orderData?.draft_document ? "مسودة العقد للعميل (عرض / استبدال)" : "رفع مسودة العقد للعميل"}
                 </DropdownMenuItem>
               ) : null}
               <DropdownMenuItem onSelect={() => onOpenNotes?.()} className={item}>

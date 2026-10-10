@@ -6,6 +6,7 @@ import {
   BadgeCheck,
   Bell,
   CreditCard,
+  FileUp,
   Hand,
   History,
   ListChecks,
@@ -43,12 +44,17 @@ const ACTION_ICONS = {
   // دفعة و (W-10 / APP-6)
   customer_edited: PencilLine,
   data_request_progress: ListChecks,
+  // دفعة و (D9)
+  draft_document_uploaded: FileUp,
+  draft_document_removed: Trash2,
 };
 
 /** تسميات احتياطية إن لم يرسل الخادم `action_label`. */
 export const ACTION_LABELS = {
   customer_edited: "تعديل من العميل بعد الإرسال",
   data_request_progress: "العميل أرسل جزءاً من المطلوب",
+  draft_document_uploaded: "رُفعت مسودة العقد للعميل",
+  draft_document_removed: "حُذفت مسودة العقد",
 };
 
 export function activityLabel(a = {}) {
@@ -63,6 +69,7 @@ const ACTION_TONE = {
   refunded: "text-[#9A6100] bg-[#FFF4DE]",
   customer_edited: "text-[#9A6100] bg-[#FFF4DE]",
   data_request_progress: "text-[#1D4ED8] bg-[#EAF2FF]",
+  draft_document_uploaded: "text-[#0B7A4C] bg-[#E3F4EA]",
 };
 
 function display(value) {
