@@ -44,7 +44,7 @@ export function normalizeApiInvoice(invoice) {
     customerName: invoice.customer_name || null,
     customerPhone: invoice.customer_phone || null,
     contractTypeLabel: invoice.contract_type_label || null,
-    platformName: invoice.platform_name || "عقد إيجار",
+    platformName: invoice.platform_name || "عقدي",
     platformSubtitle: invoice.platform_subtitle || "منصة توثيق عقود الإيجار",
     statusLabel: invoice.status_label || null,
     isPaid: invoice.is_paid !== false,

@@ -13,7 +13,7 @@ import {
   isReturnContractStatus,
 } from "@/components/analysis/returned/refund-contract-utils";
 
-// جدول الحالات كما في قاعدة «عقد إيجار» (لا توجد حالة «استرجاع»؛ 2 = «قيد المراجعة»).
+// جدول الحالات كما في قاعدة «عقدي» (لا توجد حالة «استرجاع»؛ 2 = «قيد المراجعة»).
 const SEEDED = [
   { id: 1, name: "جديد" },
   { id: 2, name: "قيد المراجعة" },

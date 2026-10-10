@@ -7,7 +7,7 @@ export const CONTRACT_STATUSES_ACTIVE_QUERY_KEY = "contract-statuses-active";
 
 export const NEW_CONTRACT_STATUS_ID = 1;
 export const RECEIVED_CONTRACT_STATUS_ID = 6;
-// لا يوجد رقم ثابت لحالة «الاسترجاع»: الرقم 2 في قاعدة «عقد إيجار» هو «قيد المراجعة».
+// لا يوجد رقم ثابت لحالة «الاسترجاع»: الرقم 2 في قاعدة «عقدي» هو «قيد المراجعة».
 // تُعرف حالة الاسترجاع بالاسم فقط (انظر resolveReturnedContractStatusId).
 export const CANCELED_CONTRACT_STATUS_ID = 4;
 

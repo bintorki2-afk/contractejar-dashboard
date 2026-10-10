@@ -8,7 +8,7 @@
 import { buildOrderSmartLink } from "@/src/lib/customer-site";
 
 /**
- * رابط الطلب للعميل على موقع «عقد إيجار» (يتضمن «ادفع الآن» إن لم يُدفع).
+ * رابط الطلب للعميل على موقع «عقدي» (يتضمن «ادفع الآن» إن لم يُدفع).
  * كان سابقاً يشير خطأً إلى aqdi.sa (موقع آخر منفصل).
  */
 export function buildOrderPaymentUrl(uuid) {

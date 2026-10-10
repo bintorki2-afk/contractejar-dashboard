@@ -57,7 +57,7 @@ export default function OrderActionsMenu({
       if (ok) onStatusChange?.(order, status);
     });
   };
-  // حالات قابلة للتغيير من القائمة، مع استبعاد حالات الاسترجاع (معطّلة لعقد إيجار).
+  // حالات قابلة للتغيير من القائمة، مع استبعاد حالات الاسترجاع (معطّلة لعقدي).
   const changeableStatuses = (statuses || []).filter(
     (status) => status && !isReturnContractStatus(status)
   );

@@ -198,7 +198,7 @@ export default function ClientsWrapper() {
               العملاء
             </h1>
             <p className="text-13 text-gray-400 dark:text-white/45 font-medium leading-relaxed">
-              كل عملاء «عقد إيجار» - اضغط «عرض» لملف العميل الكامل
+              كل عملاء «عقدي» - اضغط «عرض» لملف العميل الكامل
             </p>
           </div>
         </div>

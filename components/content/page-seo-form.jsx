@@ -64,7 +64,7 @@ export default function PageSeoForm({
           control={form.control}
           name="meta_title"
           label="عنوان الصفحة (SEO)"
-          placeholder="مثال: الأسئلة الشائعة — عقد إيجار"
+          placeholder="مثال: الأسئلة الشائعة — عقدي"
           description="يُفضّل ألا يتجاوز ~60 حرفًا (الحد الأقصى 255)."
         />
         <SectionTextField

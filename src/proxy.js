@@ -24,7 +24,7 @@ export function proxy(request) {
     const snapshot = parseAuthSnapshot(request.cookies.get('auth_snapshot')?.value);
     const section = getSectionForPath(pathname);
 
-    // ميزات مُخفاة (عقد إيجار): أعِد التوجيه دائمًا حتى لو كان القسم null أو المستخدم مسؤولًا.
+    // ميزات مُخفاة (عقدي): أعِد التوجيه دائمًا حتى لو كان القسم null أو المستخدم مسؤولًا.
     if (isFeatureDisabled(pathname)) {
       const fallback = getFirstAllowedHrefFromSnapshot(snapshot);
       const target = fallback && fallback !== pathname ? fallback : '/home';

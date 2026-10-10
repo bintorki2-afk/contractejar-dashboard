@@ -11,7 +11,7 @@ import { usePermissions } from "@/src/hooks/use-permissions";
 import { PERMISSION_SECTIONS } from "@/src/lib/permissions";
 import { CONTRACT_SUB_TABS } from "./mock-data";
 
-// تبويبات غير مفعّلة لعقد إيجار (بدون بوابة دفع / بدون SMS على الويب) → «قريبًا» ومعطّلة.
+// تبويبات غير مفعّلة لعقدي (بدون بوابة دفع / بدون SMS على الويب) → «قريبًا» ومعطّلة.
 const COMING_SOON_SUBTABS = new Set(["sms-settings", "payment-messages"]);
 
 const SUB_TAB_PANELS = {

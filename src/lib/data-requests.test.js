@@ -10,7 +10,7 @@ describe("data-request message builder (دفعة هـ — E4)", () => {
       deepLink: "https://contractejar.com/r/920012?fix=3",
     });
     const lines = msg.split("\n");
-    expect(lines[1]).toBe("بخصوص طلبك رقم 920012 في «عقد إيجار»، نحتاج منك:");
+    expect(lines[1]).toBe("بخصوص طلبك رقم 920012 في «عقدي»، نحتاج منك:");
     expect(lines).toContain("• صورة الصك غير واضحة");
     expect(lines).toContain("• رقم الصك");
     expect(lines).toContain("• الصورة مقصوصة");

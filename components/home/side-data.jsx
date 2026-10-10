@@ -173,7 +173,7 @@ export default function SideData() {
               >
                 <Image
                   src={logo}
-                  alt="عقد إيجار"
+                  alt="عقدي"
                   width={28}
                   height={36}
                   className="h-7 w-auto object-contain"
@@ -182,7 +182,7 @@ export default function SideData() {
               {!isCollapsed ? (
                 <div className="min-w-0 flex-1 pe-10">
                   <h2 className="truncate text-15 font-extrabold leading-tight text-brand-deep dark:text-sidebar-foreground">
-                    عقد إيجار
+                    عقدي
                   </h2>
                   <p className="mt-0.5 truncate text-11 font-semibold text-[#6B7570] dark:text-sidebar-foreground/55">
                     لوحة الموظفين

@@ -127,7 +127,7 @@ export function buildContractPrintSections(orderData) {
 
   return `
   <div class="header">
-    <h1>عقد إيجار - تفاصيل الطلب</h1>
+    <h1>عقدي - تفاصيل الطلب</h1>
     <p>رقم الطلب: ${display(orderData.uuid)}</p>
     <p>حالة الطلب: ${display(summary.contract_status_name)}</p>
     <p>رقم جوال العميل: ${display(formatSaudiMobileDisplay(user.mobile ?? orderData.user_mobile))}</p>

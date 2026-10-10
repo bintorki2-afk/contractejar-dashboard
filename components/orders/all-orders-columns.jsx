@@ -201,7 +201,7 @@ export function buildAllOrderColumns({
       sticky: "end",
       stopRowClick: true,
       cell: (row) => {
-        // الطباعة متاحة دائمًا (لا تشترط الدفع) — لعقد إيجار بلا بوابة دفع.
+        // الطباعة متاحة دائمًا (لا تشترط الدفع) — لعقدي بلا بوابة دفع.
         const canPrint = true;
         const stage = canStage ? nextStageForRow(row) : null;
         const StageIcon = STAGE_ROW_ICONS[stage];

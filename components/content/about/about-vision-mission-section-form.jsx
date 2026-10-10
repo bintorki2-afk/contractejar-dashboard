@@ -15,7 +15,7 @@ import { useSaveSection } from "@/src/hooks/use-save-section";
 const DEFAULT_VALUES = {
   sectionTitle: "كل ما تريد معرفته",
   sectionDescription:
-    'يمكنك استخدام منصة «عقد إيجار» لتوثيق عقودك السكنية والتجارية بسهولة ويسر.',
+    'يمكنك استخدام منصة «عقدي» لتوثيق عقودك السكنية والتجارية بسهولة ويسر.',
   mission: {
     badgeText: "الرسالة",
     title: "رسالتنا",
@@ -165,7 +165,7 @@ export default function AboutVisionMissionSectionForm({
           control={form.control}
           name="sectionDescription"
           label="وصف القسم"
-          placeholder='مثال: يمكنك استخدام منصة «عقد إيجار» لتوثيق عقودك السكنية والتجارية بسهولة ويسر.'
+          placeholder='مثال: يمكنك استخدام منصة «عقدي» لتوثيق عقودك السكنية والتجارية بسهولة ويسر.'
           multiline
           rules={{ required: "وصف القسم مطلوب" }}
         />

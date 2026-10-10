@@ -131,7 +131,7 @@ export const MOCK_PAYMENT_MESSAGES = [
     type: "success",
     label: "رسالة نجاح الدفع",
     description: "تظهر للعميل بعد إتمام عملية الدفع بنجاح",
-    message: "تم الدفع بنجاح. شكراً لثقتك في «عقد إيجار».",
+    message: "تم الدفع بنجاح. شكراً لثقتك في «عقدي».",
     buttonText: "عرض العقد",
     buttonLink: "https://aqdi.sa/contract",
     buttonText2: "الرئيسية",
