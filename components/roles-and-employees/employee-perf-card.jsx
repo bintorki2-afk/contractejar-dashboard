@@ -77,7 +77,7 @@ export default function EmployeePerfCard({ item, periodLabel, detailsHref }) {
       {(item.fees_added_count ?? item.price_difference_count ?? item.data_requests_count ?? item.bank_transfers_recorded) != null ? (
         <div className="flex flex-wrap gap-1.5 text-[11px] font-semibold text-[#6B7B71] dark:text-white/55" data-perf-money>
           <span className="rounded-full bg-[#F3F6F4] px-2 py-0.5 dark:bg-white/[0.06]">رسوم أضافها {item.fees_added_count ?? 0}{Number(item.fees_added_amount) > 0 ? ` · ${Number(item.fees_added_amount).toLocaleString("en-US")} ر.س` : ""}</span>
-          <span className="rounded-full bg-[#F3F6F4] px-2 py-0.5 dark:bg-white/[0.06]">فروقات {item.price_difference_count ?? 0}</span>
+          <span className="rounded-full bg-[#F3F6F4] px-2 py-0.5 dark:bg-white/[0.06]">فروقات {item.price_difference_count ?? 0}{Number(item.price_difference_amount) > 0 ? ` · ${Number(item.price_difference_amount).toLocaleString("en-US")} ر.س` : ""}</span>
           <span className="rounded-full bg-[#F3F6F4] px-2 py-0.5 dark:bg-white/[0.06]">طلبات مرفق {item.data_requests_count ?? 0}</span>
           <span className="rounded-full bg-[#F3F6F4] px-2 py-0.5 dark:bg-white/[0.06]">حوالات {item.bank_transfers_recorded ?? 0}{Number(item.bank_transfers_amount) > 0 ? ` · ${Number(item.bank_transfers_amount).toLocaleString("en-US")} ر.س` : ""}</span>
         </div>

@@ -22,6 +22,7 @@ const TAB_COMPONENTS = {
   campaigns: loader(() => import("./tabs/campaigns-tab")),
   seo: loader(() => import("./tabs/seo-tab")),
   content: loader(() => import("./tabs/content-tab")),
+  reviews: loader(() => import("@/components/content/reviews/reviews-content-view")),
   reports: loader(() => import("./tabs/reports-tab")),
   pixels: loader(() => import("./tabs/pixels-tab")),
 };
@@ -87,6 +88,8 @@ export default function MarketingContentWrapper() {
         ))}
       </div>
 
+      {/* D7: تبويب «التقييمات» بيانات حقيقية من الخادم — لا يُعرض عليه تنبيه الأرقام التجريبية. */}
+      {activeTab !== "reviews" ? (
       <div
         className="rounded-xl border border-dashed border-amber-400/70 bg-amber-50 dark:bg-amber-500/10 text-amber-800 dark:text-amber-200 text-[12.5px] font-bold px-4 py-3 mb-4 flex items-start gap-2"
         dir="rtl"
@@ -102,6 +105,7 @@ export default function MarketingContentWrapper() {
           البكسلات) بعد، والأرقام المعروضة تجريبية للعرض فقط ولا تمثل بيانات فعلية.
         </span>
       </div>
+      ) : null}
 
       <div className="mkt-body">
         {ActivePanel ? (

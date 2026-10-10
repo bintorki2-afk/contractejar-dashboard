@@ -62,7 +62,7 @@ export function needsReminder(pending, reminderAfterHours = 24) {
  */
 export function buildDataRequestMessage({ orderNumber, items = [], note = "", deepLink = "" } = {}) {
   const labels = itemLabels(items);
-  const lines = [`مرحباً عميل عقد إيجار`, `بخصوص طلبك رقم ${orderNumber ?? "—"} في «عقد إيجار»، نحتاج منك:`];
+  const lines = [`مرحباً عميل عقدي`, `بخصوص طلبك رقم ${orderNumber ?? "—"} في «عقدي»، نحتاج منك:`];
   labels.forEach((l) => lines.push(`• ${l}`));
   const trimmed = String(note ?? "").trim();
   if (trimmed) lines.push(`• ${trimmed}`);

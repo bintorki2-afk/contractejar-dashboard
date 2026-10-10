@@ -13,7 +13,7 @@ import {
   isReturnContractStatus,
 } from "@/components/analysis/returned/refund-contract-utils";
 
-// جدول الحالات كما في قاعدة «عقد إيجار» (لا توجد حالة «استرجاع»؛ 2 = «قيد المراجعة»).
+// جدول الحالات كما في قاعدة «عقدي» (لا توجد حالة «استرجاع»؛ 2 = «قيد المراجعة»).
 const SEEDED = [
   { id: 1, name: "جديد" },
   { id: 2, name: "قيد المراجعة" },
@@ -29,7 +29,12 @@ const SEEDED = [
 describe("contract statuses are resolved by name, never by a guessed id", () => {
   it("resolves the main statuses from the seeded table", () => {
     expect(resolveNewContractStatusId(SEEDED)).toBe(1);
-    expect(resolveReceivedContractStatusId(SEEDED)).toBe(6);
+    // D1: «مستلم» دُمجت مع «مستلم من الموظف».
+    expect(resolveReceivedContractStatusId(SEEDED)).toBe(7);
+    expect(resolveReceivedContractStatusId(SEEDED.filter((s) => s.id !== 7))).toBe(6);
+    expect(
+      resolveReceivedContractStatusId([{ id: 6, name: "مستلم", status_key: "received" }, { id: 9, name: "استلمه موظف", status_key: "received_by_employee" }])
+    ).toBe(9);
     expect(resolveCanceledContractStatusId(SEEDED)).toBe(4);
   });
 

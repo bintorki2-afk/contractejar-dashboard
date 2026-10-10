@@ -10,13 +10,15 @@ export const MARKETING_TABS = [
     label: "إدارة المحتوى",
     section: ["analytics", "blogs", "app_content", "website_images", "faqs"],
   },
+  // دفعة و (D7): تقييمات العملاء و«4.7 من 3000».
+  { value: "reviews", label: "التقييمات", section: "customer_reviews" },
   { value: "reports", label: "التقارير", section: "analytics" },
   { value: "pixels", label: "الربط والبكسلات", section: "analytics" },
 ];
 
 export const DATE_RANGE_LABEL = "آخر 30 يومًا · حتى 24/07";
 export const SCOPE_BREADCRUMB =
-  "ROI · الحملات · SEO · المحتوى · التقارير · البكسلات";
+  "ROI · الحملات · SEO · المحتوى · التقييمات · التقارير · البكسلات";
 
 /* ---------------- Overview ---------------- */
 
@@ -324,7 +326,7 @@ export const ARTICLES = [
     revenue: "20,400ريال",
   },
   {
-    title: "الفرق بين إيجار و«عقد إيجار»: أيهما أسرع وأوفر؟",
+    title: "الفرق بين إيجار و«عقدي»: أيهما أسرع وأوفر؟",
     category: "مقارنات",
     author: "فريق المحتوى",
     status: "منشور",

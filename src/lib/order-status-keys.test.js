@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  isAutoOnlyStatus,
+  manualStatusOptions,
   nextStageForRow,
   resolveOrderStatusKey,
   sortStatusTabs,
@@ -37,5 +39,30 @@ describe("order status keys", () => {
     expect(nextStageForRow({ status_key: "received_by_employee", is_paid: true, is_received: true })).toBe("notarized");
     expect(nextStageForRow({ status_key: "new", is_paid: false })).toBe(null);
     expect(nextStageForRow({ status_key: "completed", is_paid: true })).toBe(null);
+  });
+
+  it("D1: legacy «received» is labelled and merged as «مستلم من الموظف»", () => {
+    expect(statusKeyLabel("received")).toBe("مستلم من الموظف");
+    const sorted = sortStatusTabs([{ key: "received", count: 0 }, { key: "received_by_employee" }, { key: "whatsapp_draft" }, { key: "all" }]);
+    expect(sorted.map((t) => t.key)).toEqual(["all", "received_by_employee"]);
+  });
+
+  it("D2: «مسترجع» cannot be chosen manually and legacy keys are hidden", () => {
+    const opts = manualStatusOptions([
+      { id: 1, name: "جديد", status_key: "new" },
+      { id: 6, name: "مستلم", status_key: "received" },
+      { id: 7, name: "مستلم من الموظف", status_key: "received_by_employee" },
+      { id: 11, name: "مسترجع", status_key: "refunded" },
+    ]);
+    expect(opts.map((s) => s.id)).toEqual([1, 7, 11]);
+    expect(opts.find((s) => s.id === 11).manualDisabled).toBe(true);
+    expect(opts.find((s) => s.id === 11).manualHint).toContain("ميسر");
+    expect(opts.find((s) => s.id === 7).manualDisabled).toBeUndefined();
+    expect(isAutoOnlyStatus({ name: "مسترجع" })).toBe(true);
+    // الخادم هو المصدر: manual_selectable + manual_hint.
+    const fromServer = manualStatusOptions([{ id: 20, name: "حالة خاصة", status_key: "x", manual_selectable: false, manual_hint: "تلميح الخادم" }]);
+    expect(fromServer[0]).toMatchObject({ manualDisabled: true, manualHint: "تلميح الخادم" });
+    expect(isAutoOnlyStatus({ name: "مسترجع", status_key: "refunded", manual_selectable: true })).toBe(false);
+    expect(isAutoOnlyStatus({ name: "قيد المراجعة", status_key: "under_review" })).toBe(false);
   });
 });

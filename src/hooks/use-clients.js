@@ -4,6 +4,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { toast } from "sonner";
 import { axiosInstance } from "@/src/utils/axios";
 import { normalizeAdminSearch } from "@/src/lib/search-term";
+import { getInstrumentTypeLabel } from "@/src/lib/instrument-types";
 
 export const CLIENTS_API = "/admin/users";
 export const CLIENTS_QUERY_KEY = "clients";
@@ -132,20 +133,28 @@ function mapRealEstateUnit(unit = {}) {
   };
 }
 
-function mapRealEstateToProperty(realEstate = {}, units = []) {
+/** QA PROPS-17: عقار بلا اسم = مسودة لم تكتمل (الموقع يخفيها عن العميل). */
+export function isDraftRealEstate(realEstate = {}) {
+  if (realEstate?.is_complete === true || realEstate?.is_complete === false) return !realEstate.is_complete;
+  return !String(realEstate?.name_real_estate ?? "").trim();
+}
+
+export function mapRealEstateToProperty(realEstate = {}, units = []) {
+  const isDraft = isDraftRealEstate(realEstate);
   return {
     id: realEstate.id,
-    title: realEstate.name_real_estate || `عقار #${realEstate.id}`,
+    isDraft,
+    title: isDraft ? `مسودة عقار #${realEstate.id} — غير مكتملة (لا تظهر للعميل)` : realEstate.name_real_estate,
     street: realEstate.street || null,
     buildingNumber: realEstate.building_number || null,
     addedAt: realEstate.date_first_registration || null,
     orderId: null,
     propertyName: realEstate.name_real_estate || null,
-    documentType: realEstate.instrument_type || null,
+    documentType: realEstate.instrument_type_label || (realEstate.instrument_type ? getInstrumentTypeLabel(realEstate.instrument_type) : null),
     deedNumber: realEstate.instrument_number || null,
-    region: null,
+    region: realEstate.property_place_name || null,
     city: realEstate.property_city_name || null,
-    district: realEstate.property_place_name || null,
+    district: realEstate.neighborhood || null,
     ownerId: realEstate.national_num || null,
     ownerMobile: realEstate.mobile || null,
     units: units
@@ -172,7 +181,11 @@ export function useClientProperties(clientId) {
   const realEstates = user?.real_estates_list ?? [];
   const units = user?.units_list ?? [];
 
-  const properties = realEstates.map((re) => mapRealEstateToProperty(re, units));
+  // المكتملة أولاً ثم المسودات (مميّزة) — حتى يطابق العدّ ما يراه العميل في «عقاراتي».
+  const properties = realEstates
+    .map((re) => mapRealEstateToProperty(re, units))
+    .sort((a, b) => Number(a.isDraft) - Number(b.isDraft));
+  const draftCount = properties.filter((p) => p.isDraft).length;
 
   const unassignedUnits = units.filter(
     (u) => !realEstates.some((re) => re.id === u.real_estates_units_id)
@@ -201,7 +214,8 @@ export function useClientProperties(clientId) {
     client,
     properties,
     totals: {
-      properties: realEstates.length,
+      properties: realEstates.length - draftCount,
+      drafts: draftCount,
       units: units.length,
     },
     isLoading: query.isLoading,

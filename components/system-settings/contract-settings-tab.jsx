@@ -11,7 +11,7 @@ import { usePermissions } from "@/src/hooks/use-permissions";
 import { PERMISSION_SECTIONS } from "@/src/lib/permissions";
 import { CONTRACT_SUB_TABS } from "./mock-data";
 
-// تبويبات غير مفعّلة لعقد إيجار (بدون بوابة دفع / بدون SMS على الويب) → «قريبًا» ومعطّلة.
+// تبويبات غير مفعّلة لعقدي (بدون بوابة دفع / بدون SMS على الويب) → «قريبًا» ومعطّلة.
 const COMING_SOON_SUBTABS = new Set(["sms-settings", "payment-messages"]);
 
 const SUB_TAB_PANELS = {
@@ -33,9 +33,11 @@ export default function ContractSettingsTab({ activeSub, onSubChange }) {
     [can, isReady]
   );
 
-  const currentSub = visibleSubTabs.some((tab) => tab.id === activeSub)
+  // QA DASH-24: تبويب «قريبًا» لا يُفتح بالرابط المباشر (?sub=sms-settings / payment-messages).
+  const enabledSubTabs = visibleSubTabs.filter((tab) => !COMING_SOON_SUBTABS.has(tab.id));
+  const currentSub = enabledSubTabs.some((tab) => tab.id === activeSub)
     ? activeSub
-    : visibleSubTabs[0]?.id;
+    : enabledSubTabs[0]?.id;
   const Panel = SUB_TAB_PANELS[currentSub] ?? PopupContractsTab;
 
   return (

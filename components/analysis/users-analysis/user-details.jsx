@@ -104,7 +104,7 @@ export default function UserDetailsCard({ user, backUrl }) {
             <StatItem
               icon={Wallet}
               label="إجمالي المدفوع"
-              value={parseFloat(user?.total_paid_amount || 0).toLocaleString("ar-EG")}
+              value={parseFloat(user?.total_paid_amount || 0).toLocaleString("ar-EG-u-nu-latn")}
             />
             <div className="flex items-center gap-3">
               <div className="bg-black text-white p-3 rounded-full">

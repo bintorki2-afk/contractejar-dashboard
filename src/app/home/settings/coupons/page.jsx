@@ -39,7 +39,7 @@ const HEADERS = [
 function formatDate(dateString) {
   if (!dateString) return "—";
   try {
-    return new Date(dateString).toLocaleDateString("ar-EG", {
+    return new Date(dateString).toLocaleDateString("ar-EG-u-nu-latn", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",

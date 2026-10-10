@@ -179,12 +179,15 @@ export function useRealtimeOrdersWrapper() {
             ? undefined
             : receivedStatusId;
 
+    // QA DASH-16: «موثق» = حالة «التوثيق في إيجار» (status_key) و«طلب غير مكتمل» = تبويب «غير مكتمل»
+    // (لم يبلغ الخطوة 4) — لا `complete/incomplete` اللذين صارا فلتر الدفع (مدفوع/غير مدفوع).
     return buildAdminOrdersParams({
       page: currentPage,
       perPage,
       search: debouncedSearch,
-      isCompleted: hasAuthenticated ? 1 : hasIncomplete ? 0 : undefined,
       statusId,
+      statusKey: hasAuthenticated && !hasExtraStatus ? "ejar_authenticated" : undefined,
+      tab: hasIncomplete && !hasExtraStatus ? "incomplete" : undefined,
       contractType: contractType || undefined,
     });
   }, [

@@ -138,8 +138,8 @@ function PropertyCard({
     >
       <div className="px-5 pt-5 pb-4">
         <div className="inline-flex items-center gap-2">
-          <span className="size-2 rounded-full bg-brand-dark dark:bg-emerald-400 shrink-0" />
-          <h2 className="text-15 font-bold text-gray-900 dark:text-white leading-tight">
+          <span className={cn("size-2 rounded-full shrink-0", property.isDraft ? "bg-amber-500" : "bg-brand-dark dark:bg-emerald-400")} />
+          <h2 className={cn("text-15 font-bold leading-tight", property.isDraft ? "text-amber-700 dark:text-amber-300" : "text-gray-900 dark:text-white")}>
             {property.title}
           </h2>
         </div>
@@ -284,7 +284,7 @@ export default function ClientPropertiesWrapper() {
         </div>
 
         <p className="text-13 font-bold text-status-neutral dark:text-white/55 tabular-nums shrink-0 sm:pt-8">
-          {totals.properties} عقار · {totals.units} وحدة
+          {totals.properties} عقار{totals.drafts ? ` (+${totals.drafts} مسودة غير مكتملة)` : ""} · {totals.units} وحدة
         </p>
       </div>
 

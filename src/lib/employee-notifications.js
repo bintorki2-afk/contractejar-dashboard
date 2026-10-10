@@ -7,6 +7,9 @@
 export const EMPLOYEE_NOTIFICATION_KINDS = {
   data_request_resolved: { label: "ردّ العميل", tone: "info", icon: "reply" },
   charge_paid: { label: "دفع رسوم", tone: "success", icon: "paid" },
+  // دفعة و (W-10 / APP-6): العميل عدّل طلباً مدفوعاً · أرسل جزءاً من المطلوب في طلب مرفق ناقص.
+  customer_edited: { label: "تعديل من العميل", tone: "warning", icon: "edit" },
+  data_request_progress: { label: "ردّ جزئي من العميل", tone: "info", icon: "partial" },
 };
 
 const DEFAULT_KIND = { label: "إشعار", tone: "neutral", icon: "bell" };

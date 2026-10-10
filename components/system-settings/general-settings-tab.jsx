@@ -20,7 +20,7 @@ import { PERMISSION_SECTIONS } from "@/src/lib/permissions";
 import { SYSTEM_CATEGORIES } from "./mock-data";
 import SiteSettingsCards from "./site-settings-cards";
 
-// أيقونات غير مفعّلة لعقد إيجار (خاصة بالتطبيق/الدفع أو غير موصولة بالموقع بعد) → تعرض «قريبًا» ومعطّلة.
+// أيقونات غير مفعّلة لعقدي (خاصة بالتطبيق/الدفع أو غير موصولة بالموقع بعد) → تعرض «قريبًا» ومعطّلة.
 const COMING_SOON_CARDS = new Set([
   "property-types",
   "property-usage",

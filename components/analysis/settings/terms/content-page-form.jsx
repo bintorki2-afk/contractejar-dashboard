@@ -18,7 +18,7 @@ const TextEditor = dynamic(
 const formatDate = (dateString) => {
   if (!dateString) return null;
   try {
-    return new Date(dateString).toLocaleDateString("ar-EG", {
+    return new Date(dateString).toLocaleDateString("ar-EG-u-nu-latn", {
       year: "numeric",
       month: "long",
       day: "numeric",

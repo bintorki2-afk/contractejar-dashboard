@@ -240,6 +240,10 @@ export function buildRealtimeOrderColumns({
         return Number.isFinite(t) ? t : null;
       },
       cell: (row) => {
+        // QA DASH-3: طلب لم يُستلم بعد ⇒ «—» (لا نعرض عمر الطلب).
+        if (!row?.received_at) {
+          return <span className="text-11 font-bold text-ink-placeholder">—</span>;
+        }
         const label = row?.received_since || formatRelativeShort(row?.received_at);
         const urgency = getReceivedUrgency(row?.received_at);
         const styles =

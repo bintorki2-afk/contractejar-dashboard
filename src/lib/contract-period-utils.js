@@ -48,7 +48,7 @@ export function formatContractPeriodPrice(price) {
   if (price === null || price === undefined || price === "") return null;
   const value = Number(price);
   if (!Number.isFinite(value)) return String(price);
-  return `${value.toLocaleString("ar-SA")} ر.س`;
+  return `${value.toLocaleString("ar-SA-u-nu-latn")} ر.س`;
 }
 
 export function getContractPeriodLabel(period) {

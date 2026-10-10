@@ -68,32 +68,68 @@ function csvCell(text) {
   return `"${String(text ?? "").replace(/"/g, '""').trim()}"`;
 }
 
-/** Scrapes every <table> inside the report panel into a CSV. Returns false if the
- *  active report has no tabular data (KPI/chart-only tabs). */
-export function exportPanelTablesToCsv(panelId = "reports-print-area", filenamePrefix = "report") {
-  const panel = document.getElementById(panelId);
-  if (!panel) return false;
+function sectionTitleOf(el) {
+  return el.closest?.("[data-section-title]")?.getAttribute("data-section-title") || "";
+}
 
-  const tables = Array.from(panel.querySelectorAll("table"));
-  if (tables.length === 0) return false;
-
-  const blocks = tables.map((table) =>
-    Array.from(table.querySelectorAll("tr"))
-      .map((row) =>
-        Array.from(row.querySelectorAll("th,td"))
-          .map((cell) => csvCell(cell.textContent))
-          .join(",")
-      )
-      .join("\n")
+/** صفوف جدول حقيقي `<table>`. */
+function rowsOfTable(table) {
+  return Array.from(table.querySelectorAll("tr")).map((row) =>
+    Array.from(row.querySelectorAll("th,td")).map((cell) => cell.textContent)
   );
+}
 
-  const csv = `﻿${blocks.join("\n\n")}`;
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+/** صفوف «جدول» مرسوم كـdiv (الرسوم الأفقية وقوائم المبالغ): `[data-export-table] > [data-export-row] > [data-export-cell]`. */
+function rowsOfDivTable(el) {
+  return Array.from(el.querySelectorAll("[data-export-row]"))
+    .map((row) => Array.from(row.querySelectorAll("[data-export-cell]")).map((cell) => cell.textContent))
+    .filter((cells) => cells.length);
+}
+
+/** يبني نص CSV من كل الجداول (الحقيقية والمرسومة كـdiv) داخل اللوحة، مع عنوان القسم فوق كل جدول. */
+export function buildPanelCsv(panel) {
+  if (!panel) return "";
+  const nodes = Array.from(panel.querySelectorAll("table, [data-export-table]")).filter(
+    // جدول div داخل جدول div آخر يُحسب مرة واحدة.
+    (el) => !el.parentElement?.closest("[data-export-table]")
+  );
+  const blocks = nodes
+    .map((el) => {
+      const rows = el.tagName === "TABLE" ? rowsOfTable(el) : rowsOfDivTable(el);
+      if (!rows.length) return null;
+      const title = sectionTitleOf(el);
+      const lines = rows.map((cells) => cells.map(csvCell).join(","));
+      return (title ? [csvCell(title), ...lines] : lines).join("\n");
+    })
+    .filter(Boolean);
+  return blocks.length ? `\uFEFF${blocks.join("\n\n")}` : "";
+}
+
+/** QA DASH-8: تنزيل ملف باسمه وامتداده (الرابط يُلحق بالصفحة، والإلغاء بعد النقر لا قبله). */
+export function downloadTextFile(content, filename, type = "text/csv;charset=utf-8;") {
+  const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${filenamePrefix}-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.download = filename;
+  link.rel = "noopener";
+  link.style.display = "none";
+  document.body.appendChild(link);
   link.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => {
+    link.remove();
+    URL.revokeObjectURL(url);
+  }, 1000);
+}
+
+/** Exports every table (real `<table>` + div-drawn `[data-export-table]`, QA DASH-9) inside the report panel
+ *  into a CSV. Returns false if the active report has no tabular data. */
+export function exportPanelTablesToCsv(panelId = "reports-print-area", filenamePrefix = "report") {
+  const panel = document.getElementById(panelId);
+  if (!panel) return false;
+  const csv = buildPanelCsv(panel);
+  if (!csv) return false;
+  const safePrefix = String(filenamePrefix || "report").replace(/[\\/:*?"<>|]+/g, "-").trim() || "report";
+  downloadTextFile(csv, `${safePrefix}-${new Date().toISOString().slice(0, 10)}.csv`);
   return true;
 }

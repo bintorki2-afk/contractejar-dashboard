@@ -18,7 +18,7 @@ export const EJAR_SECTIONS = [
   { key: "conditions", number: "٦", title: "الشروط الإضافية", requestSection: null },
 ];
 
-export const ADDRESS_MODE_LABELS = { manual: "إدخال يدوي", map: "من الخريطة", image: "مرفق كصورة" };
+export const ADDRESS_MODE_LABELS = { manual: "إدخال يدوي", map: "من الخريطة", image: "مرفق كصورة", none: "غير مطلوب" };
 
 function pick(...values) {
   for (const v of values) {
@@ -32,12 +32,20 @@ function truthy(v) {
   return v === true || v === 1 || v === "1" || v === "true";
 }
 
+/** null للقيم الصفرية/الفارغة (0 / "0" / "0.00"). */
+function nonZero(v) {
+  if (v == null || v === "") return null;
+  const n = Number(String(v).replace(/,/g, ""));
+  return Number.isFinite(n) && n === 0 ? null : v;
+}
+
 function digits(v) {
   return String(v ?? "").replace(/\D/g, "");
 }
 
 /** رقم بتنسيق 1,234 (لاتيني). */
 export function formatNumber(value) {
+  if (value == null || value === "") return null;
   const n = Number(typeof value === "string" ? value.replace(/,/g, "").trim() : value);
   if (!Number.isFinite(n)) return value == null ? null : String(value);
   return n.toLocaleString("en-US", { maximumFractionDigits: 2 });
@@ -147,14 +155,15 @@ export function propertySection(order = {}) {
   ]);
 
   const a = order.address ?? {};
-  const mode = order.address_entry_mode ?? (a.map_url ? "map" : a.image_url ? "image" : "manual");
-  let addressRows = [];
-  let addressNote = null;
-  if (mode === "manual") {
-    addressRows = [
+  const hasAnyAddress = [a.region, a.city, a.district, a.street, a.building_no, a.additional_no, a.postal_code, a.map_url, a.image_url, a.image_key, a.lat].some(
+    (v) => v != null && v !== ""
+  );
+  // QA ORDERS-RES-6: بلا أي بيانات عنوان (مثل «عقد إيجار من الباطن») لا نفترض «إدخال يدوي».
+  const mode = hasAnyAddress ? order.address_entry_mode ?? (a.map_url ? "map" : a.image_url ? "image" : "manual") : "none";
+  // QA DASH-4: حقول العنوان الوطني التفصيلية تُعرض في كل الأوضاع متى أرسلها الخادم (الموظف يحتاجها لإيجار).
+  const detailRows = () =>
+    [
       compact([
-        cell("region", "المنطقة", a.region, { editKey: null }),
-        cell("city", "المدينة", a.city),
         cell("district", "الحي", a.district, { editKey: "neighborhood" }),
         cell("street", "اسم الشارع", a.street, { editKey: "street" }),
       ]),
@@ -164,6 +173,13 @@ export function propertySection(order = {}) {
         cell("postal_code", "الرمز البريدي", a.postal_code, { big: true, editKey: "postal_code" }),
       ]),
     ].filter((r) => r.length);
+  let addressRows = [];
+  let addressNote = null;
+  if (mode === "none") {
+    addressNote = "لا يوجد عنوان وطني لهذا الطلب (نوع المستند لا يتطلب عنواناً أو لم يُدخله العميل).";
+  } else if (mode === "manual") {
+    const [first = [], ...rest] = detailRows();
+    addressRows = [compact([cell("region", "المنطقة", a.region, { editKey: null }), cell("city", "المدينة", a.city), ...first]), ...rest].filter((r) => r.length);
   } else if (mode === "map") {
     const coords = a.lat != null && a.lng != null ? `${a.lat}, ${a.lng}` : null;
     addressRows = [
@@ -173,9 +189,10 @@ export function propertySection(order = {}) {
         cell("map_url", "قوقل ماب", a.map_url, { link: a.map_url, linkLabel: "فتح الموقع على الخريطة ↗" }),
         cell("coords", "الإحداثيات", coords, { ltr: true }),
       ]),
-    ];
+      ...detailRows(),
+    ].filter((r) => r.length);
   } else {
-    addressRows = [compact([cell("region", "المنطقة", a.region), cell("city", "المدينة", a.city)])].filter((r) => r.length);
+    addressRows = [compact([cell("region", "المنطقة", a.region), cell("city", "المدينة", a.city)]), ...detailRows()].filter((r) => r.length);
     addressNote = "العميل أرفق العنوان كصورة — تلقاها في قسم المرفقات (تبويب «العنوان الوطني»).";
   }
   return {
@@ -224,6 +241,28 @@ const DEFAULT_UNIT_LABELS = {
   parking: "مواقف",
 };
 
+/**
+ * QA ORDERS-RES-7: نوع التأثيث (جديد/مستعمل). الموقع يرسل `type_furnished` = true (جديد) / false (مستعمل)
+ * فيُخزَّن "1"/"0"؛ وقد يرسل الخادم لاحقاً "new"/"used" أو تسمية جاهزة في `furnished_label`.
+ */
+export function furnishingTypeLabel(type) {
+  if (type === true || type === 1) return "جديد";
+  if (type === false || type === 0) return "مستعمل";
+  const t = String(type ?? "").trim().toLowerCase();
+  if (["1", "true", "new", "جديد"].includes(t)) return "جديد";
+  if (["0", "false", "used", "مستعمل"].includes(t)) return "مستعمل";
+  return t ? String(type).trim() : null;
+}
+
+function furnishedText(unit = {}) {
+  const fromLabel = String(unit.furnished_label ?? "")
+    .replace(/^نعم\s*—?\s*/, "")
+    .replace(/^أثاث\s*/, "")
+    .trim();
+  const kind = fromLabel || furnishingTypeLabel(unit.type_furnished);
+  return kind ? `مؤثثة ✓ · ${kind}` : "مؤثثة ✓";
+}
+
 function floorLabel(v) {
   if (v === 0 || v === "0") return "أرضي";
   return v;
@@ -261,7 +300,7 @@ export function unitCells(unit = {}) {
       return cell("ac", labels.ac, label, { copy: false });
     },
     // مؤثثة تُعرض فقط عندما تكون نعم.
-    furnished: () => (truthy(unit.furnished) ? cell("furnished", null, unit.furnished_label ? `مؤثثة ✓ · ${unit.furnished_label.replace(/^نعم\s*—?\s*/, "")}` : "مؤثثة ✓", { copy: false, highlight: true }) : null),
+    furnished: () => (truthy(unit.furnished) ? cell("furnished", null, furnishedText(unit), { copy: false, highlight: true }) : null),
     kitchen_cabinets: () => (truthy(unit.kitchen_cabinets) ? cell("kitchen_cabinets", null, "خزائن مطبخ ✓", { copy: false }) : null),
     electricity_meter: () => {
       const m = meter("electricity") ?? metersFallback("electricity");
@@ -355,9 +394,17 @@ export function financialSection(order = {}) {
       .map((u) => (Array.isArray(u.meters) ? u.meters.find((m) => m.kind === kind && m.shared) : u[`${kind}_meter_ownership`] === "shared" ? { monthly_amount: u[`${kind}_shared_monthly_fee`] } : null))
       .filter(Boolean);
     if (!shared.length) continue;
-    const monthly = shared.reduce((sum, m) => sum + (Number(m.monthly_amount) || 0), 0);
+    // QA ORDERS-RES-8: البند الكامل (شهري × أشهر العقد = الإجمالي) من الخادم (`shared_meters`) — الواجهة لا تحسب مبالغ.
+    const server = order.shared_meters?.[kind] ?? order.meter_fees?.shared_meters?.[kind] ?? null;
+    const monthly = server?.monthly != null ? Number(server.monthly) : shared.reduce((sum, m) => sum + (Number(m.monthly_amount) || 0), 0);
+    const sharedText =
+      server && Number(server.months) > 0 && server.total != null
+        ? `مشترك · ${formatNumber(server.monthly)} ر.س/شهر × ${formatNumber(server.months)} شهراً = ${formatNumber(server.total)} ر.س`
+        : monthly > 0
+          ? `مشترك · ${formatNumber(monthly)} ر.س/شهر`
+          : "مشترك";
     sharedCells.push(
-      cell(`${kind}_shared`, kind === "electricity" ? "عداد الكهرباء" : "عداد المياه", monthly > 0 ? `مشترك · ${formatNumber(monthly)} ر.س/شهر` : "مشترك", {
+      cell(`${kind}_shared`, kind === "electricity" ? "عداد الكهرباء" : "عداد المياه", sharedText, {
         copy: false,
         icon: `${kind}_meter`,
         tone: UNIT_ICON_TONES[`${kind}_meter`],
@@ -372,9 +419,10 @@ export function financialSection(order = {}) {
       cell("payments", "الدفعات", pick(s4.payment_type_name, order.payment_type_name, order.payment_type?.name_ar), { copy: false }),
     ]),
     compact([
-      cell("guarantee", "مبلغ الضمان", formatNumber(pick(s4.Guarantee_amount, order.Guarantee_amount)), { big: true, raw: pick(s4.Guarantee_amount, order.Guarantee_amount) }),
-      cell("deposit", "العربون", formatNumber(pick(s4.deposit, order.deposit)), { big: true, raw: pick(s4.deposit, order.deposit) }),
-      cell("daily_fine", "الغرامة اليومية", formatNumber(pick(s4.daily_fine, order.daily_fine)), { big: true, raw: pick(s4.daily_fine, order.daily_fine) }),
+      // QA ORDERS-RES-19: المبالغ الاختيارية (الضمان/العربون/الغرامة) تُخفى إن كانت صفراً — المعالج لا يحوي حقل عربون أصلاً.
+      cell("guarantee", "مبلغ الضمان", formatNumber(nonZero(pick(s4.Guarantee_amount, order.Guarantee_amount))), { big: true, raw: pick(s4.Guarantee_amount, order.Guarantee_amount) }),
+      cell("deposit", "العربون", formatNumber(nonZero(pick(s4.deposit, order.deposit))), { big: true, raw: pick(s4.deposit, order.deposit) }),
+      cell("daily_fine", "الغرامة اليومية", formatNumber(nonZero(pick(s4.daily_fine, order.daily_fine))), { big: true, raw: pick(s4.daily_fine, order.daily_fine) }),
       ...sharedCells,
     ]),
   ].filter((r) => r.length);

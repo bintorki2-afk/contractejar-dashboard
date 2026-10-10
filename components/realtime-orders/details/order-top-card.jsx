@@ -11,7 +11,9 @@ import {
   ChevronRight,
   ClipboardCopy,
   Copy,
+  Download,
   FileText,
+  FileUp,
   Link2,
   Loader2,
   MessageSquarePlus,
@@ -49,6 +51,7 @@ import { getSendErrorTitle } from "@/components/orders/messages/order-send-error
 import { DelayBadge, StatusPill } from "@/components/orders/status-pill";
 import { formatSaudiMobileDisplay, toSaudiMobileDialDigits } from "@/src/lib/format-phone";
 import { paymentBreakdown, sar } from "@/src/lib/payment-state";
+import { manualStatusOptions } from "@/src/lib/order-status-keys";
 import OrderJourney from "./order-journey";
 import PaymentChip, { openInvoice } from "./payment-chip";
 import PreviousOrdersChip from "./previous-orders-chip";
@@ -95,6 +98,7 @@ export default function OrderTopCard({
   canEdit = true,
   isAdmin = false,
   canRefund = false,
+  canReturn = false,
   canRecordTransfer = false,
   canAddFee = false,
   statuses = [],
@@ -105,6 +109,7 @@ export default function OrderTopCard({
   onPayLink,
   onBankTransfer,
   onAddFee,
+  onUploadDraft,
   onRefund,
   onPropertyUpdate,
   onRequestData,
@@ -140,6 +145,8 @@ export default function OrderTopCard({
       setIsPrinting(false);
     }
   };
+  const invoicePdfUrl = breakdown.invoice_pdf_url;
+  const hasInvoice = breakdown.has_invoice;
   const handleInvoice = () => {
     if (breakdown.invoice_url) openInvoice(breakdown.invoice_url);
     else handlePrint();
@@ -190,6 +197,19 @@ export default function OrderTopCard({
             </span>
           ) : null}
           <DelayBadge order={orderData} />
+          {/* D9: العميل اختار الدفع بعد مشاهدة المسودة — تنبيه للموظف ليرفعها. */}
+          {orderData?.pay_after_draft && !breakdown.state.is_paid ? (
+            <button
+              type="button"
+              onClick={() => onUploadDraft?.()}
+              disabled={!onUploadDraft}
+              title={orderData?.draft_document ? "رُفعت المسودة — بانتظار دفع العميل" : "ارفع مسودة العقد للعميل ليراجعها ثم يدفع"}
+              className="inline-flex h-7 items-center gap-1.5 rounded-full bg-[#E8F0FE] px-2.5 text-[12px] font-bold text-[#1D4ED8] disabled:cursor-default dark:bg-blue-500/15 dark:text-blue-300"
+            >
+              <FileUp className="size-3.5" />
+              {orderData?.draft_document ? "المسودة مُرسلة · بانتظار الدفع" : "يدفع بعد مشاهدة المسودة"}
+            </button>
+          ) : null}
           {badges}
         </div>
 
@@ -223,21 +243,47 @@ export default function OrderTopCard({
               <DropdownMenuItem onSelect={() => onViewExpanded?.()} className={item}>
                 <ZoomIn className="size-4 text-[#6B7570]" /> عرض مكبّر للطلب
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={handleInvoice} className={item}>
-                <Receipt className="size-4 text-[#6B7570]" /> الفاتورة{breakdown.state.paid_total > 0 ? ` (${sar(breakdown.state.paid_total)})` : ""}
-              </DropdownMenuItem>
+              {/* B16 + D4: لا فاتورة قبل الدفع؛ «الفاتورة» (PDF) + صفحة الطباعة. */}
+              {hasInvoice ? (
+                <>
+                  {invoicePdfUrl ? (
+                    <DropdownMenuItem onSelect={() => openInvoice(invoicePdfUrl)} className={item}>
+                      <Download className="size-4 text-[#6B7570]" /> تنزيل الفاتورة (PDF){breakdown.state.paid_total > 0 ? ` (${sar(breakdown.state.paid_total)})` : ""}
+                    </DropdownMenuItem>
+                  ) : null}
+                  <DropdownMenuItem onSelect={handleInvoice} className={item}>
+                    <Receipt className="size-4 text-[#6B7570]" /> {invoicePdfUrl ? "طباعة الفاتورة" : "الفاتورة"}{!invoicePdfUrl && breakdown.state.paid_total > 0 ? ` (${sar(breakdown.state.paid_total)})` : ""}
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <DropdownMenuItem disabled title="تصدر الفاتورة بعد الدفع" className={cn(item, "flex-col items-start gap-0.5")}>
+                  <span className="inline-flex items-center gap-2"><Receipt className="size-4 text-[#6B7570]" /> الفاتورة</span>
+                  <span className="text-[10.5px] font-medium leading-4 text-[#8A958F]">تصدر الفاتورة بعد الدفع</span>
+                </DropdownMenuItem>
+              )}
               {onShowHistory ? (
                 <DropdownMenuItem onSelect={() => onShowHistory()} className={item}>
                   <FileText className="size-4 text-[#6B7570]" /> سجل الطلب (نشاط · إشعارات · مدفوعات)
                 </DropdownMenuItem>
               ) : null}
               <DropdownMenuSeparator className="my-1 bg-[#EEF1F0] dark:bg-white/10" />
-              <DropdownMenuItem onSelect={() => onRequestData?.(null)} className={item}>
-                <Paperclip className="size-4 text-[#B25E00]" /> طلب مرفق ناقص من العميل
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => onPropertyUpdate?.()} className={item}>
-                <Upload className="size-4 text-[#2563EB]" /> رفع تحديث العقار
-              </DropdownMenuItem>
+              {/* QA DASH-18: لا نعرض ما يرفضه الخادم لهذا الدور (data-requests / تحديث العقار ← all_requests.edit). */}
+              {canEdit ? (
+                <DropdownMenuItem onSelect={() => onRequestData?.(null)} className={item}>
+                  <Paperclip className="size-4 text-[#B25E00]" /> طلب مرفق ناقص من العميل
+                </DropdownMenuItem>
+              ) : null}
+              {canEdit ? (
+                <DropdownMenuItem onSelect={() => onPropertyUpdate?.()} className={item}>
+                  <Upload className="size-4 text-[#2563EB]" /> رفع تحديث العقار
+                </DropdownMenuItem>
+              ) : null}
+              {/* D9: «الدفع بعد مشاهدة المسودة» — قبل الدفع (أو لإدارة مسودة مرفوعة). */}
+              {onUploadDraft && (!breakdown.state.is_paid || orderData?.draft_document) ? (
+                <DropdownMenuItem onSelect={() => onUploadDraft()} className={item}>
+                  <FileUp className="size-4 text-[#0B7A4C]" /> {orderData?.draft_document ? "مسودة العقد للعميل (عرض / استبدال)" : "رفع مسودة العقد للعميل"}
+                </DropdownMenuItem>
+              ) : null}
               <DropdownMenuItem onSelect={() => onOpenNotes?.()} className={item}>
                 <MessageSquarePlus className="size-4 text-[#6B7570]" /> إضافة ملاحظة
               </DropdownMenuItem>
@@ -309,9 +355,18 @@ export default function OrderTopCard({
                     <StatusPill statusKey={view?.status_key} label={view?.status_name} className="ms-auto" />
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent className={cn(sub, "max-h-[320px] overflow-y-auto")}>
-                    {statuses.map((status) => {
+                    {manualStatusOptions(statuses).map((status) => {
                       const label = status.name ?? status.label;
                       const active = String(status.id) === String(view?.status_id) || label === view?.status_name;
+                      // D2: «مسترجع» تلقائي فقط — يظهر معطّلاً مع تلميح.
+                      if (status.manualDisabled) {
+                        return (
+                          <DropdownMenuItem key={status.id} disabled title={status.manualHint} className={cn(item, "flex-col items-start gap-0.5")}>
+                            <span>{label}</span>
+                            <span className="text-[10.5px] font-medium leading-4 text-[#8A958F]">{status.manualHint}</span>
+                          </DropdownMenuItem>
+                        );
+                      }
                       return (
                         <DropdownMenuItem key={status.id} disabled={isStatusPending || active} onSelect={() => setPendingStatus(status)} className={cn(item, active && "bg-brand-mint text-brand-deep")}>
                           {label}
@@ -321,10 +376,12 @@ export default function OrderTopCard({
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
               ) : null}
-              <DropdownMenuSeparator className="my-1 bg-[#EEF1F0] dark:bg-white/10" />
-              <DropdownMenuItem onSelect={() => onRefund?.()} className={cn(item, "text-[#B42318] dark:text-red-300")}>
-                <Undo2 className="size-4" /> {canRefund ? "استرجاع المبلغ" : "رفع طلب استرجاع"}
-              </DropdownMenuItem>
+              {canRefund || canReturn || (canChangeStatus && cancelStatus) ? <DropdownMenuSeparator className="my-1 bg-[#EEF1F0] dark:bg-white/10" /> : null}
+              {canRefund || canReturn ? (
+                <DropdownMenuItem onSelect={() => onRefund?.()} className={cn(item, "text-[#B42318] dark:text-red-300")}>
+                  <Undo2 className="size-4" /> {canRefund ? "استرجاع المبلغ" : "رفع طلب استرجاع"}
+                </DropdownMenuItem>
+              ) : null}
               {canChangeStatus && cancelStatus ? (
                 <DropdownMenuItem onSelect={() => setPendingStatus(cancelStatus)} disabled={isStatusPending || view?.status_key === "cancelled"} className={cn(item, "text-[#B42318] dark:text-red-300")}>
                   <XCircle className="size-4" /> إلغاء الطلب

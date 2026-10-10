@@ -10,7 +10,7 @@ import { AmberNote, CellRow, HeaderInfo, SectionCard, Tab, copyText } from "./or
  * لوحة البيانات (دفعة هـ — E1): ستة أقسام بترتيب إدخال منصة إيجار، تتمرر لحالها (ارتفاع ثابت + تمرير داخلي
  * على الشاشات الواسعة). كل قسم: «أدخلتها في إيجار» (يُحفظ في الخادم)، «نسخ المجموعة»، و«مرفق ناقص» للأقسام ١/٢/٤.
  */
-export default function OrderDataPanel({ orderData, canEdit = true, onRequestData, onOpenAttachment, className }) {
+export default function OrderDataPanel({ orderData, canEdit = true, isLeaseRenewal = false, onRequestData, onOpenAttachment, className }) {
   const sections = useMemo(() => buildEjarSections(orderData ?? {}), [orderData]);
   const progress = orderData?.ejar_entry_progress ?? {};
   const entry = useEjarEntryProgress(orderData?.id);
@@ -22,6 +22,7 @@ export default function OrderDataPanel({ orderData, canEdit = true, onRequestDat
   const pending = (section) => entry.isPending && entry.variables?.section === section;
   const copyGroup = (rows, title) => () => copyText(groupCopyText(rows), `تم نسخ «${title}»`);
   const sec = (key) => EJAR_SECTIONS.find((s) => s.key === key);
+  const hasInstrument = Array.isArray(orderData?.attachments) && orderData.attachments.some((a) => a?.key === "image_instrument" && a?.url);
 
   const lessor = sections.lessor;
   const property = sections.property;
@@ -31,6 +32,20 @@ export default function OrderDataPanel({ orderData, canEdit = true, onRequestDat
 
   return (
     <div className={cn("flex flex-col gap-3", className)} dir="rtl" data-panel="ejar-data">
+      {isLeaseRenewal ? (
+        <AmberNote>
+          طلب <b>تجديد عقد إيجار</b> — العقد السابق مرفق في المرفقات
+          {onOpenAttachment && hasInstrument ? (
+            <>
+              {" "}
+              <button type="button" onClick={() => onOpenAttachment("image_instrument")} className="font-bold underline underline-offset-2">
+                فتح العقد السابق
+              </button>
+            </>
+          ) : null}
+          . الأقسام الفارغة تعني أن العميل اختار «نفس بيانات العقد السابق»، وأي تعديلات طلبها تظهر في الشروط والملاحظات.
+        </AmberNote>
+      ) : null}
       {/* ١ المؤجر */}
       <SectionCard
         id="sec-lessor"
@@ -60,9 +75,11 @@ export default function OrderDataPanel({ orderData, canEdit = true, onRequestDat
       >
         <CellRow cells={property.docRow} />
         <CellRow cells={property.propertyRow} />
-        <p className="text-[12px] text-[#6B7B71] dark:text-white/50">
-          العنوان الوطني — <span className="font-semibold text-[#2F4A3B] dark:text-white/70">{property.addressModeLabel}</span>
-        </p>
+        {property.addressMode !== "none" ? (
+          <p className="text-[12px] text-[#6B7B71] dark:text-white/50">
+            العنوان الوطني — <span className="font-semibold text-[#2F4A3B] dark:text-white/70">{property.addressModeLabel}</span>
+          </p>
+        ) : null}
         {property.addressRows.map((row, i) => (
           <CellRow key={i} cells={row} />
         ))}

@@ -133,3 +133,16 @@ describe("employee notifications mapping (دفعة هـ — D-1)", () => {
     expect(relativeTimeAr("garbage", NOW)).toBe("");
   });
 });
+
+describe("دفعة و — أنواع إشعارات الموظف الجديدة", () => {
+  it("customer_edited / data_request_progress بتسميات عربية ورابط الطلب", async () => {
+    const { mapEmployeeNotification } = await import("./employee-notifications");
+    const a = mapEmployeeNotification({ id: 1, kind: "customer_edited", title: "العميل عدّل بيانات الطلب", url: "/home/orders/140", contract_id: 140 });
+    expect(a.kindLabel).toBe("تعديل من العميل");
+    expect(a.icon).toBe("edit");
+    expect(a.href).toBe("/home/orders/140");
+    const b = mapEmployeeNotification({ id: 2, kind: "data_request_progress", data: { contract_id: "177" } });
+    expect(b.kindLabel).toBe("ردّ جزئي من العميل");
+    expect(b.href).toBe("/home/orders/177");
+  });
+});

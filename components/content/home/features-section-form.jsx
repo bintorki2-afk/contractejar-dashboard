@@ -15,7 +15,7 @@ import { useSaveSection } from "@/src/hooks/use-save-section";
 
 const DEFAULT_VALUES = {
   badgeText: "مميزاتنا",
-  mainTitle: "لماذا عقد إيجار؟",
+  mainTitle: "لماذا عقدي؟",
   description: "عقدك الموثق من شبكة إيجار والهيئة العامة للعقار خلال دقائق.",
   cards: [
     {
@@ -94,7 +94,7 @@ export default function FeaturesSectionForm({ initialData, saveEndpoint, queryKe
           control={form.control}
           name="mainTitle"
           label="العنوان الرئيسي"
-          placeholder="مثال: لماذا عقد إيجار؟"
+          placeholder="مثال: لماذا عقدي؟"
           rules={{ required: "العنوان الرئيسي مطلوب" }}
         />
         <SectionTextField

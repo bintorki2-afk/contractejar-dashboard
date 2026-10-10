@@ -6,10 +6,13 @@ import {
   BadgeCheck,
   Bell,
   CreditCard,
+  FileUp,
   Hand,
   History,
+  ListChecks,
   MessageSquareText,
   Pencil,
+  PencilLine,
   RotateCcw,
   Tag,
   Trash2,
@@ -38,7 +41,25 @@ const ACTION_ICONS = {
   restored: RotateCcw,
   notification_sent: Bell,
   delay_flagged: AlarmClock,
+  // دفعة و (W-10 / APP-6)
+  customer_edited: PencilLine,
+  data_request_progress: ListChecks,
+  // دفعة و (D9)
+  draft_document_uploaded: FileUp,
+  draft_document_removed: Trash2,
 };
+
+/** تسميات احتياطية إن لم يرسل الخادم `action_label`. */
+export const ACTION_LABELS = {
+  customer_edited: "تعديل من العميل بعد الإرسال",
+  data_request_progress: "العميل أرسل جزءاً من المطلوب",
+  draft_document_uploaded: "رُفعت مسودة العقد للعميل",
+  draft_document_removed: "حُذفت مسودة العقد",
+};
+
+export function activityLabel(a = {}) {
+  return a.action_label || ACTION_LABELS[a.action] || a.action;
+}
 
 const ACTION_TONE = {
   refund_failed: "text-[#B42318] bg-[#FDECEC]",
@@ -46,6 +67,9 @@ const ACTION_TONE = {
   deleted: "text-[#B42318] bg-[#FDECEC]",
   delay_flagged: "text-[#B42318] bg-[#FDECEC]",
   refunded: "text-[#9A6100] bg-[#FFF4DE]",
+  customer_edited: "text-[#9A6100] bg-[#FFF4DE]",
+  data_request_progress: "text-[#1D4ED8] bg-[#EAF2FF]",
+  draft_document_uploaded: "text-[#0B7A4C] bg-[#E3F4EA]",
 };
 
 function display(value) {
@@ -143,7 +167,7 @@ export default function OrderActivityTab({ orderData }) {
                 <Icon className="size-4" />
               </span>
               <div className="min-w-0 flex-1 pt-0.5">
-                <p className="text-[12.5px] font-extrabold text-[#14231D] dark:text-white">{a.action_label || a.action}</p>
+                <p className="text-[12.5px] font-extrabold text-[#14231D] dark:text-white">{activityLabel(a)}</p>
                 <p className="text-[11px] text-[#8A958F] dark:text-white/45">
                   <span className="font-semibold">
                     {a.actor_type === "system" ? "النظام" : a.actor_type === "customer" ? "العميل" : a.actor_name || "موظف"}

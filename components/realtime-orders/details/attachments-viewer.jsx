@@ -14,6 +14,21 @@ function isPdf(url = "") {
 }
 
 /**
+ * QA ORDERS-RES-4 / ORDERS-COM-1د: روابط المرفقات الموقّعة (`/deed-image/{field}?signature=…`) بلا امتداد،
+ * فنعتمد على ما يرسله الخادم (`is_pdf` / `mime` / `extension`) ثم امتداد الرابط.
+ */
+export function attachmentIsPdf(attachment, url) {
+  if (!attachment && !url) return false;
+  const a = attachment ?? {};
+  if (a.is_pdf === true) return true;
+  const mime = String(a.mime ?? a.mime_type ?? a.content_type ?? "").toLowerCase();
+  if (mime.includes("pdf")) return true;
+  const ext = String(a.extension ?? a.ext ?? a.file_type ?? "").toLowerCase().replace(/^\./, "");
+  if (ext === "pdf") return true;
+  return isPdf(url ?? a.url) || isPdf(a.path ?? a.file_name ?? a.name ?? "");
+}
+
+/**
  * عارض المرفقات (دفعة هـ — E1): تبويبات حسب ما يوجد فعلاً (الصك / هوية … / العنوان الوطني / شهادة الوقف / صك النظارة / الوكالة …)،
  * تكبير بالعجلة أو الأزرار، تدوير، سحب للتحريك، وفتح بالحجم الكامل. ثابت (sticky) بجانب لوحة البيانات.
  * وضع «سجل الطلب» يعرض سجل النشاط / الإشعارات / المدفوعات في نفس المكان حتى تبقى متاحة.
@@ -30,7 +45,13 @@ export default function AttachmentsViewer({
 }) {
   const list = useMemo(() => (Array.isArray(attachments) ? attachments.filter((a) => a?.url) : []), [attachments]);
   const current = list.find((a) => a.key === selectedKey) ?? list[0] ?? null;
-  const pages = Array.isArray(current?.pages) && current.pages.length ? current.pages : null;
+  // صفحات الصك: الخادم يرسل `pages` كروابط نصية (و`pages_meta` بنوع كل صفحة) — نطبّعها إلى {url}.
+  const pages = useMemo(() => {
+    const raw = Array.isArray(current?.pages_meta) && current.pages_meta.length ? current.pages_meta : current?.pages;
+    if (!Array.isArray(raw) || !raw.length) return null;
+    const list = raw.map((p, i) => (typeof p === "string" ? { key: i, url: p } : p)).filter((p) => p?.url);
+    return list.length ? list : null;
+  }, [current]);
   const [pageIndex, setPageIndex] = useState(0);
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
@@ -41,6 +62,10 @@ export default function AttachmentsViewer({
   const frameRef = useRef(null);
 
   const url = pages ? pages[Math.min(pageIndex, pages.length - 1)]?.url ?? pages[0]?.url : current?.url;
+  const currentPage = pages ? pages[Math.min(pageIndex, pages.length - 1)] ?? null : null;
+  // عند فشل تحميل الصورة نجرّب عرض الملف كمستند (PDF) قبل إظهار «تعذّر العرض».
+  const [pdfFallback, setPdfFallback] = useState(false);
+  const showPdf = Boolean(url) && (attachmentIsPdf(currentPage ?? current, url) || pdfFallback);
 
   // عند تغيير المرفق نعيد التكبير والتدوير والموضع (أثناء التصيير، بلا effect).
   const [shownKey, setShownKey] = useState(current?.key ?? null);
@@ -51,22 +76,23 @@ export default function AttachmentsViewer({
     setOffset({ x: 0, y: 0 });
     setPageIndex(0);
     setLoadError(false);
+    setPdfFallback(false);
   }
 
   useEffect(() => {
     const el = frameRef.current;
     if (!el) return undefined;
     const onWheel = (e) => {
-      if (!url || isPdf(url)) return;
+      if (!url || showPdf) return;
       e.preventDefault();
       setZoom((z) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.round((z + (e.deltaY < 0 ? 0.15 : -0.15)) * 100) / 100)));
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => el.removeEventListener("wheel", onWheel);
-  }, [url]);
+  }, [url, showPdf]);
 
   const startDrag = (e) => {
-    if (!url || isPdf(url)) return;
+    if (!url || showPdf) return;
     dragRef.current = { x: e.clientX - offset.x, y: e.clientY - offset.y };
     setDragging(true);
   };
@@ -164,7 +190,7 @@ export default function AttachmentsViewer({
             onMouseMove={moveDrag}
             onMouseUp={endDrag}
             onMouseLeave={endDrag}
-            style={{ cursor: url && !isPdf(url) ? (dragging ? "grabbing" : "grab") : "default" }}
+            style={{ cursor: url && !showPdf ? (dragging ? "grabbing" : "grab") : "default" }}
           >
             {!url ? (
               <div className="p-5 text-center text-[13px] text-[#6B7B71] dark:text-white/50">
@@ -172,27 +198,41 @@ export default function AttachmentsViewer({
                 <div className="font-semibold text-[#2F4A3B] dark:text-white/70">لا توجد مرفقات</div>
                 <div className="mt-1 text-[12px]">لم يرفع العميل أي مستند لهذا الطلب بعد.</div>
               </div>
-            ) : isPdf(url) ? (
-              <iframe title={current?.label ?? "مرفق"} src={url} className="h-full min-h-[420px] w-full rounded-[10px] bg-white" />
             ) : loadError ? (
-              <div className="p-5 text-center text-[13px] text-[#6B7B71]">
-                <div className="font-semibold text-[#2F4A3B]">تعذّر عرض الصورة</div>
-                <a href={url} target="_blank" rel="noreferrer" className="mt-1 inline-block text-brand-deep underline">
+              <div className="p-5 text-center text-[13px] text-[#6B7B71] dark:text-white/70">
+                <div className="font-semibold text-[#2F4A3B] dark:text-white">تعذّر عرض الملف</div>
+                <a href={url} target="_blank" rel="noreferrer" className="mt-1 inline-block text-brand-deep underline dark:text-emerald-300">
                   فتح الملف في تبويب جديد ↗
                 </a>
               </div>
+            ) : showPdf ? (
+              <object
+                key={url}
+                data={url}
+                type="application/pdf"
+                aria-label={current?.label ?? "مرفق"}
+                className="h-full min-h-[420px] w-full rounded-[10px] bg-white"
+              >
+                <div className="p-5 text-center text-[13px] text-[#6B7B71]">
+                  <FileText className="mx-auto mb-2 size-9 opacity-50" />
+                  <div className="font-semibold text-[#2F4A3B]">مستند PDF</div>
+                  <a href={url} target="_blank" rel="noreferrer" className="mt-1 inline-block text-brand-deep underline">
+                    فتح الملف في تبويب جديد ↗
+                  </a>
+                </div>
+              </object>
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={url}
                 alt={current?.label ?? "مرفق"}
                 draggable={false}
-                onError={() => setLoadError(true)}
+                onError={() => (pdfFallback ? setLoadError(true) : setPdfFallback(true))}
                 className="max-h-full max-w-full select-none object-contain transition-transform duration-75"
                 style={{ transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom}) rotate(${rotation}deg)` }}
               />
             )}
-            {url && !isPdf(url) ? (
+            {url && !showPdf ? (
               <span className="pointer-events-none absolute bottom-2 start-2 rounded-md bg-black/55 px-1.5 py-0.5 text-[11px] font-bold text-white tabular-nums">
                 {Math.round(zoom * 100)}%
               </span>
@@ -201,13 +241,13 @@ export default function AttachmentsViewer({
 
           <div className="flex items-center justify-between gap-2">
             <div className="flex gap-1.5">
-              <button type="button" aria-label="تكبير" disabled={!url} onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z + 0.25))} className={toolBtn}>
+              <button type="button" aria-label="تكبير" disabled={!url || showPdf} onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z + 0.25))} className={toolBtn}>
                 <Plus className="size-4" />
               </button>
-              <button type="button" aria-label="تصغير" disabled={!url} onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - 0.25))} className={toolBtn}>
+              <button type="button" aria-label="تصغير" disabled={!url || showPdf} onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - 0.25))} className={toolBtn}>
                 <Minus className="size-4" />
               </button>
-              <button type="button" aria-label="تدوير" disabled={!url} onClick={() => setRotation((r) => (r + 90) % 360)} className={toolBtn}>
+              <button type="button" aria-label="تدوير" disabled={!url || showPdf} onClick={() => setRotation((r) => (r + 90) % 360)} className={toolBtn}>
                 <RotateCw className="size-4" />
               </button>
               {zoom !== 1 || rotation !== 0 || offset.x || offset.y ? (
@@ -229,15 +269,15 @@ export default function AttachmentsViewer({
                 href={url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 text-[13px] font-semibold text-brand-deep hover:underline dark:text-emerald-300"
+                className="inline-flex items-center gap-1 text-[13px] font-semibold text-brand-deep hover:underline dark:text-emerald-200"
               >
                 فتح بالحجم الكامل
                 <ExternalLink className="size-3.5" />
               </a>
             ) : null}
           </div>
-          {url && !isPdf(url) ? (
-            <p className="text-center text-[11.5px] text-[#8A958F] dark:text-white/40">تكبير بالعجلة · سحب للتحريك</p>
+          {url && !showPdf ? (
+            <p className="text-center text-[11.5px] text-[#8A958F] dark:text-white/60">تكبير بالعجلة · سحب للتحريك</p>
           ) : null}
         </>
       )}

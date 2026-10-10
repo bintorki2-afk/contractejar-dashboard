@@ -35,7 +35,7 @@ function errorMessage(err, fallback) {
   return err?.response?.data?.message || err?.message || fallback;
 }
 
-// شارة «قريبًا» للميزات غير المفعّلة بعد (مثل تطبيق الجوال لعقد إيجار).
+// شارة «قريبًا» للميزات غير المفعّلة بعد (مثل تطبيق الجوال لعقدي).
 function ComingSoonBadge() {
   return (
     <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-700 dark:bg-amber-400/15 dark:text-amber-300">
@@ -219,7 +219,7 @@ export default function AppStatusPanel() {
           <ComingSoonBadge />
         </div>
         <p className="mt-1 text-13 leading-7 text-[#707070] dark:text-white/55">
-          هذه الميزة غير مفعّلة حاليًا (لا يوجد تطبيق جوال لعقد إيجار بعد).
+          هذه الميزة غير مفعّلة حاليًا (لا يوجد تطبيق جوال لعقدي بعد).
         </p>
 
         <div className="pointer-events-none mt-5 flex items-center justify-between gap-4 rounded-2xl border border-surface-border bg-neutral-50 px-4 py-3.5 opacity-60 dark:border-white/10 dark:bg-white/[0.04]">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ExternalLink, ImageOff, Loader2 } from "lucide-react";
+import { Download, ExternalLink, FileText, ImageOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -51,8 +51,20 @@ function Field({ label, value, dir, className }) {
   );
 }
 
-function DeedImage({ title, url }) {
-  const [failed, setFailed] = useState(false);
+const looksLikePdf = (value) => /\.pdf(\?|$)/i.test(String(value ?? ""));
+
+/**
+ * QA PROPS-16: صك بصيغة PDF يُعرض كمستند (`<object>`) لا كصورة مكسورة. نعتمد على `is_pdf/mime` إن أرسلها الخادم،
+ * ثم امتداد الرابط، ثم نجرّب العرض كمستند عند فشل تحميل الصورة.
+ */
+function DeedImage({ title, url, isPdf = false }) {
+  const [mode, setMode] = useState(null);
+  const [shownUrl, setShownUrl] = useState(url);
+  if (shownUrl !== url) {
+    setShownUrl(url);
+    setMode(null);
+  }
+  const effective = mode ?? (isPdf || looksLikePdf(url) ? "pdf" : "image");
 
   return (
     <div className="rounded-2xl border border-[#E8EEEC] bg-[#F8FAF9] p-3 dark:border-white/[0.08] dark:bg-white/[0.03]">
@@ -70,7 +82,7 @@ function DeedImage({ title, url }) {
           </a>
         ) : null}
       </div>
-      {url && !failed ? (
+      {url && effective === "image" ? (
         <a href={url} target="_blank" rel="noopener noreferrer" className="block">
           {/* الصور موقّعة ومؤقتة (private disk) — لا نستخدم next/image حتى لا تُحجب عن طريق remotePatterns. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -78,14 +90,23 @@ function DeedImage({ title, url }) {
             src={url}
             alt={title}
             loading="lazy"
-            onError={() => setFailed(true)}
+            onError={() => setMode("pdf")}
             className="max-h-[260px] w-full rounded-xl object-contain bg-white dark:bg-black/20"
           />
         </a>
+      ) : url && effective === "pdf" ? (
+        <object data={url} type="application/pdf" aria-label={title} className="h-[320px] w-full rounded-xl bg-white">
+          <div className="flex h-[120px] flex-col items-center justify-center gap-1 rounded-xl bg-white text-[#9CA3AF]">
+            <FileText className="size-5" />
+            <a href={url} target="_blank" rel="noopener noreferrer" className="text-[11px] font-bold text-brand-dark underline">
+              مستند PDF — فتح في تبويب جديد
+            </a>
+          </div>
+        </object>
       ) : (
         <div className="flex h-[120px] flex-col items-center justify-center gap-1 rounded-xl bg-white text-[#9CA3AF] dark:bg-black/20 dark:text-white/35">
           <ImageOff className="size-5" />
-          <span className="text-[11px] font-medium">{url ? "تعذر عرض الصورة" : "لا توجد صورة"}</span>
+          <span className="text-[11px] font-medium">{url ? "تعذر عرض الملف" : "لا توجد صورة"}</span>
         </div>
       )}
     </div>
@@ -111,6 +132,15 @@ function StatusUpdateForm({ request, statuses }) {
   if (!canEdit) return null;
 
   const options = statuses?.length ? statuses : LESSOR_CHANGE_STATUS_FALLBACK;
+  // QA PROPS-4: لا انتقالات يرفضها الخادم — طلب مدفوع لا يُعاد إلى «بانتظار الدفع»،
+  // وإن أرسل الخادم قائمة الانتقالات المسموحة (`allowed_statuses`) نلتزم بها.
+  const allowed = Array.isArray(request?.allowed_statuses) ? request.allowed_statuses : null;
+  const alreadyPaid = Boolean(request?.paid_at) || request?.is_paid === true;
+  const isOptionBlocked = (value) => {
+    if (value === request?.status) return false;
+    if (allowed) return !allowed.includes(value);
+    return value === "pending_payment" && alreadyPaid;
+  };
   const dirty = status !== (request?.status ?? "") || (note ?? "") !== (request?.status_note ?? "");
 
   return (
@@ -131,7 +161,12 @@ function StatusUpdateForm({ request, statuses }) {
             </SelectTrigger>
             <SelectContent dir="rtl" className="dark:bg-[#0F1C16] dark:border-white/[0.1]">
               {options.map((option) => (
-                <SelectItem key={option.value} value={option.value} className="text-13 font-semibold">
+                <SelectItem
+                  key={option.value}
+                  value={option.value}
+                  disabled={isOptionBlocked(option.value)}
+                  className="text-13 font-semibold"
+                >
                   <span className="inline-flex items-center gap-2">
                     <span className="size-2 rounded-full" style={{ backgroundColor: option.color }} aria-hidden />
                     {option.label}
@@ -223,6 +258,23 @@ export default function LessorChangeDetailsDialog({ requestId, statuses, open, o
                 <Field label="الجوال" value={formatSaudiMobileDisplay(request.mobile) || request.mobile} dir="ltr" />
                 <Field label="الرسوم" value={formatFee(request.fee)} />
                 <Field label="الدفع" value={request.is_paid ? "مدفوع" : "غير مدفوع"} />
+                {/* D4: فاتورة PDF حقيقية من الخادم — تظهر بعد الدفع فقط (null قبله). */}
+                {request.is_paid && request.invoice_pdf_url ? (
+                  <Field
+                    label="الفاتورة"
+                    value={
+                      <a
+                        href={request.invoice_pdf_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-brand-dark hover:underline dark:text-emerald-300"
+                      >
+                        <Download className="size-3.5" />
+                        تنزيل PDF
+                      </a>
+                    }
+                  />
+                ) : null}
                 <Field label="تاريخ الدفع" value={request.paid_at} dir="ltr" />
                 <Field label="المنصة" value={platformLabel(request.platform)} />
                 <Field label="تاريخ الإنشاء" value={request.created_at} dir="ltr" />
@@ -260,8 +312,8 @@ export default function LessorChangeDetailsDialog({ requestId, statuses, open, o
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <DeedImage title="صورة الصك القديم" url={request.old_deed_image_url} />
-              <DeedImage title="صورة الصك الجديد" url={request.new_deed_image_url} />
+              <DeedImage title="صورة الصك القديم" url={request.old_deed_image_url} isPdf={Boolean(request.old_deed_is_pdf)} />
+              <DeedImage title="صورة الصك الجديد" url={request.new_deed_image_url} isPdf={Boolean(request.new_deed_is_pdf)} />
             </div>
 
             <div className="rounded-2xl border border-[#E8EEEC] bg-white p-3.5 dark:border-white/[0.08] dark:bg-[#0F1C16]">

@@ -102,7 +102,7 @@ export default function ContentTab() {
 
       {requestedView === "images" && !WEBSITE_IMAGES_REGISTRY_ENABLED ? (
         <div role="note" className="mb-4 rounded-2xl border border-[#F3DFA9] bg-[#FFF8E6] px-4 py-3 text-[13px] text-[#7A5600] dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200">
-          <b>«صور الموقع (SEO)» مخفية:</b> هذا السجل يخص الموقع القديم ولا يستخدمه موقع «عقد إيجار» (contractejar.com).
+          <b>«صور الموقع (SEO)» مخفية:</b> هذا السجل يخص الموقع القديم ولا يستخدمه موقع «عقدي» (contractejar.com).
           صور المقالات والصفحات والأقسام تُدار من محرراتها في «إدارة المحتوى».
         </div>
       ) : null}

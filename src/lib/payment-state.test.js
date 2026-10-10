@@ -69,6 +69,15 @@ describe("paymentBreakdown (قائمة الشارة)", () => {
     expect(b.original.id).toBe(95);
     expect(transactionMeta(b.original, b.invoice_number)).toBe("Moyasar · بطاقة mada •••• 4821 · 09/10/2026 22:02 · فاتورة INV-308");
   });
+  it("B16/D4: has_invoice and invoice_pdf_url come from the server", () => {
+    expect(paymentBreakdown({ has_invoice: false, is_paid: 0 }).has_invoice).toBe(false);
+    expect(paymentBreakdown({ is_paid: 0, amount_payment: 249 }).has_invoice).toBe(false);
+    expect(paymentBreakdown({ is_paid: 1, amount_payment: 249 }).has_invoice).toBe(true);
+    const withPdf = paymentBreakdown({ ...order, has_invoice: true, invoice_pdf_url: "http://x/api/v2/invoices/pdf/308?signature=y" });
+    expect(withPdf.has_invoice).toBe(true);
+    expect(withPdf.invoice_pdf_url).toContain("/invoices/pdf/308");
+    expect(paymentBreakdown(order).invoice_pdf_url).toBeNull();
+  });
   it("works for legacy orders without payment_details", () => {
     const b = paymentBreakdown({ is_paid: 1, amount_payment: 264 });
     expect(b.lines).toEqual([]);
@@ -77,5 +86,17 @@ describe("paymentBreakdown (قائمة الشارة)", () => {
   });
   it("bank transfer transaction meta mentions reference and employee", () => {
     expect(transactionMeta({ kind: "bank_transfer", method: "bank_transfer", brand: "bank", reference: "TRF-1", employee: { name: "أدمن" } })).toBe("حوالة · مرجع TRF-1 · سجّلها أدمن");
+  });
+});
+
+describe("QA WEB-5 — refund_pending", () => {
+  it("شارة «مسترجع — بانتظار إعادة المبلغ» بدل «مدفوع»", async () => {
+    const { normalizePaymentState } = await import("./payment-state");
+    const s = normalizePaymentState({ payment_state: { status: "paid", paid_total: 1992, refund_pending: true, refund_pending_amount: 1992, refund_pending_label: "مسترجع — بانتظار إعادة المبلغ · 1992 ر.س" } });
+    expect(s.label).toBe("مسترجع — بانتظار إعادة المبلغ · 1992 ر.س");
+    expect(s.tone).toBe("warning");
+    expect(s.refund_pending).toBe(true);
+    const plain = normalizePaymentState({ payment_state: { status: "paid", paid_total: 10, label: "مدفوع · 10 ر.س" } });
+    expect(plain.label).toBe("مدفوع · 10 ر.س");
   });
 });

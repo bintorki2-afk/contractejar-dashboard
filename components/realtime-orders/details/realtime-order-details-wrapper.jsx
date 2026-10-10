@@ -5,7 +5,6 @@ import { useParams, useSearchParams } from "next/navigation";
 import { ChevronDown, Images } from "lucide-react";
 import Loader from "@/components/home/loader";
 import { SingleOrderProvider, useSingleOrderContext } from "@/components/orders/single-order/single-order-context";
-import LeaseRenewalOrderView from "@/components/orders/single-order/lease-renewal/lease-renewal-order-view";
 import { useSidebarStore } from "@/src/stores/sidebar-store";
 import { useContractStatuses } from "@/src/hooks/use-contract-statuses";
 import { usePermissions } from "@/src/hooks/use-permissions";
@@ -14,6 +13,8 @@ import { useOrderDetailsDialogs } from "@/src/hooks/use-order-details-dialogs";
 import OrderTopCard from "./order-top-card";
 import OrderDataPanel from "./order-data-panel";
 import AttachmentsViewer from "./attachments-viewer";
+import DraftDocumentDialog from "./draft-document-dialog";
+import { withDraftAttachment } from "@/src/lib/draft-document";
 import OrderDetailsDialogs from "./order-details-dialogs";
 import ContractExpandedViewDialog from "./contract-expanded-view-dialog";
 import { mapOrderDetailView } from "./map-order-detail";
@@ -72,6 +73,7 @@ function OrderDetailsBody() {
   const [refundOpen, setRefundOpen] = useState(false);
   const [refundPrefill, setRefundPrefill] = useState(null);
   const [addFeeOpen, setAddFeeOpen] = useState(false);
+  const [draftOpen, setDraftOpen] = useState(false);
   const openRefund = (prefill = null) => {
     setRefundPrefill(prefill);
     setRefundOpen(true);
@@ -109,7 +111,7 @@ function OrderDetailsBody() {
       if (!digits) toast.error("لا يوجد رقم جوال للعميل");
       else window.open(orderData?.creator_mobile?.whatsapp_url || `https://wa.me/${digits}`, "_blank", "noopener,noreferrer");
     },
-    onDataRequest: () => dialogs.openDataRequest(null),
+    onDataRequest: canEditOrder ? () => dialogs.openDataRequest(null) : undefined,
     onAddFee: canAddFee ? () => setAddFeeOpen(true) : undefined,
     onBankTransfer: canRecordTransfer ? () => openBankTransfer(null) : undefined,
   });
@@ -126,8 +128,9 @@ function OrderDetailsBody() {
 
   const view = useMemo(() => (orderData ? mapOrderDetailView(orderData) : null), [orderData]);
   const back = resolveBackLink(searchParams.get("from"));
-  const isLeaseRenewal = orderData?.contract_summary?.instrument_type_key === "lease_renewal";
-  const attachments = Array.isArray(orderData?.attachments) ? orderData.attachments : [];
+  const isLeaseRenewal = (orderData?.contract_summary?.instrument_type_key ?? orderData?.instrument_type_key ?? orderData?.document?.type_key) === "lease_renewal";
+  // D9: مسودة العقد المرفوعة للعميل تظهر في عارض المرفقات (أولاً).
+  const attachments = withDraftAttachment(Array.isArray(orderData?.attachments) ? orderData.attachments : [], orderData);
 
   const handleOpenNotes = () => {
     setOrderId(id);
@@ -176,6 +179,7 @@ function OrderDetailsBody() {
         canEdit={canEditOrder}
         isAdmin={isAdmin}
         canRefund={canRefundPayments}
+        canReturn={canReturn}
         canRecordTransfer={canRecordTransfer}
         canAddFee={canAddFee}
         statuses={statuses}
@@ -186,6 +190,7 @@ function OrderDetailsBody() {
         onPayLink={dialogs.handlePayLink}
         onBankTransfer={() => openBankTransfer(null)}
         onAddFee={() => setAddFeeOpen(true)}
+        onUploadDraft={canEditOrder ? () => setDraftOpen(true) : undefined}
         onRefund={() => (canRefundPayments ? openRefund(null) : dialogs.openReturn(orderData))}
         badges={<DataRequestBadge orderData={orderData} canEdit={canEditOrder} />}
         onPropertyUpdate={() => dialogs.setPropertyUpdateOpen(true)}
@@ -215,11 +220,14 @@ function OrderDetailsBody() {
       <div className={cn("flex flex-col items-start gap-3 lg:flex-row", SPLIT_HEIGHT)}>
         <div className={cn("w-full min-w-0 flex-1 lg:h-full lg:overflow-y-auto lg:pe-1 [scrollbar-gutter:stable]")} data-scroll="ejar-panel">
           <InlineEditProvider orderData={orderData} canEdit={canEditOrder}>
-            {isLeaseRenewal ? (
-              <LeaseRenewalOrderView orderData={orderData} />
-            ) : (
-              <OrderDataPanel orderData={orderData} canEdit={canEditOrder} onRequestData={(section) => dialogs.openDataRequest(section)} onOpenAttachment={openAttachment} />
-            )}
+            {/* QA ORDERS-RES-3: طلب «تجديد عقد إيجار» يستخدم نفس لوحة E1 (لا تصميم قديم مستقل). */}
+            <OrderDataPanel
+              orderData={orderData}
+              canEdit={canEditOrder}
+              isLeaseRenewal={isLeaseRenewal}
+              onRequestData={canEditOrder ? (section) => dialogs.openDataRequest(section) : undefined}
+              onOpenAttachment={openAttachment}
+            />
           </InlineEditProvider>
         </div>
 
@@ -246,6 +254,7 @@ function OrderDetailsBody() {
 
       <RefundDialog open={refundOpen} onOpenChange={setRefundOpen} orderData={orderData} prefill={refundPrefill} />
       <AddFeeDialog open={addFeeOpen} onOpenChange={setAddFeeOpen} orderData={orderData} />
+      {canEditOrder ? <DraftDocumentDialog open={draftOpen} onOpenChange={setDraftOpen} orderData={orderData} /> : null}
       <BankTransferDialog
         open={bankTransfer.open}
         onOpenChange={(next) => setBankTransfer((prev) => ({ ...prev, open: next }))}

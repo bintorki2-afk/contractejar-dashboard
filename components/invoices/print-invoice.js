@@ -139,7 +139,7 @@ ${invoiceStyles(isPaid)}
   <div class="sheet">
     <div class="top">
       <div class="brand">
-        <h1>عقد إيجار</h1>
+        <h1>عقدي</h1>
         <p>منصة توثيق عقود الإيجار</p>
       </div>
       <div class="meta">

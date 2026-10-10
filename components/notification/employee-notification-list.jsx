@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { BadgeCheck, CheckCheck, Loader2, MessageSquareReply } from "lucide-react";
+import { BadgeCheck, CheckCheck, ListChecks, Loader2, MessageSquareReply, PencilLine } from "lucide-react";
 import { toast } from "sonner";
 import { useSidebarStore } from "@/src/stores/sidebar-store";
 import {
@@ -14,12 +14,15 @@ import { cn } from "@/lib/utils";
 const KIND_ICON = {
   reply: MessageSquareReply,
   paid: BadgeCheck,
+  edit: PencilLine,
+  partial: ListChecks,
 };
 
 const TONE = {
   info: "bg-[#EAF2FF] text-[#1D4ED8] dark:bg-blue-500/15 dark:text-blue-300",
   success: "bg-[#E4F3EC] text-[#0B7A4C] dark:bg-emerald-500/15 dark:text-emerald-300",
   neutral: "bg-[#F0F8F4] text-[#0B5A3C] dark:bg-[#1B3A2E] dark:text-emerald-300",
+  warning: "bg-[#FFF4E0] text-[#9A6100] dark:bg-amber-500/15 dark:text-amber-300",
 };
 
 /**

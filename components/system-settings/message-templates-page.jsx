@@ -47,6 +47,7 @@ const KEY_LABELS = {
   status_on_hold: "الحالة: معلق",
   status_cancelled: "الحالة: ملغى",
   notarized: "التوثيق",
+  draft_ready: "مسودة العقد جاهزة (الدفع بعد المسودة)",
 };
 
 function TemplateEditor({ open, onOpenChange, template, placeholders, channels }) {

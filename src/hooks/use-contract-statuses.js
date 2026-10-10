@@ -14,8 +14,13 @@ import {
   resolveReceivedContractStatusId,
   resolveReturnedContractStatusId,
 } from "@/src/lib/contract-statuses";
+import { usePermissions } from "@/src/hooks/use-permissions";
+import { PERMISSION_SECTIONS } from "@/src/lib/permissions";
 
 export function useContractStatuses({ enabled = true, activeOnly = true } = {}) {
+  // QA DASH-20: لا نطلب الحالات (contract_statuses.view) لدور لا يملكها — كان يرجع 403 في الكونسول.
+  const { can, isAdmin, isReady } = usePermissions();
+  const allowed = isReady && (isAdmin || can(PERMISSION_SECTIONS.contract_statuses, "view"));
   const query = useQuery({
     queryKey: [
       activeOnly ? CONTRACT_STATUSES_ACTIVE_QUERY_KEY : CONTRACT_STATUSES_QUERY_KEY,
@@ -24,7 +29,7 @@ export function useContractStatuses({ enabled = true, activeOnly = true } = {}) 
       axiosInstance(
         activeOnly ? CONTRACT_STATUSES_ACTIVE_API : CONTRACT_STATUSES_API
       ),
-    enabled,
+    enabled: enabled && allowed,
     staleTime: 60_000,
   });
 

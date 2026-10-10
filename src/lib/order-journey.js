@@ -104,9 +104,12 @@ function fromServer(order) {
   if (!serverSteps.length) return null;
   const steps = JOURNEY_STEPS.map((def) => {
     const s = serverSteps.find((x) => x.key === def.key) ?? {};
+    // QA ORDERS-RES-13: الخادم يرسل `awaiting_payment` + `current_label` («بانتظار الدفع») على الخطوة ① قبل الدفع.
+    const awaiting = Boolean(s.awaiting_payment);
     return {
       key: def.key,
-      label: s.label || def.label,
+      label: awaiting && s.current_label ? s.current_label : s.label || def.label,
+      awaitingPayment: awaiting || undefined,
       description: s.description ?? null,
       done: Boolean(s.done),
       at: s.at ?? null,
@@ -127,6 +130,26 @@ function fromServer(order) {
  * يبني خطوات الرحلة. `order` = بيانات `GET /admin/orders/{id}` الخام.
  */
 export function buildOrderJourney(order = {}) {
+  return markAwaitingPayment(buildJourneyCore(order), order);
+}
+
+/**
+ * QA ORDERS-RES-13: طلب جديد غير مدفوع — الخطوة الحالية الأولى تُسمّى «بانتظار الدفع» بدل «قيد المراجعة»
+ * (حالة الطلب «جديد» وشارة الدفع «غير مدفوع»؛ «قيد المراجعة» تعني بعد الدفع).
+ */
+function markAwaitingPayment(journey, order = {}) {
+  const first = journey.steps[0];
+  if (!first || first.done || !first.current || journey.sideState) return journey;
+  const payStatus = order.payment_state?.status;
+  const unpaid = payStatus ? payStatus === "unpaid" : order.status_key === "new" || order.status_key == null;
+  if (!unpaid) return journey;
+  first.label = "بانتظار الدفع";
+  first.description = "الطلب جديد ولم يُسجَّل الدفع بعد — يصبح «قيد المراجعة» بعد الدفع.";
+  first.awaitingPayment = true;
+  return journey;
+}
+
+function buildJourneyCore(order = {}) {
   const server = fromServer(order);
   if (server) return server;
 

@@ -125,7 +125,9 @@ export default function OrderJourney({ orderData, orderId, canEdit = true, canFo
                     <p
                       className={cn(
                         "text-[14px] font-bold",
-                        step.current && !journey.sideState
+                        step.current && !journey.sideState && step.awaitingPayment
+                          ? "text-[#B42318] dark:text-red-300"
+                          : step.current && !journey.sideState
                           ? "text-brand-deep dark:text-emerald-300"
                           : step.done
                             ? "text-[#14231D] dark:text-white"
@@ -143,7 +145,7 @@ export default function OrderJourney({ orderData, orderId, canEdit = true, canFo
                           {step.note ? <span className="text-[#8A958F]"> · {step.note}</span> : null}
                         </>
                       ) : step.current && !journey.sideState ? (
-                        "الخطوة الحالية"
+                        step.awaitingPayment ? "الخطوة الحالية — لم يُسجَّل الدفع بعد" : "الخطوة الحالية"
                       ) : (
                         "لم تبدأ"
                       )}

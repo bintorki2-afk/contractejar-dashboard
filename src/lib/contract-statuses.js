@@ -7,7 +7,7 @@ export const CONTRACT_STATUSES_ACTIVE_QUERY_KEY = "contract-statuses-active";
 
 export const NEW_CONTRACT_STATUS_ID = 1;
 export const RECEIVED_CONTRACT_STATUS_ID = 6;
-// لا يوجد رقم ثابت لحالة «الاسترجاع»: الرقم 2 في قاعدة «عقد إيجار» هو «قيد المراجعة».
+// لا يوجد رقم ثابت لحالة «الاسترجاع»: الرقم 2 في قاعدة «عقدي» هو «قيد المراجعة».
 // تُعرف حالة الاسترجاع بالاسم فقط (انظر resolveReturnedContractStatusId).
 export const CANCELED_CONTRACT_STATUS_ID = 4;
 
@@ -75,8 +75,15 @@ export function resolveNewContractStatusId(statusItems = []) {
   );
 }
 
+/**
+ * دفعة و (D1): «مستلم» دُمجت مع «مستلم من الموظف» — نفضّل المفتاح الثابت `received_by_employee`
+ * ثم الاسم، ولا نرجع للحالة القديمة «مستلم» إلا إن لم تُوجد الجديدة (قاعدة قبل الترحيل).
+ */
 export function resolveReceivedContractStatusId(statusItems = []) {
+  const byKey = (statusItems ?? []).find((item) => item?.status_key === "received_by_employee");
   return (
+    byKey?.id ??
+    findExactStatusId(statusItems, "مستلم من الموظف") ??
     findExactStatusId(statusItems, "مستلم") ??
     findOrdersPageStatusIdByLabel(statusItems, "مستلم") ??
     RECEIVED_CONTRACT_STATUS_ID
@@ -102,7 +109,9 @@ export function resolveCanceledContractStatusId(statusItems = []) {
 }
 
 /** Statuses already covered by the main pills / new-requests strip. */
-function isPillCoveredStatus(name = "") {
+function isPillCoveredStatus(name = "", key = null) {
+  // المفاتيح التاريخية (received/whatsapp_draft) لا تظهر كشرائح فلترة.
+  if (key === "received" || key === "whatsapp_draft") return true;
   const normalized = String(name).trim();
   if (!normalized) return true;
   if (normalized === "جديد") return true;
@@ -122,7 +131,7 @@ function isPillCoveredStatus(name = "") {
 
 export function getRealtimeExtraFilterStatuses(statusItems = []) {
   return (statusItems ?? []).filter(
-    (item) => !isPillCoveredStatus(item?.name)
+    (item) => !isPillCoveredStatus(item?.name, item?.status_key)
   );
 }
 

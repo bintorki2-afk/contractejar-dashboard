@@ -90,21 +90,19 @@ export default function PaymentLinkDialog({
       <DialogContent
         className="sm:max-w-[500px] rounded-[28px] border border-[#B8E6C1] bg-[#E6FFE6] p-6 sm:p-8"
         dir="rtl"
-        closeButton={false}
       >
-        <DialogTitle className="sr-only">{title}</DialogTitle>
-        <DialogDescription className="sr-only">{description}</DialogDescription>
 
         <div className="flex w-full flex-col items-center text-center">
           <div className="mb-4 flex size-[60px] items-center justify-center rounded-full bg-brand-accent text-white shadow-[0_4px_14px_rgba(16,185,129,0.35)]">
             <Check className="size-7 stroke-[3]" />
           </div>
 
-          <h2 className="mb-2 text-lg font-bold leading-snug text-[#007C13]">
+          {/* QA DASH-10: العنوان والوصف مرة واحدة (كانا مكرّرين بنسخة sr-only) + زر إغلاق مرئي. */}
+          <DialogTitle className="mb-2 text-lg font-bold leading-snug text-[#007C13]">
             {title}
-          </h2>
+          </DialogTitle>
 
-          <p className="mb-5 text-13 text-[#007C13]/80">{description}</p>
+          <DialogDescription className="mb-5 text-13 text-[#007C13]/80">{description}</DialogDescription>
 
           {alreadyPaid ? (
             <>

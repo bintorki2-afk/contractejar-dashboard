@@ -94,8 +94,16 @@ function MoneyPill({ value }) {
       </span>
     );
   }
+  // QA DASH-6: الرقم باتجاه LTR حتى تُرسم الإشارة السالبة يسار الرقم («-153.00» لا «153.00-»)، والسالب بالأحمر.
   return (
-    <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-[#DCFCE7] text-green-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-xs font-bold tabular-nums whitespace-nowrap">
+    <span
+      dir="ltr"
+      className={
+        n < 0
+          ? "inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-[#FDECEC] text-[#B42318] dark:bg-red-500/15 dark:text-red-300 text-xs font-bold tabular-nums whitespace-nowrap"
+          : "inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-[#DCFCE7] text-green-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-xs font-bold tabular-nums whitespace-nowrap"
+      }
+    >
       {formatMoney(n)}
     </span>
   );
@@ -198,7 +206,7 @@ export default function ClientsWrapper() {
               العملاء
             </h1>
             <p className="text-13 text-gray-400 dark:text-white/45 font-medium leading-relaxed">
-              كل عملاء «عقد إيجار» - اضغط «عرض» لملف العميل الكامل
+              كل عملاء «عقدي» - اضغط «عرض» لملف العميل الكامل
             </p>
           </div>
         </div>

@@ -70,3 +70,30 @@ describe("buildOrderJourney (دفعة هـ — 3 خطوات)", () => {
     expect(j.allDone).toBe(true);
   });
 });
+
+describe("QA ORDERS-RES-13 — طلب غير مدفوع", () => {
+  it("الخطوة الحالية تُسمّى «بانتظار الدفع» لطلب جديد غير مدفوع", () => {
+    const j = buildOrderJourney({ status_key: "new", payment_state: { status: "unpaid" } });
+    expect(j.steps[0].current).toBe(true);
+    expect(j.steps[0].label).toBe("بانتظار الدفع");
+  });
+  it("لا تتغيّر لطلب مدفوع", () => {
+    const j = buildOrderJourney({ status_key: "under_review", payment_state: { status: "paid", is_paid: true }, is_paid: true });
+    expect(j.steps[0].label).toBe("قيد المراجعة");
+  });
+});
+
+describe("QA ORDERS-RES-13 — حقول الخادم", () => {
+  it("يعرض current_label من الخادم عند awaiting_payment", () => {
+    const j = buildOrderJourney({
+      journey: [
+        { step: 1, key: "under_review", label: "قيد المراجعة", done: false, current: true, awaiting_payment: true, current_label: "بانتظار الدفع" },
+        { step: 2, key: "received_by_employee", label: "مستلم من الموظف", done: false, current: false },
+        { step: 3, key: "ejar_authenticated", label: "تم التوثيق", done: false, current: false },
+      ],
+      payment_state: { status: "partially_paid" },
+    });
+    expect(j.steps[0].label).toBe("بانتظار الدفع");
+    expect(j.steps[0].awaitingPayment).toBe(true);
+  });
+});

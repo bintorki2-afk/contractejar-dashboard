@@ -1,5 +1,5 @@
 /**
- * موقع العملاء «عقد إيجار» (contractejar.com) — منفصل تماماً عن aqdi.sa.
+ * موقع العملاء «عقدي» (contractejar.com) — منفصل تماماً عن aqdi.sa.
  * أي رابط يُرسل للعميل من اللوحة يجب أن يكون على هذا الموقع.
  */
 export const CUSTOMER_SITE_URL = String(

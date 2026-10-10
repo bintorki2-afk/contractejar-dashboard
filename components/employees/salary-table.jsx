@@ -24,7 +24,7 @@ export default function SalaryTable({ salaries }) {
     if (!dateString) return "---";
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString("ar-EG", {
+      return date.toLocaleDateString("ar-EG-u-nu-latn", {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -67,22 +67,22 @@ export default function SalaryTable({ salaries }) {
                   </td>
                   <td className="p-[15px_20px]">
                     <div className="flex items-center gap-1.5 text-brand-hover font-bold text-13">
-                      <span>{parseFloat(salary.basic_salary || 0).toLocaleString('ar-EG')}</span>
+                      <span>{parseFloat(salary.basic_salary || 0).toLocaleString('ar-EG-u-nu-latn')}</span>
                     </div>
                   </td>
                   <td className="p-[15px_20px]">
                     <div className="flex items-center gap-1.5 text-red-500 font-bold text-13">
-                      <span>{parseFloat(salary.deduction || 0).toLocaleString('ar-EG')}</span>
+                      <span>{parseFloat(salary.deduction || 0).toLocaleString('ar-EG-u-nu-latn')}</span>
                     </div>
                   </td>
                   <td className="p-[15px_20px]">
                     <div className="flex items-center gap-1.5 text-green-600 font-bold text-13">
-                      <span>{parseFloat(salary.bonus || 0).toLocaleString('ar-EG')}</span>
+                      <span>{parseFloat(salary.bonus || 0).toLocaleString('ar-EG-u-nu-latn')}</span>
                     </div>
                   </td>
                   <td className='p-[15px_20px]'>
                     <div className="flex items-center gap-1.5 text-brand-main font-bold text-13">
-                      <span>{parseFloat(salary.total || 0).toLocaleString('ar-EG')}</span>
+                      <span>{parseFloat(salary.total || 0).toLocaleString('ar-EG-u-nu-latn')}</span>
                     </div>
                   </td>
                 </tr>
