@@ -103,7 +103,7 @@ export default function ContractEmployeeTable({ receivedContracts = [], refundab
                     </td>
                     <td className="p-[15px_20px]">
                       <div className="flex items-center gap-1.5 text-green-600 font-bold text-13">
-                        <span>{amount !== "---" ? parseFloat(amount).toLocaleString('ar-EG') : "---"}</span>
+                        <span>{amount !== "---" ? parseFloat(amount).toLocaleString('ar-EG-u-nu-latn') : "---"}</span>
                         {item.admin_confirmed && <Check size={14} className='text-green-600' />}
                       </div>
                     </td>

@@ -24,7 +24,7 @@ export default function UserContractsTable({ contracts = [], userId = null }) {
   const formatDate = (dateString) => {
     if (!dateString) return "—";
     try {
-      return new Date(dateString).toLocaleDateString("ar-EG", {
+      return new Date(dateString).toLocaleDateString("ar-EG-u-nu-latn", {
         year: "numeric",
         month: "short",
         day: "numeric",
@@ -91,7 +91,7 @@ export default function UserContractsTable({ contracts = [], userId = null }) {
                   </td>
                   <td className="p-[15px_20px] text-black text-13">{contract.contract_type || "—"}</td>
                   <td className="p-[15px_20px] text-green-600 font-bold text-13">
-                    {parseFloat(contract.amount_payment || 0).toLocaleString("ar-EG")}
+                    {parseFloat(contract.amount_payment || 0).toLocaleString("ar-EG-u-nu-latn")}
                   </td>
                   <td className="p-[15px_20px]">
                     <span

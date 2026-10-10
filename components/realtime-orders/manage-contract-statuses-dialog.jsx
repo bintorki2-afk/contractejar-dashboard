@@ -52,7 +52,10 @@ export default function ManageContractStatusesDialog({
   });
 
   const items = extractContractStatusItems(data);
-  const list = items.length > 0 ? items : extractContractStatusItems(activeData);
+  // QA DASH-11 (احتياط): المرحلة الملغاة «إرسال المسودة» (E3) لا تُعرض ولا تُعاد تفعيلها من هنا.
+  const list = (items.length > 0 ? items : extractContractStatusItems(activeData)).filter(
+    (status) => status?.status_key !== "whatsapp_draft"
+  );
 
   const closeForm = () => {
     setFormOpen(false);

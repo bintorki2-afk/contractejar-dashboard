@@ -42,7 +42,7 @@ const stripHtml = (html) => {
 const formatDate = (dateString) => {
   if (!dateString) return "—";
   try {
-    return new Date(dateString).toLocaleDateString("ar-EG", {
+    return new Date(dateString).toLocaleDateString("ar-EG-u-nu-latn", {
       year: "numeric",
       month: "short",
       day: "numeric",

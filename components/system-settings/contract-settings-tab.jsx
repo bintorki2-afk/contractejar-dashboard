@@ -33,9 +33,11 @@ export default function ContractSettingsTab({ activeSub, onSubChange }) {
     [can, isReady]
   );
 
-  const currentSub = visibleSubTabs.some((tab) => tab.id === activeSub)
+  // QA DASH-24: تبويب «قريبًا» لا يُفتح بالرابط المباشر (?sub=sms-settings / payment-messages).
+  const enabledSubTabs = visibleSubTabs.filter((tab) => !COMING_SOON_SUBTABS.has(tab.id));
+  const currentSub = enabledSubTabs.some((tab) => tab.id === activeSub)
     ? activeSub
-    : visibleSubTabs[0]?.id;
+    : enabledSubTabs[0]?.id;
   const Panel = SUB_TAB_PANELS[currentSub] ?? PopupContractsTab;
 
   return (

@@ -20,7 +20,7 @@ export default function NotesTable({ notes }) {
     if (!dateString) return "---";
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString("ar-EG", {
+      return date.toLocaleDateString("ar-EG-u-nu-latn", {
         year: "numeric",
         month: "long",
         day: "numeric",
