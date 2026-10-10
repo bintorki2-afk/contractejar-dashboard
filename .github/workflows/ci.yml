@@ -9,6 +9,9 @@ jobs:
   test:
     name: Vitest + Build
     runs-on: ubuntu-latest
+    env:
+      # اللوحة تعرض الأوقات بتوقيت الرياض والاختبارات تفترضه — سيرفر GitHub على UTC افتراضياً
+      TZ: Asia/Riyadh
 
     steps:
       - uses: actions/checkout@v7
