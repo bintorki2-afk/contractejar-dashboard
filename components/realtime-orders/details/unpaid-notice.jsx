@@ -105,9 +105,12 @@ export function UnpaidBanner({ orderData, onPayLink, onBankTransfer, canRecordTr
             <Banknote className="size-3.5" /> تسجيل حوالة + إيصال
           </button>
         ) : null}
-        <button type="button" onClick={sendBankDetails} disabled={sending} className="inline-flex h-8 items-center gap-1 rounded-lg border border-[#B42318]/40 bg-white px-3 text-[12.5px] font-bold text-[#B42318] hover:bg-[#FBDCDA] disabled:opacity-60 dark:bg-transparent" title="يرسل للعميل اسم البنك والآيبان والمبلغ عبر واتساب">
-          <MessageCircle className="size-3.5" /> إرسال بيانات الحوالة واتساب
-        </button>
+        {/* QA DASH-19: بيانات البنك/الآيبان للمخوّل بالدفع فقط (الخادم: payments.record_transfer). */}
+        {canRecordTransfer ? (
+          <button type="button" onClick={sendBankDetails} disabled={sending} className="inline-flex h-8 items-center gap-1 rounded-lg border border-[#B42318]/40 bg-white px-3 text-[12.5px] font-bold text-[#B42318] hover:bg-[#FBDCDA] disabled:opacity-60 dark:bg-transparent" title="يرسل للعميل اسم البنك والآيبان والمبلغ عبر واتساب">
+            <MessageCircle className="size-3.5" /> إرسال بيانات الحوالة واتساب
+          </button>
+        ) : null}
       </div>
     </div>
   );

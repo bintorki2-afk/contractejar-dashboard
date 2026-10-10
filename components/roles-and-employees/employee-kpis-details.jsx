@@ -242,7 +242,7 @@ export default function EmployeeKpisDetails() {
               {hasMoneyMetrics ? (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-dashed border-[#E5E7EB] dark:border-white/10" data-kpi-money>
                   <MiniMetric label={feesCard?.label_ar ?? "رسوم أضافها"} value={moneyLabel(feesCard?.value ?? data.fees_added_count, feesCard?.amount ?? data.fees_added_amount)} />
-                  <MiniMetric label={diffCard?.label_ar ?? "فروقات سعر"} value={moneyLabel(diffCard?.value ?? data.price_difference_count)} />
+                  <MiniMetric label={diffCard?.label_ar ?? "فروقات سعر"} value={moneyLabel(diffCard?.value ?? data.price_difference_count, diffCard?.amount ?? data.price_difference_amount)} />
                   <MiniMetric label={dataReqCard?.label_ar ?? "طلبات مرفق ناقص"} value={moneyLabel(dataReqCard?.value ?? data.data_requests_count)} />
                   <MiniMetric label={transfersCard?.label_ar ?? "حوالات سجّلها"} value={moneyLabel(transfersCard?.value ?? data.bank_transfers_recorded, transfersCard?.amount ?? data.bank_transfers_amount)} />
                 </div>
